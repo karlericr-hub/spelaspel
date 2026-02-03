@@ -806,7 +806,7 @@ button:disabled {
     position: absolute;
     width: 4px;
     height: 75px;
-    background: linear-gradient(to top, #6b9b7a 0%, #a8d5b8 100%);
+    background: linear-gradient(to top, #2d5a3d 0%, #4a7c59 100%);
     border-radius: 2px;
     left: 50%;
     top: 50%;
