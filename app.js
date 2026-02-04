@@ -8,6 +8,7 @@
 const CONFIG = {
     totalQuestions: 10,
     clockQuestions: 10, // 5 utan minutvisare + 5 med minutvisare
+    helHalvQuestions: 8, // 2 bara timvisare + 2 båda på hel + 4 hel/halv
     delayAfterCorrect: 1000, // ms
     delayAfterWrong: 300, // ms
     loadingDuration: 1500, // ms
@@ -32,6 +33,7 @@ const state = {
     usedHours: [],
     targetLetter: '',
     targetHour: 0,
+    isHalfHour: false, // För hel/halv-spelet
     answerOptions: [],
     isProcessing: false,
     previousScreen: null,
@@ -79,6 +81,7 @@ const audio = {
     wrong: null,
     instructionLetter: null,
     instructionClock: null,
+    instructionHelHalv: null,
     letters: {}
 };
 
@@ -89,12 +92,14 @@ function loadAudio() {
     audio.wrong = new Audio('audio/wrong.mp3');
     audio.instructionLetter = new Audio('audio/tryck_pa_lilla.mp3');
     audio.instructionClock = new Audio('audio/vilken_timme.mp3');
-    
+    audio.instructionHelHalv = new Audio('audio/helhalv.mp3');
+
     // Sätt volym (subtil)
     audio.correct.volume = 0.5;
     audio.wrong.volume = 0.4;
     audio.instructionLetter.volume = 0.7;
     audio.instructionClock.volume = 0.7;
+    audio.instructionHelHalv.volume = 0.7;
     
     // Förbered bokstavsljud (laddas vid behov)
     CONFIG.alphabet.forEach(letter => {
@@ -120,6 +125,8 @@ function playSound(soundType) {
         audioElement = audio.instructionLetter;
     } else if (soundType === 'instruction-clock') {
         audioElement = audio.instructionClock;
+    } else if (soundType === 'instruction-helhalv') {
+        audioElement = audio.instructionHelHalv;
     } else if (soundType.startsWith('letter-')) {
         const letter = soundType.replace('letter-', '').toUpperCase();
         const audioPath = audio.letters[letter];
@@ -217,11 +224,15 @@ function startGame(gameType) {
     state.correctFirstTry = 0;
     state.usedLetters = [];
     state.usedHours = [];
-    
+    state.isHalfHour = false;
+
     // Avgör vilken typ av spel
     if (gameType === 'timvisaren') {
         state.returnToArea = 'klockan';
         startClockGame();
+    } else if (gameType === 'hel-halv') {
+        state.returnToArea = 'klockan';
+        startHelHalvGame();
     } else {
         state.returnToArea = 'svenska';
         startLetterGame();
@@ -597,13 +608,206 @@ function handleClockAnswer(selectedHour, buttonElement) {
 }
 
 // ========================================
+// Spellogik: Hel eller Halvtimme
+// ========================================
+function startHelHalvGame() {
+    // Skapa progress-prickar
+    createProgressDots(elements.clockProgressDots, CONFIG.helHalvQuestions);
+
+    // Visa spelskärmen (återanvänder klockskärmen)
+    showScreen('clockGame');
+
+    // Uppdatera frågetexten
+    const questionText = document.querySelector('.clock-question');
+    if (questionText) {
+        questionText.textContent = 'ÄR KLOCKAN HEL ELLER HALV?';
+    }
+
+    // Spela instruktionsljudet när spelet startar
+    setTimeout(() => {
+        playSound('instruction-helhalv');
+    }, 400);
+
+    // Starta första frågan
+    nextHelHalvQuestion();
+}
+
+function nextHelHalvQuestion() {
+    if (state.currentQuestion >= CONFIG.helHalvQuestions) {
+        endGame();
+        return;
+    }
+
+    // Markera nuvarande fråga
+    updateProgressDots(elements.clockProgressDots, state.currentQuestion, null);
+
+    // Avgör visarläge baserat på frågenummer:
+    // Fråga 1-2 (index 0-1): Endast timvisare, hel timme
+    // Fråga 3-4 (index 2-3): Båda visare, minutvisare på 12, hel timme
+    // Fråga 5-8 (index 4-7): Minutvisare på 12 (hel) eller 6 (halv)
+    let isHalfHour = false;
+    let showMinuteHand = false;
+
+    if (state.currentQuestion <= 1) {
+        // Fråga 1-2: Endast timvisare
+        showMinuteHand = false;
+        isHalfHour = false;
+    } else if (state.currentQuestion <= 3) {
+        // Fråga 3-4: Båda visare på hel timme
+        showMinuteHand = true;
+        isHalfHour = false;
+    } else {
+        // Fråga 5-8: Slumpmässigt hel eller halv
+        showMinuteHand = true;
+        isHalfHour = Math.random() < 0.5;
+    }
+
+    // Välj en slumpmässig timme som inte använts nyligen
+    let availableHours = CONFIG.hours.filter(
+        hour => !state.usedHours.includes(hour)
+    );
+
+    if (availableHours.length === 0) {
+        state.usedHours = [];
+        availableHours = [...CONFIG.hours];
+    }
+
+    // Slumpa måltimme
+    const selectedHour = availableHours[
+        Math.floor(Math.random() * availableHours.length)
+    ];
+    state.usedHours.push(selectedHour);
+
+    // Uppdatera klockan
+    setHelHalvClockHands(selectedHour, showMinuteHand, isHalfHour);
+
+    // Bestäm rätt svar
+    if (isHalfHour) {
+        // För halv: svaret är nästa timme (halv 3 = klockan 2:30)
+        const nextHour = selectedHour === 12 ? 1 : selectedHour + 1;
+        state.targetHour = nextHour;
+        state.isHalfHour = true;
+    } else {
+        state.targetHour = selectedHour;
+        state.isHalfHour = false;
+    }
+
+    // Skapa svarsalternativ
+    state.answerOptions = generateHelHalvOptions(state.targetHour, state.isHalfHour);
+
+    // Rendera svarsknappar
+    renderHelHalvAnswerButtons();
+
+    state.isProcessing = false;
+}
+
+function setHelHalvClockHands(hour, showMinuteHand, isHalfHour) {
+    // Timvisaren: 360 grader / 12 timmar = 30 grader per timme
+    let hourAngle = (hour % 12) * 30;
+    let minuteAngle = 0;
+
+    if (isHalfHour) {
+        // Halv timme: minutvisare på 6, timvisare mittemellan
+        minuteAngle = 180; // 30 minuter = 180 grader
+        // Timvisaren halvvägs till nästa timme
+        hourAngle += 15; // Halva vägen (30/2 = 15 grader)
+    }
+
+    // Visa/dölj minutvisaren
+    if (showMinuteHand) {
+        elements.minuteHand.classList.add('visible');
+        elements.minuteHand.style.transform =
+            `translateX(-50%) translateY(-100%) rotate(${minuteAngle}deg)`;
+    } else {
+        elements.minuteHand.classList.remove('visible');
+    }
+
+    elements.hourHand.style.transform =
+        `translateX(-50%) translateY(-100%) rotate(${hourAngle}deg)`;
+}
+
+function generateHelHalvOptions(correctHour, isHalfHour) {
+    const correctAnswer = isHalfHour ? `HALV ${correctHour}` : `HEL ${correctHour}`;
+    const options = [correctAnswer];
+
+    // Skapa 3 andra alternativ
+    const otherHours = CONFIG.hours.filter(h => h !== correctHour);
+
+    while (options.length < 4) {
+        const randomHour = otherHours[Math.floor(Math.random() * otherHours.length)];
+        // Slumpmässigt välja HEL eller HALV för distraktorer
+        const useHalf = Math.random() < 0.5;
+        const option = useHalf ? `HALV ${randomHour}` : `HEL ${randomHour}`;
+
+        if (!options.includes(option)) {
+            options.push(option);
+        }
+    }
+
+    // Blanda ordningen
+    return shuffleArray(options);
+}
+
+function renderHelHalvAnswerButtons() {
+    elements.clockAnswerGrid.innerHTML = '';
+
+    state.answerOptions.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn';
+        btn.textContent = option;
+        btn.dataset.answer = option;
+        btn.addEventListener('click', () => handleHelHalvAnswer(option, btn));
+        elements.clockAnswerGrid.appendChild(btn);
+    });
+}
+
+function handleHelHalvAnswer(selectedAnswer, buttonElement) {
+    if (state.isProcessing) return;
+
+    const correctAnswer = state.isHalfHour ? `HALV ${state.targetHour}` : `HEL ${state.targetHour}`;
+    const isCorrect = selectedAnswer === correctAnswer;
+    const isFirstAttempt = !elements.clockAnswerGrid.querySelector('.answer-btn.wrong');
+
+    if (isCorrect) {
+        state.isProcessing = true;
+        buttonElement.classList.add('correct');
+        playSound('correct');
+
+        // Uppdatera statistik
+        if (isFirstAttempt) {
+            state.correctFirstTry++;
+        }
+
+        // Markera progress
+        updateProgressDots(elements.clockProgressDots, state.currentQuestion, 'completed');
+
+        // Gå till nästa fråga
+        state.currentQuestion++;
+
+        setTimeout(() => {
+            nextHelHalvQuestion();
+        }, CONFIG.delayAfterCorrect);
+
+    } else {
+        buttonElement.classList.add('wrong');
+        buttonElement.disabled = true;
+        playSound('wrong');
+    }
+}
+
+// ========================================
 // Avsluta spel
 // ========================================
 function endGame() {
     // Beräkna procent rätt
-    const totalQuestions = state.currentGame === 'timvisaren' 
-        ? CONFIG.clockQuestions 
-        : CONFIG.totalQuestions;
+    let totalQuestions;
+    if (state.currentGame === 'timvisaren') {
+        totalQuestions = CONFIG.clockQuestions;
+    } else if (state.currentGame === 'hel-halv') {
+        totalQuestions = CONFIG.helHalvQuestions;
+    } else {
+        totalQuestions = CONFIG.totalQuestions;
+    }
     
     const percentage = Math.round(
         (state.correctFirstTry / totalQuestions) * 100
