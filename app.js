@@ -8,7 +8,7 @@
 const CONFIG = {
     totalQuestions: 10,
     clockQuestions: 10, // 5 utan minutvisare + 5 med minutvisare
-    helHalvQuestions: 8, // 2 bara timvisare + 2 båda på hel + 4 hel/halv
+    helHalvQuestions: 10, // 2 bara timvisare + 2 båda på hel + 4 hel/halv + 2 med lurigt alternativ
     delayAfterCorrect: 1000, // ms
     delayAfterWrong: 300, // ms
     loadingDuration: 1500, // ms
@@ -645,8 +645,10 @@ function nextHelHalvQuestion() {
     // Fråga 1-2 (index 0-1): Endast timvisare, hel timme
     // Fråga 3-4 (index 2-3): Båda visare, minutvisare på 12, hel timme
     // Fråga 5-8 (index 4-7): Minutvisare på 12 (hel) eller 6 (halv)
+    // Fråga 9-10 (index 8-9): Som 5-8 men med lurigt alternativ (HALV X-1)
     let isHalfHour = false;
     let showMinuteHand = false;
+    let useTrickyDistractor = false;
 
     if (state.currentQuestion <= 1) {
         // Fråga 1-2: Endast timvisare
@@ -656,10 +658,15 @@ function nextHelHalvQuestion() {
         // Fråga 3-4: Båda visare på hel timme
         showMinuteHand = true;
         isHalfHour = false;
-    } else {
+    } else if (state.currentQuestion <= 7) {
         // Fråga 5-8: Slumpmässigt hel eller halv
         showMinuteHand = true;
         isHalfHour = Math.random() < 0.5;
+    } else {
+        // Fråga 9-10: Som 5-8 men med lurigt alternativ
+        showMinuteHand = true;
+        isHalfHour = Math.random() < 0.5;
+        useTrickyDistractor = true;
     }
 
     // Välj en slumpmässig timme som inte använts nyligen
@@ -693,7 +700,7 @@ function nextHelHalvQuestion() {
     }
 
     // Skapa svarsalternativ
-    state.answerOptions = generateHelHalvOptions(state.targetHour, state.isHalfHour);
+    state.answerOptions = generateHelHalvOptions(state.targetHour, state.isHalfHour, useTrickyDistractor);
 
     // Rendera svarsknappar
     renderHelHalvAnswerButtons();
@@ -726,11 +733,21 @@ function setHelHalvClockHands(hour, showMinuteHand, isHalfHour) {
         `translateX(-50%) translateY(-100%) rotate(${hourAngle}deg)`;
 }
 
-function generateHelHalvOptions(correctHour, isHalfHour) {
+function generateHelHalvOptions(correctHour, isHalfHour, useTrickyDistractor = false) {
     const correctAnswer = isHalfHour ? `HALV ${correctHour}` : `HEL ${correctHour}`;
     const options = [correctAnswer];
 
-    // Skapa 3 andra alternativ
+    // Lägg till lurigt alternativ om det ska användas
+    // "HALV X" där X är siffran innan det korrekta svaret
+    if (useTrickyDistractor) {
+        const prevHour = correctHour === 1 ? 12 : correctHour - 1;
+        const trickyOption = `HALV ${prevHour}`;
+        if (!options.includes(trickyOption)) {
+            options.push(trickyOption);
+        }
+    }
+
+    // Skapa resterande alternativ
     const otherHours = CONFIG.hours.filter(h => h !== correctHour);
 
     while (options.length < 4) {
