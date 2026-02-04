@@ -873,6 +873,11 @@ button:disabled {
     left: 0;
 }
 
+/* Dölj etiketter i svårt läge */
+.clock-with-labels.hide-labels .minute-labels {
+    display: none;
+}
+
 .minute-label {
     position: absolute;
     font-size: 0.55rem;

@@ -249,6 +249,25 @@
                         </div>
                     </button>
 
+                    <button class="game-btn" data-game="minutvisaren-hard" data-level="4">
+                        <div class="game-icon clock-game-icon">
+                            <svg viewBox="0 0 50 50" aria-hidden="true">
+                                <circle cx="25" cy="25" r="22" fill="none" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="25" cy="25" r="2" fill="currentColor"/>
+                                <line x1="25" y1="25" x2="25" y2="12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                                <line x1="25" y1="25" x2="25" y2="7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <span class="game-label">MINUTVISAREN - SVÅR</span>
+                        <div class="level-meter" aria-label="Svårighetsgrad 4 av 5">
+                            <span class="level-bar filled"></span>
+                            <span class="level-bar filled"></span>
+                            <span class="level-bar filled"></span>
+                            <span class="level-bar filled"></span>
+                            <span class="level-bar"></span>
+                        </div>
+                    </button>
+
                     <!-- Placeholder för fler spel -->
                     <button class="game-btn placeholder" disabled>
                         <div class="game-icon">
@@ -438,6 +457,7 @@
                                     </g>
                                 </svg>
                                 <div class="clock-hands">
+                                    <div class="hour-hand" id="hour-hand-labeled" style="display: none;"></div>
                                     <div class="minute-hand visible" id="minute-hand-labeled"></div>
                                     <div class="clock-center"></div>
                                 </div>
