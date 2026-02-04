@@ -465,7 +465,13 @@ function nextClockQuestion() {
     
     // Uppdatera klockan och få info om vilken minut som visas
     const minuteInfo = setClockHands(state.targetHour, minuteMode);
-    
+
+    // Om minutvisaren visar 55, ska rätt svar vara nästa timme
+    // eftersom timvisaren visuellt pekar på nästa timme
+    if (minuteInfo.minuteValue === 55) {
+        state.targetHour = state.targetHour === 12 ? 1 : state.targetHour + 1;
+    }
+
     // Skapa svarsalternativ
     state.answerOptions = generateClockOptions(state.targetHour);
     
