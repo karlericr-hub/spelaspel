@@ -887,10 +887,21 @@ button:disabled {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* Större och fetare etiketter för HEL, HALV, KVART I, KVART ÖVER */
+.minute-label[data-position="12"],
+.minute-label[data-position="6"],
+.minute-label[data-position="3"],
+.minute-label[data-position="9"] {
+    font-size: 0.7rem;
+    font-weight: 900;
+    padding: 3px 6px;
+}
+
 /* Positionering av etiketter runt klockan */
 /* Etiketterna är placerade utanför klockans siffror */
+/* HEL och HALV är närmare klockan */
 .minute-label[data-position="12"] {
-    top: 2%;
+    top: 8%;
     left: 50%;
 }
 
@@ -920,7 +931,7 @@ button:disabled {
 }
 
 .minute-label[data-position="6"] {
-    top: 98%;
+    top: 92%;
     left: 50%;
 }
 
@@ -960,6 +971,14 @@ button:disabled {
         font-size: 0.6rem;
         padding: 3px 5px;
     }
+
+    .minute-label[data-position="12"],
+    .minute-label[data-position="6"],
+    .minute-label[data-position="3"],
+    .minute-label[data-position="9"] {
+        font-size: 0.75rem;
+        padding: 4px 7px;
+    }
 }
 
 @media (min-width: 500px) {
@@ -971,6 +990,14 @@ button:disabled {
     .minute-label {
         font-size: 0.65rem;
         padding: 3px 6px;
+    }
+
+    .minute-label[data-position="12"],
+    .minute-label[data-position="6"],
+    .minute-label[data-position="3"],
+    .minute-label[data-position="9"] {
+        font-size: 0.8rem;
+        padding: 4px 8px;
     }
 }
 
