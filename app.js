@@ -663,9 +663,9 @@ function nextHelHalvQuestion() {
         showMinuteHand = true;
         isHalfHour = Math.random() < 0.5;
     } else {
-        // Fråga 9-10: Som 5-8 men med lurigt alternativ
+        // Fråga 9-10: Alltid halv timme med lurigt alternativ
         showMinuteHand = true;
-        isHalfHour = Math.random() < 0.5;
+        isHalfHour = true;
         useTrickyDistractor = true;
     }
 
