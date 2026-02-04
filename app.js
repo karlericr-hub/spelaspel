@@ -9,6 +9,7 @@ const CONFIG = {
     totalQuestions: 10,
     clockQuestions: 10, // 5 utan minutvisare + 5 med minutvisare
     helHalvQuestions: 10, // 2 bara timvisare + 2 båda på hel + 4 hel/halv + 2 med lurigt alternativ
+    minutvisarenQuestions: 10, // 2 hel/halv + 3 hel/halv/kvart + 5 alla positioner
     delayAfterCorrect: 1000, // ms
     delayAfterWrong: 300, // ms
     loadingDuration: 1500, // ms
@@ -17,7 +18,22 @@ const CONFIG = {
     // Svåra bokstäver - lätta att förväxla
     alphabetHard: 'ABDEGIJLNQRTYÅÄÖ'.split(''),
     // Timmar för klockspelet
-    hours: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    hours: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    // Minutetiketterna - position på klockan och motsvarande text
+    minuteLabels: {
+        12: 'HEL',
+        1: 'FEM MINUTER ÖVER',
+        2: 'TIO MINUTER ÖVER',
+        3: 'KVART ÖVER',
+        4: 'TJUGO MINUTER ÖVER',
+        5: 'FEM MINUTER I HALV',
+        6: 'HALV',
+        7: 'FEM MINUTER ÖVER HALV',
+        8: 'TJUGO MINUTER I',
+        9: 'KVART I',
+        10: 'TIO MINUTER I',
+        11: 'FEM MINUTER I'
+    }
 };
 
 // ========================================
@@ -31,8 +47,10 @@ const state = {
     correctFirstTry: 0,
     usedLetters: [],
     usedHours: [],
+    usedMinutePositions: [], // För minutvisaren-spelet
     targetLetter: '',
     targetHour: 0,
+    targetMinutePosition: 0, // För minutvisaren-spelet (1-12)
     isHalfHour: false, // För hel/halv-spelet
     answerOptions: [],
     isProcessing: false,
@@ -66,6 +84,10 @@ const elements = {
     clockAnswerGrid: document.getElementById('clock-answer-grid'),
     hourHand: document.getElementById('hour-hand'),
     minuteHand: document.getElementById('minute-hand'),
+    // Klocka med etiketter (för minutvisaren-spelet)
+    clockContainer: document.getElementById('clock-container'),
+    clockWithLabels: document.getElementById('clock-with-labels'),
+    minuteHandLabeled: document.getElementById('minute-hand-labeled'),
     // Resultat
     resultPercentage: document.getElementById('result-percentage'),
     playAgainBtn: document.getElementById('play-again-btn'),
@@ -82,6 +104,7 @@ const audio = {
     instructionLetter: null,
     instructionClock: null,
     instructionHelHalv: null,
+    instructionMinutvisaren: null,
     letters: {}
 };
 
@@ -93,6 +116,7 @@ function loadAudio() {
     audio.instructionLetter = new Audio('audio/tryck_pa_lilla.mp3');
     audio.instructionClock = new Audio('audio/vilken_timme.mp3');
     audio.instructionHelHalv = new Audio('audio/helhalv.mp3');
+    audio.instructionMinutvisaren = new Audio('audio/minutvisaren.mp3');
 
     // Sätt volym (subtil)
     audio.correct.volume = 0.5;
@@ -100,6 +124,7 @@ function loadAudio() {
     audio.instructionLetter.volume = 0.7;
     audio.instructionClock.volume = 0.7;
     audio.instructionHelHalv.volume = 0.7;
+    audio.instructionMinutvisaren.volume = 0.7;
     
     // Förbered bokstavsljud (laddas vid behov)
     CONFIG.alphabet.forEach(letter => {
@@ -127,6 +152,8 @@ function playSound(soundType) {
         audioElement = audio.instructionClock;
     } else if (soundType === 'instruction-helhalv') {
         audioElement = audio.instructionHelHalv;
+    } else if (soundType === 'instruction-minutvisaren') {
+        audioElement = audio.instructionMinutvisaren;
     } else if (soundType.startsWith('letter-')) {
         const letter = soundType.replace('letter-', '').toUpperCase();
         const audioPath = audio.letters[letter];
@@ -224,6 +251,7 @@ function startGame(gameType) {
     state.correctFirstTry = 0;
     state.usedLetters = [];
     state.usedHours = [];
+    state.usedMinutePositions = [];
     state.isHalfHour = false;
 
     // Avgör vilken typ av spel
@@ -233,6 +261,9 @@ function startGame(gameType) {
     } else if (gameType === 'hel-halv') {
         state.returnToArea = 'klockan';
         startHelHalvGame();
+    } else if (gameType === 'minutvisaren') {
+        state.returnToArea = 'klockan';
+        startMinutvisarenGame();
     } else {
         state.returnToArea = 'svenska';
         startLetterGame();
@@ -813,6 +844,214 @@ function handleHelHalvAnswer(selectedAnswer, buttonElement) {
 }
 
 // ========================================
+// Spellogik: Minutvisaren
+// ========================================
+function startMinutvisarenGame() {
+    // Skapa progress-prickar
+    createProgressDots(elements.clockProgressDots, CONFIG.minutvisarenQuestions);
+
+    // Visa spelskärmen (återanvänder klockskärmen)
+    showScreen('clockGame');
+
+    // Uppdatera frågetexten
+    const questionText = document.querySelector('.clock-question');
+    if (questionText) {
+        questionText.textContent = 'VAD VISAR MINUTVISAREN?';
+    }
+
+    // Visa klockan med etiketter, dölj standard-klockan
+    if (elements.clockWithLabels) {
+        elements.clockWithLabels.classList.add('visible');
+    }
+    if (elements.clockContainer) {
+        elements.clockContainer.style.display = 'none';
+    }
+
+    // Dölj timvisaren i standard-klockan
+    if (elements.hourHand) {
+        elements.hourHand.style.display = 'none';
+    }
+
+    // Spela instruktionsljudet när spelet startar
+    setTimeout(() => {
+        playSound('instruction-minutvisaren');
+    }, 400);
+
+    // Starta första frågan
+    nextMinutvisarenQuestion();
+}
+
+function nextMinutvisarenQuestion() {
+    if (state.currentQuestion >= CONFIG.minutvisarenQuestions) {
+        // Återställ klockvyn innan vi avslutar
+        resetClockView();
+        endGame();
+        return;
+    }
+
+    // Markera nuvarande fråga
+    updateProgressDots(elements.clockProgressDots, state.currentQuestion, null);
+
+    // Avgör vilka positioner som är tillåtna baserat på frågenummer:
+    // Fråga 1-2 (index 0-1): Endast HEL (12) eller HALV (6)
+    // Fråga 3-5 (index 2-4): HEL (12), HALV (6), KVART ÖVER (3), KVART I (9)
+    // Fråga 6-10 (index 5-9): Alla positioner (1-12)
+    let allowedPositions;
+
+    if (state.currentQuestion <= 1) {
+        // Fråga 1-2: Endast hel eller halv
+        allowedPositions = [12, 6];
+    } else if (state.currentQuestion <= 4) {
+        // Fråga 3-5: Hel, halv, kvart över, kvart i
+        allowedPositions = [12, 6, 3, 9];
+    } else {
+        // Fråga 6-10: Alla positioner
+        allowedPositions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    }
+
+    // Välj en slumpmässig position som inte använts nyligen (inom tillåtna)
+    let availablePositions = allowedPositions.filter(
+        pos => !state.usedMinutePositions.includes(pos)
+    );
+
+    if (availablePositions.length === 0) {
+        // Om alla positioner inom den tillåtna gruppen är använda, återställ
+        state.usedMinutePositions = state.usedMinutePositions.filter(
+            pos => !allowedPositions.includes(pos)
+        );
+        availablePositions = [...allowedPositions];
+    }
+
+    // Slumpa målposition
+    state.targetMinutePosition = availablePositions[
+        Math.floor(Math.random() * availablePositions.length)
+    ];
+    state.usedMinutePositions.push(state.targetMinutePosition);
+
+    // Uppdatera minutvisaren
+    setMinutvisarenHand(state.targetMinutePosition);
+
+    // Skapa svarsalternativ
+    state.answerOptions = generateMinutvisarenOptions(state.targetMinutePosition, allowedPositions);
+
+    // Rendera svarsknappar
+    renderMinutvisarenAnswerButtons();
+
+    state.isProcessing = false;
+}
+
+function setMinutvisarenHand(position) {
+    // Minutvisaren: position 12 = 0 grader, position 3 = 90 grader, etc.
+    // Varje position är 30 grader (360 / 12)
+    const angle = (position % 12) * 30;
+
+    if (elements.minuteHandLabeled) {
+        elements.minuteHandLabeled.style.transform =
+            `translateX(-50%) translateY(-100%) rotate(${angle}deg)`;
+    }
+}
+
+function generateMinutvisarenOptions(correctPosition, allowedPositions) {
+    const correctAnswer = CONFIG.minuteLabels[correctPosition];
+    const options = [correctAnswer];
+
+    // Skapa distraktorer från tillåtna positioner
+    const otherPositions = allowedPositions.filter(p => p !== correctPosition);
+
+    while (options.length < 4 && otherPositions.length > 0) {
+        const randomIndex = Math.floor(Math.random() * otherPositions.length);
+        const randomPosition = otherPositions[randomIndex];
+        const option = CONFIG.minuteLabels[randomPosition];
+
+        if (!options.includes(option)) {
+            options.push(option);
+        }
+        otherPositions.splice(randomIndex, 1);
+    }
+
+    // Om vi inte har tillräckligt med alternativ från tillåtna positioner,
+    // lägg till från övriga positioner
+    const allPositions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    const remainingPositions = allPositions.filter(
+        p => p !== correctPosition && !allowedPositions.includes(p)
+    );
+
+    while (options.length < 4 && remainingPositions.length > 0) {
+        const randomIndex = Math.floor(Math.random() * remainingPositions.length);
+        const randomPosition = remainingPositions[randomIndex];
+        const option = CONFIG.minuteLabels[randomPosition];
+
+        if (!options.includes(option)) {
+            options.push(option);
+        }
+        remainingPositions.splice(randomIndex, 1);
+    }
+
+    // Blanda ordningen
+    return shuffleArray(options);
+}
+
+function renderMinutvisarenAnswerButtons() {
+    elements.clockAnswerGrid.innerHTML = '';
+
+    state.answerOptions.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn minutvisaren-answer';
+        btn.textContent = option;
+        btn.dataset.answer = option;
+        btn.addEventListener('click', () => handleMinutvisarenAnswer(option, btn));
+        elements.clockAnswerGrid.appendChild(btn);
+    });
+}
+
+function handleMinutvisarenAnswer(selectedAnswer, buttonElement) {
+    if (state.isProcessing) return;
+
+    const correctAnswer = CONFIG.minuteLabels[state.targetMinutePosition];
+    const isCorrect = selectedAnswer === correctAnswer;
+    const isFirstAttempt = !elements.clockAnswerGrid.querySelector('.answer-btn.wrong');
+
+    if (isCorrect) {
+        state.isProcessing = true;
+        buttonElement.classList.add('correct');
+        playSound('correct');
+
+        // Uppdatera statistik
+        if (isFirstAttempt) {
+            state.correctFirstTry++;
+        }
+
+        // Markera progress
+        updateProgressDots(elements.clockProgressDots, state.currentQuestion, 'completed');
+
+        // Gå till nästa fråga
+        state.currentQuestion++;
+
+        setTimeout(() => {
+            nextMinutvisarenQuestion();
+        }, CONFIG.delayAfterCorrect);
+
+    } else {
+        buttonElement.classList.add('wrong');
+        buttonElement.disabled = true;
+        playSound('wrong');
+    }
+}
+
+function resetClockView() {
+    // Återställ klockvyn till standard
+    if (elements.clockWithLabels) {
+        elements.clockWithLabels.classList.remove('visible');
+    }
+    if (elements.clockContainer) {
+        elements.clockContainer.style.display = '';
+    }
+    if (elements.hourHand) {
+        elements.hourHand.style.display = '';
+    }
+}
+
+// ========================================
 // Avsluta spel
 // ========================================
 function endGame() {
@@ -822,6 +1061,8 @@ function endGame() {
         totalQuestions = CONFIG.clockQuestions;
     } else if (state.currentGame === 'hel-halv') {
         totalQuestions = CONFIG.helHalvQuestions;
+    } else if (state.currentGame === 'minutvisaren') {
+        totalQuestions = CONFIG.minutvisarenQuestions;
     } else {
         totalQuestions = CONFIG.totalQuestions;
     }
