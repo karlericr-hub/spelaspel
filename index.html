@@ -74,12 +74,11 @@
                         <span class="area-label">KLOCKAN</span>
                     </button>
                     
-                    <button class="area-btn" data-area="fragesport" aria-label="Frågesport" disabled>
+                    <button class="area-btn" data-area="fragesport" aria-label="Frågesport">
                         <div class="area-icon">
                             <span class="icon-text">?!</span>
                         </div>
                         <span class="area-label">FRÅGESPORT</span>
-                        <span class="coming-soon">KOMMER SNART</span>
                     </button>
                 </nav>
 
@@ -302,6 +301,101 @@
                         </div>
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Frågesport - Välj spel -->
+        <div id="fragesport-screen" class="screen">
+            <div class="screen-content">
+                <header class="page-header">
+                    <button class="back-btn" aria-label="Gå tillbaka">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <h2 class="page-title">FRÅGESPORT</h2>
+                    <button class="sound-btn" aria-label="Ljud på/av">
+                        <svg class="sound-on-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        </svg>
+                        <svg class="sound-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                            <line x1="23" y1="9" x2="17" y2="15"/>
+                            <line x1="17" y1="9" x2="23" y2="15"/>
+                        </svg>
+                    </button>
+                </header>
+
+                <div class="games-grid">
+                    <button class="game-btn" data-game="quiz-7ar-blandat" data-level="3">
+                        <div class="game-icon">
+                            <span class="icon-text">?</span>
+                        </div>
+                        <span class="game-label">7 ÅR - BLANDAT</span>
+                        <div class="level-meter" aria-label="Svårighetsgrad 3 av 5">
+                            <span class="level-bar filled"></span>
+                            <span class="level-bar filled"></span>
+                            <span class="level-bar filled"></span>
+                            <span class="level-bar"></span>
+                            <span class="level-bar"></span>
+                        </div>
+                    </button>
+
+                    <!-- Placeholder för fler spel -->
+                    <button class="game-btn placeholder" disabled>
+                        <div class="game-icon">
+                            <span class="icon-text">+</span>
+                        </div>
+                        <span class="game-label">FLER SPEL KOMMER</span>
+                        <div class="level-meter">
+                            <span class="level-bar"></span>
+                            <span class="level-bar"></span>
+                            <span class="level-bar"></span>
+                            <span class="level-bar"></span>
+                            <span class="level-bar"></span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spelskärm: Frågesport -->
+        <div id="quiz-game-screen" class="screen">
+            <div class="screen-content">
+                <header class="page-header">
+                    <button class="back-btn" aria-label="Gå tillbaka">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <div class="game-progress">
+                        <span class="progress-dots" id="quiz-progress-dots"></span>
+                    </div>
+                    <button class="sound-btn" aria-label="Ljud på/av">
+                        <svg class="sound-on-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        </svg>
+                        <svg class="sound-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                            <line x1="23" y1="9" x2="17" y2="15"/>
+                            <line x1="17" y1="9" x2="23" y2="15"/>
+                        </svg>
+                    </button>
+                </header>
+
+                <main class="game-area quiz-game-area">
+                    <div class="question-section">
+                        <p class="question-text quiz-question-text" id="quiz-question-text">Frågan visas här</p>
+                    </div>
+
+                    <div class="answers-section">
+                        <div class="answer-grid" id="quiz-answer-grid">
+                            <!-- Svarsalternativ fylls i via JavaScript -->
+                        </div>
+                    </div>
+                </main>
             </div>
         </div>
 
