@@ -21,6 +21,61 @@ const CONFIG = {
     alphabetHard: 'ABDEGIJLNQRTYÅÄÖ'.split(''),
     // Timmar för klockspelet
     hours: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    // Frågesport
+    quizQuestions: 10,
+    // Frågor för 7 år - blandat (kolumn 1 = fråga, kolumn 2 = rätt svar, kolumn 3-5 = fel svar)
+    quiz7arBlandat: [
+        { question: 'Vilken färg får man om man blandar rött och blått?', answers: ['Lila', 'Grön', 'Orange', 'Brun'] },
+        { question: 'Hur många ben har en spindel?', answers: ['8', '6', '10', '4'] },
+        { question: 'Vad heter Sveriges huvudstad?', answers: ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala'] },
+        { question: 'Vilket djur är ett däggdjur?', answers: ['Delfin', 'Groda', 'Ödla', 'Fisk'] },
+        { question: 'Vilken av dessa är inte ett väder?', answers: ['Skugga', 'Regn', 'Blåsigt', 'Molnigt'] },
+        { question: 'Vad kallas ett barn till en häst?', answers: ['Föl', 'Kalv', 'Kid', 'Lamm'] },
+        { question: 'Vilket tal är störst?', answers: ['41', '14', '32', '24'] },
+        { question: 'Vad betyder ordet "först"?', answers: ['Tidigast', 'Sist', 'Snabbast', 'Längst'] },
+        { question: 'Vilket av dessa är en frukt?', answers: ['Äpple', 'Morot', 'Gurka', 'Potatis'] },
+        { question: 'Vilket material kommer papper från?', answers: ['Träd', 'Sten', 'Plast', 'Metall'] },
+        { question: 'Vilket land ligger bredvid Sverige?', answers: ['Norge', 'Spanien', 'Finland', 'Tyskland'] },
+        { question: 'Vad gör en domare i en fotbollsmatch?', answers: ['Dömer matchen', 'Gör mål', 'Spelar i laget', 'Tränar spelarna'] },
+        { question: 'Vad är ett rim till ordet "boll"?', answers: ['Koll', 'Bil', 'Stol', 'Bal'] },
+        { question: 'Hur många minuter är det på en timme?', answers: ['60', '50', '100', '30'] },
+        { question: 'Vilket instrument har tangenter?', answers: ['Piano', 'Trumma', 'Gitarr', 'Flöjt'] },
+        { question: 'Vilken form har alla hörn lika långa sidor?', answers: ['Kvadrat', 'Rektangel', 'Cirkel', 'Triangel'] },
+        { question: 'Vad är en regel?', answers: ['Något man följer', 'Något man ritar', 'Något man äter', 'Något man leker med'] },
+        { question: 'Vilken av dessa hör till kroppen?', answers: ['Armbåge', 'Stol', 'Ryggsäck', 'Jacka'] },
+        { question: 'Vad är 5 + 5?', answers: ['10', '15', '11', '9'] },
+        { question: 'Vad händer med vatten när det fryser?', answers: ['Det blir is', 'Det försvinner', 'Det blir gas', 'Det blir varmare'] },
+        { question: 'Vilket djur är ett rovdjur?', answers: ['Lejon', 'Kanin', 'Ko', 'Häst'] },
+        { question: 'Vad betyder "lika mycket"?', answers: ['Samma mängd', 'Olika', 'Större', 'Mindre'] },
+        { question: 'Vad är motsatsen till "stor"?', answers: ['Liten', 'Lång', 'Tung', 'Snabb'] },
+        { question: 'Vilken av dessa är en kontinent?', answers: ['Europa', 'Sverige', 'Stockholm', 'Norden'] },
+        { question: 'Vad heter Sveriges kung?', answers: ['Carl XVI Gustaf', 'Olof Palme', 'Gustav Vasa', 'Stefan Löfven'] },
+        { question: 'Vad gör man oftast i ett klassrum?', answers: ['Lär sig saker', 'Sover', 'Tränar', 'Handlar'] },
+        { question: 'Vilket tal är jämnt?', answers: ['12', '7', '9', '15'] },
+        { question: 'Vad är en karta till för?', answers: ['Visa var saker finns', 'Mäta tid', 'Rita bilder', 'Skriva texter'] },
+        { question: 'Vilket av dessa är ett bränsle?', answers: ['Bensin', 'Vatten', 'Sand', 'Glas'] },
+        { question: 'Vad är "hello" på svenska?', answers: ['Hej', 'Hej då', 'Tack', 'Snälla'] },
+        { question: 'Vilken form har ett hjul?', answers: ['Cirkel', 'Fyrkant', 'Triangel', 'Rektangel'] },
+        { question: 'Vad är ett verb?', answers: ['Ett ord som visar vad man gör', 'Ett namn', 'Ett ord som beskriver', 'Ett räkneord'] },
+        { question: 'Vilken av dessa är ett hjälpmedel i trafiken?', answers: ['Övergångsställe', 'Lekplats', 'Park', 'Affär'] },
+        { question: 'Vilket djur lägger ägg?', answers: ['Höna', 'Ko', 'Häst', 'Gris'] },
+        { question: 'Vad betyder "ansvar"?', answers: ['Något man måste ta hand om', 'Något man glömmer', 'Något man leker', 'Något man äter'] },
+        { question: 'Vad är 10 − 3?', answers: ['7', '6', '8', '5'] },
+        { question: 'Vilket av dessa ord är ett sammansatt ord?', answers: ['Solglasögon', 'Sol', 'Boll', 'Se'] },
+        { question: 'Vad används elektricitet till?', answers: ['Få saker att fungera', 'Andas', 'Odla växter', 'Mäta längd'] },
+        { question: 'Vad heter vår närmaste stjärna?', answers: ['Solen', 'Månen', 'Mars', 'Venus'] },
+        { question: 'Vad är ett dygn?', answers: ['24 timmar', '6 timmar', '12 timmar', '48 timmar'] },
+        { question: 'Vilken av dessa är en lag?', answers: ['Att stanna vid rött ljus', 'Att borsta tänderna', 'Att leka ute', 'Att läsa böcker'] },
+        { question: 'Vad gör lungorna?', answers: ['Andas', 'Tänker', 'Smälter mat', 'Hör'] },
+        { question: 'Vilket av dessa är ett yrke?', answers: ['Lärare', 'Boll', 'Stol', 'Regn'] },
+        { question: 'Vad är ett material?', answers: ['Något man bygger med', 'En färg', 'Ett djur', 'Ett land'] },
+        { question: 'Vilket land ligger längst bort?', answers: ['Australien', 'Danmark', 'Norge', 'Finland'] },
+        { question: 'Vad betyder "framtid"?', answers: ['Det som ska hända', 'Det som hände', 'Det som händer nu', 'Det som aldrig händer'] },
+        { question: 'Vilket av dessa är ett flytande ämne?', answers: ['Vatten', 'Sten', 'Is', 'Trä'] },
+        { question: 'Vad gör en författare?', answers: ['Skriver böcker', 'Ritar', 'Sjunger', 'Filmar'] },
+        { question: 'Vad är ett mönster?', answers: ['Något som upprepas', 'Något som går sönder', 'Något som är osynligt', 'Något som är slump'] },
+        { question: 'Varför har vi regler i samhället?', answers: ['För att alla ska vara trygga', 'För att leka', 'För att tävla', 'För att vinna'] }
+    ],
     // Minutetiketterna - position på klockan och motsvarande text
     minuteLabels: {
         12: 'HEL',
@@ -57,7 +112,10 @@ const state = {
     answerOptions: [],
     isProcessing: false,
     previousScreen: null,
-    returnToArea: 'home' // Vilken skärm man ska återvända till
+    returnToArea: 'home', // Vilken skärm man ska återvända till
+    // Frågesport
+    quizSelectedQuestions: [], // De 10 slumpvalda frågorna för aktuell omgång
+    quizCorrectAnswer: '' // Rätt svar för aktuell fråga
 };
 
 // ========================================
@@ -69,6 +127,8 @@ const elements = {
         home: document.getElementById('home-screen'),
         svenska: document.getElementById('svenska-screen'),
         klockan: document.getElementById('klockan-screen'),
+        fragesport: document.getElementById('fragesport-screen'),
+        quizGame: document.getElementById('quiz-game-screen'),
         game: document.getElementById('game-screen'),
         clockGame: document.getElementById('clock-game-screen'),
         result: document.getElementById('result-screen')
@@ -90,6 +150,10 @@ const elements = {
     clockContainer: document.getElementById('clock-container'),
     clockWithLabels: document.getElementById('clock-with-labels'),
     minuteHandLabeled: document.getElementById('minute-hand-labeled'),
+    // Frågesport-element
+    quizProgressDots: document.getElementById('quiz-progress-dots'),
+    quizQuestionText: document.getElementById('quiz-question-text'),
+    quizAnswerGrid: document.getElementById('quiz-answer-grid'),
     // Resultat
     resultPercentage: document.getElementById('result-percentage'),
     playAgainBtn: document.getElementById('play-again-btn'),
@@ -233,6 +297,7 @@ function goBack() {
     switch (state.currentScreen) {
         case 'svenska':
         case 'klockan':
+        case 'fragesport':
             showScreen('home');
             break;
         case 'game':
@@ -240,6 +305,9 @@ function goBack() {
             break;
         case 'clockGame':
             showScreen('klockan');
+            break;
+        case 'quizGame':
+            showScreen('fragesport');
             break;
         case 'result':
             showScreen(state.returnToArea);
@@ -282,6 +350,9 @@ function startGame(gameType) {
     } else if (gameType === 'tim-och-minutvisaren') {
         state.returnToArea = 'klockan';
         startTimOchMinutvisarenGame();
+    } else if (gameType === 'quiz-7ar-blandat') {
+        state.returnToArea = 'fragesport';
+        startQuizGame();
     } else {
         state.returnToArea = 'svenska';
         startLetterGame();
@@ -1505,6 +1576,95 @@ function handleTimOchMinutvisarenAnswer(selectedAnswer, buttonElement) {
 }
 
 // ========================================
+// Spellogik: Frågesport
+// ========================================
+function startQuizGame() {
+    // Välj 10 slumpade frågor från poolen
+    const allQuestions = [...CONFIG.quiz7arBlandat];
+    const shuffled = shuffleArray(allQuestions);
+    state.quizSelectedQuestions = shuffled.slice(0, CONFIG.quizQuestions);
+
+    // Skapa progress-prickar
+    createProgressDots(elements.quizProgressDots, CONFIG.quizQuestions);
+
+    // Visa spelskärmen
+    showScreen('quizGame');
+
+    // Starta första frågan
+    nextQuizQuestion();
+}
+
+function nextQuizQuestion() {
+    if (state.currentQuestion >= CONFIG.quizQuestions) {
+        endGame();
+        return;
+    }
+
+    // Markera nuvarande fråga
+    updateProgressDots(elements.quizProgressDots, state.currentQuestion, null);
+
+    // Hämta aktuell fråga
+    const questionData = state.quizSelectedQuestions[state.currentQuestion];
+
+    // Rätt svar är alltid answers[0]
+    state.quizCorrectAnswer = String(questionData.answers[0]);
+
+    // Blanda svarsalternativen (kopiera arrayen först, konvertera allt till strängar)
+    const shuffledAnswers = shuffleArray(questionData.answers.map(a => String(a)));
+
+    // Visa frågan
+    elements.quizQuestionText.textContent = questionData.question;
+
+    // Rendera svarsknappar
+    renderQuizAnswerButtons(shuffledAnswers);
+
+    state.isProcessing = false;
+}
+
+function renderQuizAnswerButtons(answers) {
+    elements.quizAnswerGrid.innerHTML = '';
+
+    answers.forEach(answer => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn quiz-answer';
+        btn.textContent = answer;
+        btn.dataset.answer = answer;
+        btn.addEventListener('click', () => handleQuizAnswer(answer, btn));
+        elements.quizAnswerGrid.appendChild(btn);
+    });
+}
+
+function handleQuizAnswer(selectedAnswer, buttonElement) {
+    if (state.isProcessing) return;
+
+    const isCorrect = selectedAnswer === state.quizCorrectAnswer;
+    const isFirstAttempt = !elements.quizAnswerGrid.querySelector('.answer-btn.wrong');
+
+    if (isCorrect) {
+        state.isProcessing = true;
+        buttonElement.classList.add('correct');
+        playSound('correct');
+
+        if (isFirstAttempt) {
+            state.correctFirstTry++;
+        }
+
+        updateProgressDots(elements.quizProgressDots, state.currentQuestion, 'completed');
+
+        state.currentQuestion++;
+
+        setTimeout(() => {
+            nextQuizQuestion();
+        }, CONFIG.delayAfterCorrect);
+
+    } else {
+        buttonElement.classList.add('wrong');
+        buttonElement.disabled = true;
+        playSound('wrong');
+    }
+}
+
+// ========================================
 // Avsluta spel
 // ========================================
 function endGame() {
@@ -1520,6 +1680,8 @@ function endGame() {
         totalQuestions = CONFIG.minutvisarenHardQuestions;
     } else if (state.currentGame === 'tim-och-minutvisaren') {
         totalQuestions = CONFIG.timOchMinutvisarenQuestions;
+    } else if (state.currentGame === 'quiz-7ar-blandat') {
+        totalQuestions = CONFIG.quizQuestions;
     } else {
         totalQuestions = CONFIG.totalQuestions;
     }
