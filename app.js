@@ -255,6 +255,11 @@ function startGame(gameType) {
     state.usedMinutePositions = [];
     state.isHalfHour = false;
 
+    // Återställ klockvyn innan nytt klockspel startar
+    if (['timvisaren', 'hel-halv', 'minutvisaren', 'minutvisaren-hard'].includes(gameType)) {
+        resetClockView();
+    }
+
     // Avgör vilken typ av spel
     if (gameType === 'timvisaren') {
         state.returnToArea = 'klockan';
