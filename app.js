@@ -1271,6 +1271,10 @@ function getClockTimeAnswer(minutePosition, hour) {
     } else {
         refHour = hour;
     }
+    // Vid HEL visas bara siffran (t.ex. "3" istället för "HEL 3")
+    if (minutePosition === 12) {
+        return `${refHour}`;
+    }
     return `${label} ${refHour}`;
 }
 
