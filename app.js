@@ -12,6 +12,7 @@ const CONFIG = {
     minutvisarenQuestions: 10, // 2 hel/halv + 3 hel/halv/kvart + 5 alla positioner
     minutvisarenHardQuestions: 10, // 2 hel/halv + 3 alla + 3 hel/halv/kvart utan etiketter + 2 alla utan etiketter
     timOchMinutvisarenQuestions: 10, // 3 hel/halv + 3 hel/halv/kvart + 4 alla positioner
+    hurMycketArKlockanQuestions: 10, // 2 hel/halv + 6 alla utom 5ihalv/5överhalv + 2 alla
     delayAfterCorrect: 1000, // ms
     delayAfterWrong: 300, // ms
     loadingDuration: 1500, // ms
@@ -330,7 +331,7 @@ function startGame(gameType) {
     state.isHalfHour = false;
 
     // Återställ klockvyn innan nytt klockspel startar
-    if (['timvisaren', 'hel-halv', 'minutvisaren', 'minutvisaren-hard', 'tim-och-minutvisaren'].includes(gameType)) {
+    if (['timvisaren', 'hel-halv', 'minutvisaren', 'minutvisaren-hard', 'tim-och-minutvisaren', 'hur-mycket-ar-klockan'].includes(gameType)) {
         resetClockView();
     }
 
@@ -350,6 +351,9 @@ function startGame(gameType) {
     } else if (gameType === 'tim-och-minutvisaren') {
         state.returnToArea = 'klockan';
         startTimOchMinutvisarenGame();
+    } else if (gameType === 'hur-mycket-ar-klockan') {
+        state.returnToArea = 'klockan';
+        startHurMycketArKlockanGame();
     } else if (gameType === 'quiz-7ar-blandat') {
         state.returnToArea = 'fragesport';
         startQuizGame();
@@ -1566,6 +1570,163 @@ function handleTimOchMinutvisarenAnswer(selectedAnswer, buttonElement) {
 
         setTimeout(() => {
             nextTimOchMinutvisarenQuestion();
+        }, CONFIG.delayAfterCorrect);
+
+    } else {
+        buttonElement.classList.add('wrong');
+        buttonElement.disabled = true;
+        playSound('wrong');
+    }
+}
+
+// ========================================
+// Spellogik: Hur mycket är klockan?
+// ========================================
+
+function startHurMycketArKlockanGame() {
+    // Skapa progress-prickar
+    createProgressDots(elements.clockProgressDots, CONFIG.hurMycketArKlockanQuestions);
+
+    // Visa spelskärmen (återanvänder klockskärmen)
+    showScreen('clockGame');
+
+    // Uppdatera frågetexten
+    const questionText = document.querySelector('.clock-question');
+    if (questionText) {
+        questionText.textContent = 'HUR MYCKET ÄR KLOCKAN?';
+    }
+
+    // Visa klockan med etiketter-layout men DÖLJ etiketterna
+    if (elements.clockWithLabels) {
+        elements.clockWithLabels.classList.add('visible');
+        elements.clockWithLabels.classList.add('hide-labels');
+    }
+    if (elements.clockContainer) {
+        elements.clockContainer.style.display = 'none';
+    }
+
+    // Visa timvisaren i den märkta klockan (båda visarna ska visas)
+    const hourHandLabeled = document.getElementById('hour-hand-labeled');
+    if (hourHandLabeled) {
+        hourHandLabeled.style.display = 'block';
+    }
+
+    // Spela instruktionsljudet när spelet startar
+    setTimeout(() => {
+        playSound('instruction-timochminutvisaren');
+    }, 400);
+
+    // Starta första frågan
+    nextHurMycketArKlockanQuestion();
+}
+
+function nextHurMycketArKlockanQuestion() {
+    if (state.currentQuestion >= CONFIG.hurMycketArKlockanQuestions) {
+        // Återställ klockvyn innan vi avslutar
+        resetClockView();
+        endGame();
+        return;
+    }
+
+    // Markera nuvarande fråga
+    updateProgressDots(elements.clockProgressDots, state.currentQuestion, null);
+
+    // Avgör vilka minutpositioner som är tillåtna baserat på frågenummer:
+    // Fråga 1-2 (index 0-1): Endast HEL (12) eller HALV (6)
+    // Fråga 3-8 (index 2-7): Allt utom FEM I HALV (5) och FEM ÖVER HALV (7)
+    // Fråga 9-10 (index 8-9): Alla positioner (1-12)
+    let allowedPositions;
+
+    if (state.currentQuestion <= 1) {
+        allowedPositions = [12, 6];
+    } else if (state.currentQuestion <= 7) {
+        allowedPositions = [1, 2, 3, 4, 6, 8, 9, 10, 11, 12];
+    } else {
+        allowedPositions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    }
+
+    // Välj en slumpmässig minutposition som inte använts nyligen (inom tillåtna)
+    let availablePositions = allowedPositions.filter(
+        pos => !state.usedMinutePositions.includes(pos)
+    );
+
+    if (availablePositions.length === 0) {
+        state.usedMinutePositions = state.usedMinutePositions.filter(
+            pos => !allowedPositions.includes(pos)
+        );
+        availablePositions = [...allowedPositions];
+    }
+
+    // Slumpa målposition för minutvisaren
+    state.targetMinutePosition = availablePositions[
+        Math.floor(Math.random() * availablePositions.length)
+    ];
+    state.usedMinutePositions.push(state.targetMinutePosition);
+
+    // Välj en slumpmässig timme som inte använts nyligen
+    let availableHours = CONFIG.hours.filter(
+        hour => !state.usedHours.includes(hour)
+    );
+
+    if (availableHours.length === 0) {
+        state.usedHours = [];
+        availableHours = [...CONFIG.hours];
+    }
+
+    state.targetHour = availableHours[
+        Math.floor(Math.random() * availableHours.length)
+    ];
+    state.usedHours.push(state.targetHour);
+
+    // Sätt båda visarna (återanvänder samma funktion som tim-och-minutvisaren)
+    setTimOchMinutvisarenHands(state.targetHour, state.targetMinutePosition);
+
+    // Skapa svarsalternativ
+    state.answerOptions = generateTimOchMinutvisarenOptions(
+        state.targetMinutePosition, state.targetHour, allowedPositions
+    );
+
+    // Rendera svarsknappar
+    renderHurMycketArKlockanAnswerButtons();
+
+    state.isProcessing = false;
+}
+
+function renderHurMycketArKlockanAnswerButtons() {
+    elements.clockAnswerGrid.innerHTML = '';
+
+    state.answerOptions.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn minutvisaren-answer';
+        btn.textContent = option;
+        btn.dataset.answer = option;
+        btn.addEventListener('click', () => handleHurMycketArKlockanAnswer(option, btn));
+        elements.clockAnswerGrid.appendChild(btn);
+    });
+}
+
+function handleHurMycketArKlockanAnswer(selectedAnswer, buttonElement) {
+    if (state.isProcessing) return;
+
+    const correctAnswer = getClockTimeAnswer(state.targetMinutePosition, state.targetHour);
+    const isCorrect = selectedAnswer === correctAnswer;
+    const isFirstAttempt = !elements.clockAnswerGrid.querySelector('.answer-btn.wrong');
+
+    if (isCorrect) {
+        state.isProcessing = true;
+        buttonElement.classList.add('correct');
+        playSound('correct');
+
+        if (isFirstAttempt) {
+            state.correctFirstTry++;
+        }
+
+        updateProgressDots(elements.clockProgressDots, state.currentQuestion, 'completed');
+
+        state.currentQuestion++;
+
+        setTimeout(() => {
+            nextHurMycketArKlockanQuestion();
         }, CONFIG.delayAfterCorrect);
 
     } else {
