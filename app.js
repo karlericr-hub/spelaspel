@@ -881,6 +881,12 @@ function startMinutvisarenGame() {
         elements.hourHand.style.display = 'none';
     }
 
+    // Dölj timvisaren i den märkta klockan (endast minutvisaren ska synas)
+    const hourHandLabeled = document.getElementById('hour-hand-labeled');
+    if (hourHandLabeled) {
+        hourHandLabeled.style.display = 'none';
+    }
+
     // Spela instruktionsljudet när spelet startar
     setTimeout(() => {
         playSound('instruction-minutvisaren');
