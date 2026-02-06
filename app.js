@@ -473,15 +473,21 @@ function handleLetterAnswer(selectedLetter, buttonElement) {
 function startClockGame() {
     // Skapa progress-prickar
     createProgressDots(elements.clockProgressDots, CONFIG.clockQuestions);
-    
+
     // Visa spelskärmen
     showScreen('clockGame');
-    
+
+    // Uppdatera frågetexten
+    const questionText = document.querySelector('.clock-question');
+    if (questionText) {
+        questionText.textContent = 'VILKEN TIMME PEKAR TIMVISAREN PÅ?';
+    }
+
     // Spela instruktionsljudet när spelet startar
     setTimeout(() => {
         playSound('instruction-clock');
     }, 400);
-    
+
     // Starta första frågan
     nextClockQuestion();
 }
@@ -888,6 +894,12 @@ function startMinutvisarenGame() {
     // Dölj timvisaren i standard-klockan
     if (elements.hourHand) {
         elements.hourHand.style.display = 'none';
+    }
+
+    // Dölj timvisaren i den märkta klockan (endast minutvisaren ska synas)
+    const hourHandLabeled = document.getElementById('hour-hand-labeled');
+    if (hourHandLabeled) {
+        hourHandLabeled.style.display = 'none';
     }
 
     // Spela instruktionsljudet när spelet startar
