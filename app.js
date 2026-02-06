@@ -464,15 +464,21 @@ function handleLetterAnswer(selectedLetter, buttonElement) {
 function startClockGame() {
     // Skapa progress-prickar
     createProgressDots(elements.clockProgressDots, CONFIG.clockQuestions);
-    
+
     // Visa spelskärmen
     showScreen('clockGame');
-    
+
+    // Uppdatera frågetexten
+    const questionText = document.querySelector('.clock-question');
+    if (questionText) {
+        questionText.textContent = 'VILKEN TIMME PEKAR TIMVISAREN PÅ?';
+    }
+
     // Spela instruktionsljudet när spelet startar
     setTimeout(() => {
         playSound('instruction-clock');
     }, 400);
-    
+
     // Starta första frågan
     nextClockQuestion();
 }
