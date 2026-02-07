@@ -1110,12 +1110,13 @@ button:disabled {
 .continent-path {
     fill: #2d5a3d;
     stroke: #1a3d28;
-    stroke-width: 1.5;
+    stroke-width: 0.5;
     transition: fill 0.3s ease;
 }
 
 .continent-path.continent-highlight {
     fill: #6b9b7a;
+    stroke: #4a8a5e;
 }
 
 .world-map-svg.continent-solo-mode {
