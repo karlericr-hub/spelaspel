@@ -1100,6 +1100,10 @@ button:disabled {
     gap: var(--space-xxl);
 }
 
+.result-area:has(.hamster-celebration.visible) {
+    gap: var(--space-lg);
+}
+
 .result-display {
     text-align: center;
 }
@@ -1226,6 +1230,105 @@ button:disabled {
     100% {
         opacity: 0;
         transform: translateY(100vh) rotate(720deg);
+    }
+}
+
+/* ========================================
+   Hamster-animation (100% perfekt resultat)
+   ======================================== */
+.hamster-celebration {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    animation: hamsterBounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.hamster-celebration.visible {
+    display: flex;
+}
+
+.hamster-svg {
+    width: 160px;
+    height: 160px;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));
+}
+
+.hamster-wave-arm {
+    transform-origin: 145px 125px;
+    animation: hamsterWave 0.5s ease-in-out infinite alternate;
+}
+
+.hamster-text {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--sun-yellow);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    margin-top: var(--space-xs);
+    animation: hamsterTextPulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes hamsterBounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(40px);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(1.1) translateY(-5px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes hamsterWave {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(-25deg);
+    }
+}
+
+@keyframes hamsterTextPulse {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.08);
+    }
+}
+
+.hamster-star {
+    animation: hamsterStarTwinkle 1s ease-in-out infinite alternate;
+}
+
+.hamster-star.star-1 { animation-delay: 0s; }
+.hamster-star.star-2 { animation-delay: 0.3s; }
+.hamster-star.star-3 { animation-delay: 0.6s; }
+.hamster-star.star-4 { animation-delay: 0.9s; }
+
+@keyframes hamsterStarTwinkle {
+    0% {
+        opacity: 0.4;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hamster-wave-arm,
+    .hamster-star,
+    .hamster-text,
+    .hamster-celebration {
+        animation: none;
+    }
+    .hamster-celebration.visible {
+        opacity: 1;
     }
 }
 
