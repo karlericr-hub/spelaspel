@@ -346,15 +346,18 @@
                         </div>
                     </button>
 
-                    <!-- Placeholder för fler spel -->
-                    <button class="game-btn placeholder" disabled>
+                    <button class="game-btn" data-game="quiz-varldsdelar" data-level="2">
                         <div class="game-icon">
-                            <span class="icon-text">+</span>
+                            <svg class="continent-icon" viewBox="0 0 50 50" aria-hidden="true">
+                                <circle cx="25" cy="25" r="22" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                                <ellipse cx="25" cy="25" rx="10" ry="22" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                                <line x1="3" y1="25" x2="47" y2="25" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
                         </div>
-                        <span class="game-label">FLER SPEL KOMMER</span>
-                        <div class="level-meter">
-                            <span class="level-bar"></span>
-                            <span class="level-bar"></span>
+                        <span class="game-label">VÄRLDSDELARNA</span>
+                        <div class="level-meter" aria-label="Svårighetsgrad 2 av 5">
+                            <span class="level-bar filled"></span>
+                            <span class="level-bar filled"></span>
                             <span class="level-bar"></span>
                             <span class="level-bar"></span>
                             <span class="level-bar"></span>
@@ -392,6 +395,73 @@
                 <main class="game-area quiz-game-area">
                     <div class="question-section">
                         <p class="question-text quiz-question-text" id="quiz-question-text">Frågan visas här</p>
+                    </div>
+
+                    <!-- Världskarta för världsdelar-spelet -->
+                    <div class="continent-map-section" id="continent-map-section" style="display:none;">
+                        <svg id="world-map-svg" viewBox="0 0 800 450" class="world-map-svg">
+                            <!-- Bakgrund -->
+                            <rect width="800" height="450" fill="none"/>
+
+                            <!-- Världsdelar - mörk grön som standard -->
+                            <!-- Nordamerika -->
+                            <path id="continent-nordamerika" class="continent-path" d="
+                                M 120,45 L 135,42 L 150,48 L 168,40 L 185,42 L 195,55 L 210,52 L 225,58
+                                L 230,70 L 222,82 L 228,95 L 235,105 L 240,120 L 238,135 L 230,148
+                                L 222,155 L 215,165 L 205,172 L 195,178 L 185,185 L 178,192 L 170,198
+                                L 162,195 L 155,188 L 148,192 L 140,198 L 132,205 L 125,210 L 118,215
+                                L 110,210 L 105,200 L 100,188 L 95,175 L 90,162 L 88,148 L 85,135
+                                L 82,120 L 80,105 L 82,90 L 88,78 L 95,68 L 105,58 L 112,50 Z"/>
+
+                            <!-- Sydamerika -->
+                            <path id="continent-sydamerika" class="continent-path" d="
+                                M 165,225 L 178,218 L 192,222 L 205,228 L 215,238 L 220,252
+                                L 222,268 L 218,282 L 215,298 L 210,312 L 205,325 L 198,338
+                                L 190,350 L 182,360 L 175,368 L 168,375 L 162,370 L 158,358
+                                L 155,345 L 150,330 L 148,315 L 145,300 L 142,285 L 140,270
+                                L 142,255 L 148,242 L 155,232 Z"/>
+
+                            <!-- Europa -->
+                            <path id="continent-europa" class="continent-path" d="
+                                M 355,58 L 370,52 L 385,55 L 398,50 L 410,55 L 418,62
+                                L 425,72 L 430,82 L 428,92 L 422,100 L 418,110 L 412,118
+                                L 405,125 L 398,130 L 390,135 L 382,138 L 375,140 L 368,138
+                                L 360,132 L 355,125 L 350,115 L 348,105 L 345,95 L 342,85
+                                L 345,72 L 348,65 Z"/>
+
+                            <!-- Afrika -->
+                            <path id="continent-afrika" class="continent-path" d="
+                                M 365,155 L 380,148 L 395,150 L 410,155 L 422,162 L 430,172
+                                L 435,185 L 438,200 L 440,218 L 438,235 L 435,252 L 430,268
+                                L 425,282 L 418,295 L 410,308 L 402,318 L 395,325 L 388,330
+                                L 380,332 L 372,328 L 365,320 L 358,310 L 352,298 L 348,285
+                                L 345,270 L 342,255 L 340,240 L 342,225 L 345,210 L 348,195
+                                L 352,180 L 358,168 Z"/>
+
+                            <!-- Asien -->
+                            <path id="continent-asien" class="continent-path" d="
+                                M 445,38 L 465,32 L 488,35 L 510,30 L 535,32 L 558,38 L 578,42
+                                L 598,48 L 618,55 L 635,62 L 648,72 L 658,82 L 665,95 L 668,108
+                                L 670,122 L 668,135 L 662,148 L 655,160 L 645,170 L 632,178
+                                L 618,182 L 602,185 L 588,188 L 572,190 L 558,188 L 542,185
+                                L 528,180 L 515,175 L 502,168 L 490,160 L 480,150 L 472,140
+                                L 465,128 L 458,115 L 452,102 L 448,88 L 445,75 L 442,62
+                                L 443,48 Z"/>
+
+                            <!-- Oceanien -->
+                            <path id="continent-oceanien" class="continent-path" d="
+                                M 620,225 L 642,218 L 665,222 L 688,228 L 705,238 L 715,252
+                                L 720,268 L 718,282 L 712,295 L 702,305 L 690,312 L 675,315
+                                L 660,312 L 645,308 L 632,298 L 622,288 L 615,275 L 612,260
+                                L 614,242 Z"/>
+
+                            <!-- Antarktis -->
+                            <path id="continent-antarktis" class="continent-path" d="
+                                M 180,410 L 220,405 L 265,402 L 310,400 L 360,398 L 410,400
+                                L 460,402 L 510,405 L 555,408 L 598,412 L 630,418 L 640,425
+                                L 635,435 L 610,440 L 565,442 L 510,445 L 455,445 L 400,445
+                                L 345,442 L 290,440 L 240,435 L 200,428 L 178,420 Z"/>
+                        </svg>
                     </div>
 
                     <div class="answers-section">

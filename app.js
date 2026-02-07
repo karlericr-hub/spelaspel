@@ -24,6 +24,17 @@ const CONFIG = {
     hours: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     // Frågesport
     quizQuestions: 10,
+    continentQuestions: 10, // 7 med världskarta + 3 enbart världsdel
+    // Världsdelar - ID matchar SVG path ID:n
+    continents: [
+        { id: 'nordamerika', name: 'NORDAMERIKA' },
+        { id: 'sydamerika', name: 'SYDAMERIKA' },
+        { id: 'europa', name: 'EUROPA' },
+        { id: 'afrika', name: 'AFRIKA' },
+        { id: 'asien', name: 'ASIEN' },
+        { id: 'oceanien', name: 'OCEANIEN' },
+        { id: 'antarktis', name: 'ANTARKTIS' }
+    ],
     // Frågor för 7 år - blandat (kolumn 1 = fråga, kolumn 2 = rätt svar, kolumn 3-5 = fel svar)
     quiz7arBlandat: [
         { question: 'Vilken färg får man om man blandar rött och blått?', answers: ['Lila', 'Grön', 'Orange', 'Brun'] },
@@ -116,7 +127,10 @@ const state = {
     returnToArea: 'home', // Vilken skärm man ska återvända till
     // Frågesport
     quizSelectedQuestions: [], // De 10 slumpvalda frågorna för aktuell omgång
-    quizCorrectAnswer: '' // Rätt svar för aktuell fråga
+    quizCorrectAnswer: '', // Rätt svar för aktuell fråga
+    // Världsdelar-spelet
+    continentOrder: [], // Slumpad ordning av världsdelar för omgången
+    continentCorrectAnswer: '' // Rätt världsdel för aktuell fråga
 };
 
 // ========================================
@@ -155,6 +169,9 @@ const elements = {
     quizProgressDots: document.getElementById('quiz-progress-dots'),
     quizQuestionText: document.getElementById('quiz-question-text'),
     quizAnswerGrid: document.getElementById('quiz-answer-grid'),
+    // Världsdelar-element
+    continentMapSection: document.getElementById('continent-map-section'),
+    worldMapSvg: document.getElementById('world-map-svg'),
     // Resultat
     resultPercentage: document.getElementById('result-percentage'),
     playAgainBtn: document.getElementById('play-again-btn'),
@@ -313,6 +330,8 @@ function goBack() {
             showScreen('klockan');
             break;
         case 'quizGame':
+            elements.continentMapSection.style.display = 'none';
+            elements.worldMapSvg.classList.remove('continent-solo-mode');
             showScreen('fragesport');
             break;
         case 'result':
@@ -362,6 +381,9 @@ function startGame(gameType) {
     } else if (gameType === 'quiz-7ar-blandat') {
         state.returnToArea = 'fragesport';
         startQuizGame();
+    } else if (gameType === 'quiz-varldsdelar') {
+        state.returnToArea = 'fragesport';
+        startContinentGame();
     } else {
         state.returnToArea = 'svenska';
         startLetterGame();
@@ -1736,6 +1758,9 @@ function startQuizGame() {
     const shuffled = shuffleArray(allQuestions);
     state.quizSelectedQuestions = shuffled.slice(0, CONFIG.quizQuestions);
 
+    // Dölj världskarta (om den var synlig från annat spel)
+    elements.continentMapSection.style.display = 'none';
+
     // Skapa progress-prickar
     createProgressDots(elements.quizProgressDots, CONFIG.quizQuestions);
 
@@ -1817,6 +1842,155 @@ function handleQuizAnswer(selectedAnswer, buttonElement) {
 }
 
 // ========================================
+// Spellogik: Världsdelarna
+// ========================================
+function startContinentGame() {
+    // Skapa en slumpad ordning av alla 7 världsdelar
+    const shuffledContinents = shuffleArray([...CONFIG.continents]);
+    // De första 7 frågorna: världskarta med markerad världsdel
+    // De sista 3 frågorna: enbart världsdelen (utan karta), centrerad och förstorad
+    // Välj 3 slumpade världsdelar för de sista frågorna
+    const extraContinents = shuffleArray([...CONFIG.continents]).slice(0, 3);
+    state.continentOrder = [...shuffledContinents, ...extraContinents];
+
+    // Skapa progress-prickar
+    createProgressDots(elements.quizProgressDots, CONFIG.continentQuestions);
+
+    // Visa spelskärmen
+    showScreen('quizGame');
+
+    // Visa kartansektionen
+    elements.continentMapSection.style.display = '';
+
+    // Starta första frågan
+    nextContinentQuestion();
+}
+
+function nextContinentQuestion() {
+    if (state.currentQuestion >= CONFIG.continentQuestions) {
+        // Dölj kartan och återställ
+        elements.continentMapSection.style.display = 'none';
+        elements.worldMapSvg.classList.remove('continent-solo-mode');
+        endGame();
+        return;
+    }
+
+    // Markera nuvarande fråga
+    updateProgressDots(elements.quizProgressDots, state.currentQuestion, null);
+
+    // Hämta aktuell världsdel
+    const currentContinent = state.continentOrder[state.currentQuestion];
+    state.continentCorrectAnswer = currentContinent.name;
+
+    // Visa frågetext
+    elements.quizQuestionText.textContent = 'VILKEN VÄRLDSDEL?';
+
+    const isMapRound = state.currentQuestion < 7;
+
+    // Återställ alla världsdelar
+    CONFIG.continents.forEach(c => {
+        const path = document.getElementById('continent-' + c.id);
+        if (path) {
+            path.classList.remove('continent-highlight');
+            path.style.display = '';
+        }
+    });
+
+    if (isMapRound) {
+        // Världskarta-läge: visa alla, markera en
+        elements.worldMapSvg.classList.remove('continent-solo-mode');
+        // Ta bort eventuellt solo-viewBox
+        elements.worldMapSvg.setAttribute('viewBox', '0 0 800 450');
+
+        const highlightPath = document.getElementById('continent-' + currentContinent.id);
+        if (highlightPath) {
+            highlightPath.classList.add('continent-highlight');
+        }
+    } else {
+        // Solo-läge: visa enbart den aktuella världsdelen, centrerad och förstorad
+        elements.worldMapSvg.classList.add('continent-solo-mode');
+
+        // Dölj alla andra världsdelar
+        CONFIG.continents.forEach(c => {
+            const path = document.getElementById('continent-' + c.id);
+            if (path) {
+                if (c.id === currentContinent.id) {
+                    path.style.display = '';
+                    path.classList.add('continent-highlight');
+                } else {
+                    path.style.display = 'none';
+                }
+            }
+        });
+
+        // Zooma in på den enskilda världsdelen
+        const soloPath = document.getElementById('continent-' + currentContinent.id);
+        if (soloPath) {
+            const bbox = soloPath.getBBox();
+            const padding = 30;
+            const vbX = bbox.x - padding;
+            const vbY = bbox.y - padding;
+            const vbW = bbox.width + padding * 2;
+            const vbH = bbox.height + padding * 2;
+            elements.worldMapSvg.setAttribute('viewBox', `${vbX} ${vbY} ${vbW} ${vbH}`);
+        }
+    }
+
+    // Skapa svarsalternativ: rätt svar + 3 felaktiga
+    const wrongContinents = CONFIG.continents.filter(c => c.name !== currentContinent.name);
+    const shuffledWrong = shuffleArray(wrongContinents).slice(0, 3);
+    const allAnswers = shuffleArray([currentContinent.name, ...shuffledWrong.map(c => c.name)]);
+
+    // Rendera svarsknappar
+    renderContinentAnswerButtons(allAnswers);
+
+    state.isProcessing = false;
+}
+
+function renderContinentAnswerButtons(answers) {
+    elements.quizAnswerGrid.innerHTML = '';
+
+    answers.forEach(answer => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn quiz-answer';
+        btn.textContent = answer;
+        btn.dataset.answer = answer;
+        btn.addEventListener('click', () => handleContinentAnswer(answer, btn));
+        elements.quizAnswerGrid.appendChild(btn);
+    });
+}
+
+function handleContinentAnswer(selectedAnswer, buttonElement) {
+    if (state.isProcessing) return;
+
+    const isCorrect = selectedAnswer === state.continentCorrectAnswer;
+    const isFirstAttempt = !elements.quizAnswerGrid.querySelector('.answer-btn.wrong');
+
+    if (isCorrect) {
+        state.isProcessing = true;
+        buttonElement.classList.add('correct');
+        playSound('correct');
+
+        if (isFirstAttempt) {
+            state.correctFirstTry++;
+        }
+
+        updateProgressDots(elements.quizProgressDots, state.currentQuestion, 'completed');
+
+        state.currentQuestion++;
+
+        setTimeout(() => {
+            nextContinentQuestion();
+        }, CONFIG.delayAfterCorrect);
+
+    } else {
+        buttonElement.classList.add('wrong');
+        buttonElement.disabled = true;
+        playSound('wrong');
+    }
+}
+
+// ========================================
 // Avsluta spel
 // ========================================
 function endGame() {
@@ -1834,6 +2008,8 @@ function endGame() {
         totalQuestions = CONFIG.timOchMinutvisarenQuestions;
     } else if (state.currentGame === 'quiz-7ar-blandat') {
         totalQuestions = CONFIG.quizQuestions;
+    } else if (state.currentGame === 'quiz-varldsdelar') {
+        totalQuestions = CONFIG.continentQuestions;
     } else {
         totalQuestions = CONFIG.totalQuestions;
     }
