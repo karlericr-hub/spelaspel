@@ -1178,10 +1178,10 @@ function startMinutvisarenHardGame() {
         questionText.textContent = 'VAD VISAR MINUTVISAREN?';
     }
 
-    // Visa klockan med etiketter, dölj standard-klockan
+    // Visa klockan utan etiketter, dölj standard-klockan
     if (elements.clockWithLabels) {
         elements.clockWithLabels.classList.add('visible');
-        elements.clockWithLabels.classList.remove('hide-labels');
+        elements.clockWithLabels.classList.add('hide-labels');
     }
     if (elements.clockContainer) {
         elements.clockContainer.style.display = 'none';
@@ -1213,39 +1213,25 @@ function nextMinutvisarenHardQuestion() {
     // Markera nuvarande fråga
     updateProgressDots(elements.clockProgressDots, state.currentQuestion, null);
 
-    // Avgör vilka positioner som är tillåtna och om etiketter ska visas
-    // Fråga 1-2 (index 0-1): Hel eller halv (12, 6) - MED etiketter
-    // Fråga 3-5 (index 2-4): Alla positioner (1-12) - MED etiketter
-    // Fråga 6-8 (index 5-7): Hel, halv, kvart i, kvart över (12, 6, 9, 3) - UTAN etiketter
-    // Fråga 9-10 (index 8-9): Alla positioner (1-12) - UTAN etiketter
+    // Avgör vilka positioner som är tillåtna (inga etiketter visas i detta spel)
+    // Fråga 1-2 (index 0-1): Hel eller halv (12, 6)
+    // Fråga 3-5 (index 2-4): Alla positioner (1-12)
+    // Fråga 6-8 (index 5-7): Hel, halv, kvart i, kvart över (12, 6, 9, 3)
+    // Fråga 9-10 (index 8-9): Alla positioner (1-12)
     let allowedPositions;
-    let showLabels = true;
 
     if (state.currentQuestion <= 1) {
-        // Fråga 1-2: Endast hel eller halv, med etiketter
+        // Fråga 1-2: Endast hel eller halv
         allowedPositions = [12, 6];
-        showLabels = true;
     } else if (state.currentQuestion <= 4) {
-        // Fråga 3-5: Alla positioner, med etiketter
+        // Fråga 3-5: Alla positioner
         allowedPositions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-        showLabels = true;
     } else if (state.currentQuestion <= 7) {
-        // Fråga 6-8: Hel, halv, kvart i, kvart över, utan etiketter
+        // Fråga 6-8: Hel, halv, kvart i, kvart över
         allowedPositions = [12, 6, 3, 9];
-        showLabels = false;
     } else {
-        // Fråga 9-10: Alla positioner, utan etiketter
+        // Fråga 9-10: Alla positioner
         allowedPositions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-        showLabels = false;
-    }
-
-    // Visa eller dölj etiketter
-    if (elements.clockWithLabels) {
-        if (showLabels) {
-            elements.clockWithLabels.classList.remove('hide-labels');
-        } else {
-            elements.clockWithLabels.classList.add('hide-labels');
-        }
     }
 
     // Välj en slumpmässig position som inte använts nyligen (inom tillåtna)
