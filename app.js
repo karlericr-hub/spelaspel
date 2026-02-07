@@ -159,7 +159,8 @@ const elements = {
     resultPercentage: document.getElementById('result-percentage'),
     playAgainBtn: document.getElementById('play-again-btn'),
     goHomeBtn: document.getElementById('go-home-btn'),
-    confettiContainer: document.getElementById('confetti-container')
+    confettiContainer: document.getElementById('confetti-container'),
+    hamsterCelebration: document.getElementById('hamster-celebration')
 };
 
 // ========================================
@@ -1843,10 +1844,21 @@ function endGame() {
     
     // Visa resultatskärmen
     showScreen('result');
-    
+
+    // Dölj/visa hamster-animation beroende på resultat
+    if (percentage === 100) {
+        elements.hamsterCelebration.classList.remove('visible');
+        // Liten fördröjning så att animationen triggas korrekt
+        requestAnimationFrame(() => {
+            elements.hamsterCelebration.classList.add('visible');
+        });
+    } else {
+        elements.hamsterCelebration.classList.remove('visible');
+    }
+
     // Animera procenttalet
     animateNumber(elements.resultPercentage, 0, percentage, 1000);
-    
+
     // Visa konfetti och spela ljud baserat på resultat
     if (percentage >= 70) {
         setTimeout(() => {
