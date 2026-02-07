@@ -1900,7 +1900,7 @@ function nextContinentQuestion() {
         // Världskarta-läge: visa alla, markera en
         elements.worldMapSvg.classList.remove('continent-solo-mode');
         // Ta bort eventuellt solo-viewBox
-        elements.worldMapSvg.setAttribute('viewBox', '0 0 800 450');
+        elements.worldMapSvg.setAttribute('viewBox', '0 0 1000 500');
 
         const highlightPath = document.getElementById('continent-' + currentContinent.id);
         if (highlightPath) {
