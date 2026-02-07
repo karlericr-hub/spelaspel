@@ -186,6 +186,7 @@ function loadAudio() {
     audio.instructionHelHalv = new Audio('audio/helhalv.mp3');
     audio.instructionMinutvisaren = new Audio('audio/minutvisaren.mp3');
     audio.instructionTimOchMinutvisaren = new Audio('audio/hurmycketklockan.mp3');
+    audio.forsok = new Audio('audio/forsok.mp3');
 
     // Sätt volym (subtil)
     audio.correct.volume = 0.5;
@@ -195,6 +196,7 @@ function loadAudio() {
     audio.instructionHelHalv.volume = 0.7;
     audio.instructionMinutvisaren.volume = 0.7;
     audio.instructionTimOchMinutvisaren.volume = 0.7;
+    audio.forsok.volume = 0.7;
     
     // Förbered bokstavsljud (laddas vid behov)
     CONFIG.alphabet.forEach(letter => {
@@ -226,6 +228,8 @@ function playSound(soundType) {
         audioElement = audio.instructionMinutvisaren;
     } else if (soundType === 'instruction-timochminutvisaren') {
         audioElement = audio.instructionTimOchMinutvisaren;
+    } else if (soundType === 'forsok') {
+        audioElement = audio.forsok;
     } else if (soundType.startsWith('letter-')) {
         const letter = soundType.replace('letter-', '').toUpperCase();
         const audioPath = audio.letters[letter];
@@ -1843,10 +1847,15 @@ function endGame() {
     // Animera procenttalet
     animateNumber(elements.resultPercentage, 0, percentage, 1000);
     
-    // Visa konfetti om bra resultat
-    if (percentage >= 50) {
+    // Visa konfetti och spela ljud baserat på resultat
+    if (percentage >= 70) {
         setTimeout(() => {
             createConfetti();
+            playConfettiSound();
+        }, 500);
+    } else {
+        setTimeout(() => {
+            playSound('forsok');
         }, 500);
     }
 }
@@ -1875,6 +1884,28 @@ function animateNumber(element, start, end, duration) {
 // ========================================
 // Konfetti
 // ========================================
+function playConfettiSound() {
+    if (!state.soundEnabled) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.12);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.4);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + i * 0.12);
+            osc.stop(ctx.currentTime + i * 0.12 + 0.4);
+        });
+    } catch (e) {
+        console.log('Kunde inte spela konfetti-ljud');
+    }
+}
+
 function createConfetti() {
     elements.confettiContainer.innerHTML = '';
     
