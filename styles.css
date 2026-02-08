@@ -1107,16 +1107,14 @@ button:disabled {
     transition: viewBox 0.3s ease;
 }
 
-.continent-path,
-.continent-path path {
+.continent-path {
     fill: #2d5a3d;
     stroke: #1a3d28;
     stroke-width: 0.5;
     transition: fill 0.3s ease;
 }
 
-.continent-path.continent-highlight,
-.continent-path.continent-highlight path {
+.continent-path.continent-highlight {
     fill: #a8d5b8;
     stroke: #7cbf96;
 }
