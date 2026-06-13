@@ -20,6 +20,21 @@ const CONFIG = {
     alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ'.split(''),
     // Svåra bokstäver - lätta att förväxla
     alphabetHard: 'ABDEGIJLNQRTYÅÄÖ'.split(''),
+    // Hitta bokstaven - fallande bokstäver
+    hittaBokstaven: {
+        rounds: 5,               // antal poängrundor
+        lettersPerRound: 5,      // bokstäver per runda
+        testLetters: 4,          // kalibreringsbokstäver (första ignoreras)
+        testFallTime: 4000,      // ms - långsamt fall under testrundan
+        baselineMultiplier: 1.3, // runda 1 falltid = snitt-reaktionstid * 1.3
+        speedStepUp: 0.12,       // 12% kortare falltid när man klarar >= 3/5
+        speedStepDown: 0.12,     // 12% längre falltid när man missar
+        passThreshold: 3,        // antal rätt av 5 som krävs för att öka tempo
+        minFallTime: 700,        // ms - snabbaste tillåtna fall
+        maxFallTime: 6000,       // ms - långsammaste tillåtna fall
+        spawnDelay: 600,         // ms paus mellan bokstäver
+        roundBannerDelay: 1500   // ms visa rundbanner innan första bokstaven
+    },
     // Timmar för klockspelet
     hours: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     // Frågesport
@@ -130,7 +145,27 @@ const state = {
     quizCorrectAnswer: '', // Rätt svar för aktuell fråga
     // Världsdelar-spelet
     continentOrder: [], // Slumpad ordning av världsdelar för omgången
-    continentCorrectAnswer: '' // Rätt världsdel för aktuell fråga
+    continentCorrectAnswer: '', // Rätt världsdel för aktuell fråga
+    // Hitta bokstaven
+    hb: {
+        phase: 'idle',           // 'calibration' | 'round' | 'ended' | 'idle'
+        round: 0,                // 0 = kalibrering, 1..5 = poängrundor
+        letterIndex: 0,          // bokstav inom aktuell fas
+        fallTime: 0,             // aktuell falltid (ms)
+        baselineReaction: 0,     // snitt av sista 3 kalibreringsreaktionerna
+        calibrationTimes: [],    // reaktionstider under testrundan
+        targetLetter: '',        // aktuell bokstav (versal)
+        lastLetter: '',          // föregående bokstav (undvik direkt upprepning)
+        spawnTime: 0,            // performance.now() vid spawn
+        rafId: null,             // aktivt requestAnimationFrame-id
+        travel: 0,               // px boxen ska falla denna spawn
+        roundCorrect: 0,         // rätt i aktuell runda
+        totalCorrect: 0,         // rätt totalt (poängrundor)
+        fastestFallTime: Infinity, // för "högsta hastighet"
+        isProcessing: false,     // hindrar dubbelhantering mellan spawns
+        isComposing: false,      // IME-skydd
+        listenersBound: false    // input-lyssnare bundna en gång
+    }
 };
 
 // ========================================
@@ -146,6 +181,7 @@ const elements = {
         quizGame: document.getElementById('quiz-game-screen'),
         game: document.getElementById('game-screen'),
         clockGame: document.getElementById('clock-game-screen'),
+        hittaBokstaven: document.getElementById('hitta-bokstaven-screen'),
         result: document.getElementById('result-screen')
     },
     soundButtons: document.querySelectorAll('.sound-btn'),
@@ -177,7 +213,22 @@ const elements = {
     playAgainBtn: document.getElementById('play-again-btn'),
     goHomeBtn: document.getElementById('go-home-btn'),
     confettiContainer: document.getElementById('confetti-container'),
-    hamsterCelebration: document.getElementById('hamster-celebration')
+    hamsterCelebration: document.getElementById('hamster-celebration'),
+    // Hitta bokstaven
+    hbArea: document.getElementById('hb-area'),
+    hbBox: document.getElementById('hb-box'),
+    hbInput: document.getElementById('hb-input'),
+    hbBanner: document.getElementById('hb-banner'),
+    hbBannerTitle: document.getElementById('hb-banner-title'),
+    hbBannerSub: document.getElementById('hb-banner-sub'),
+    hbSpeed: document.getElementById('hb-speed'),
+    hbRound: document.getElementById('hb-round'),
+    hbCleared: document.getElementById('hb-cleared'),
+    hbEnd: document.getElementById('hb-end'),
+    hbEndSpeed: document.getElementById('hb-end-speed'),
+    hbEndCorrect: document.getElementById('hb-end-correct'),
+    hbPlayAgain: document.getElementById('hb-play-again'),
+    hbGoHome: document.getElementById('hb-go-home')
 };
 
 // ========================================
@@ -326,6 +377,10 @@ function goBack() {
         case 'game':
             showScreen(state.returnToArea);
             break;
+        case 'hittaBokstaven':
+            stopHittaBokstaven();
+            showScreen(state.returnToArea);
+            break;
         case 'clockGame':
             showScreen('klockan');
             break;
@@ -384,6 +439,9 @@ function startGame(gameType) {
     } else if (gameType === 'quiz-varldsdelar') {
         state.returnToArea = 'fragesport';
         startContinentGame();
+    } else if (gameType === 'hitta-bokstaven') {
+        state.returnToArea = 'svenska';
+        startHittaBokstavenGame();
     } else {
         state.returnToArea = 'svenska';
         startLetterGame();
@@ -2137,6 +2195,340 @@ function createConfetti() {
 }
 
 // ========================================
+// Spellogik: Hitta bokstaven
+// ========================================
+function startHittaBokstavenGame() {
+    const cfg = CONFIG.hittaBokstaven;
+
+    // Nollställ tillstånd
+    state.hb.phase = 'calibration';
+    state.hb.round = 0;
+    state.hb.letterIndex = 0;
+    state.hb.fallTime = cfg.testFallTime;
+    state.hb.baselineReaction = 0;
+    state.hb.calibrationTimes = [];
+    state.hb.targetLetter = '';
+    state.hb.lastLetter = '';
+    state.hb.roundCorrect = 0;
+    state.hb.totalCorrect = 0;
+    state.hb.fastestFallTime = Infinity;
+    state.hb.isProcessing = false;
+    state.hb.isComposing = false;
+
+    cancelAnimationFrame(state.hb.rafId);
+
+    // Återställ UI
+    elements.hbEnd.hidden = true;
+    elements.hbBox.classList.remove('correct', 'wrong', 'hidden');
+    elements.hbBox.style.transform = 'translateY(0)';
+    elements.hbCleared.textContent = '0';
+    elements.hbRound.textContent = 'Test';
+    elements.hbSpeed.textContent = '–';
+
+    // Bind input-lyssnare en gång
+    bindHittaBokstavenListeners();
+
+    // Visa skärm och öppna tangentbordet (sker inom klick-gesten)
+    showScreen('hittaBokstaven');
+    focusHbInput();
+
+    runTestRound();
+}
+
+function bindHittaBokstavenListeners() {
+    if (state.hb.listenersBound) return;
+    state.hb.listenersBound = true;
+
+    elements.hbInput.addEventListener('input', (e) => {
+        if (state.hb.isComposing || e.isComposing) return;
+        const value = elements.hbInput.value;
+        elements.hbInput.value = '';
+        if (!value) return; // tom (t.ex. radering)
+        const char = value.slice(-1);
+        handleHittaBokstavenKey(char);
+    });
+
+    elements.hbInput.addEventListener('compositionstart', () => {
+        state.hb.isComposing = true;
+    });
+
+    elements.hbInput.addEventListener('compositionend', (e) => {
+        state.hb.isComposing = false;
+        elements.hbInput.value = '';
+        const char = (e.data || '').slice(-1);
+        if (char) handleHittaBokstavenKey(char);
+    });
+
+    // Håll fokus medan spelet är aktivt (tapp i ytan öppnar tangentbordet igen)
+    elements.hbArea.addEventListener('pointerdown', () => {
+        if (isHbActive()) focusHbInput();
+    });
+
+    elements.hbInput.addEventListener('blur', () => {
+        if (isHbActive()) {
+            // Återta fokus på nästa tick så att tangentbordet inte stängs
+            setTimeout(() => {
+                if (isHbActive()) focusHbInput();
+            }, 50);
+        }
+    });
+}
+
+function isHbActive() {
+    return state.currentScreen === 'hittaBokstaven' &&
+        (state.hb.phase === 'calibration' || state.hb.phase === 'round');
+}
+
+function focusHbInput() {
+    try {
+        elements.hbInput.focus({ preventScroll: true });
+    } catch (e) {
+        elements.hbInput.focus();
+    }
+}
+
+function stopHittaBokstaven() {
+    cancelAnimationFrame(state.hb.rafId);
+    state.hb.phase = 'idle';
+    elements.hbInput.blur();
+}
+
+function runTestRound() {
+    const cfg = CONFIG.hittaBokstaven;
+    state.hb.phase = 'calibration';
+    state.hb.letterIndex = 0;
+    state.hb.fallTime = cfg.testFallTime;
+
+    elements.hbRound.textContent = 'Test';
+    elements.hbSpeed.textContent = '–';
+    elements.hbCleared.textContent = '0';
+
+    showHbBanner('TESTRUNDA', 'Tryck på bokstaven innan den når marken');
+
+    setTimeout(() => {
+        hideHbBanner();
+        spawnLetter();
+    }, cfg.roundBannerDelay);
+}
+
+function spawnLetter() {
+    const cfg = CONFIG.hittaBokstaven;
+
+    // Klar med aktuell fas?
+    if (state.hb.phase === 'calibration' && state.hb.letterIndex >= cfg.testLetters) {
+        finishCalibration();
+        return;
+    }
+    if (state.hb.phase === 'round' && state.hb.letterIndex >= cfg.lettersPerRound) {
+        endRound();
+        return;
+    }
+
+    // Slumpa bokstav (undvik direkt upprepning)
+    let available = CONFIG.alphabet.filter(l => l !== state.hb.lastLetter);
+    const letter = available[Math.floor(Math.random() * available.length)];
+    state.hb.targetLetter = letter;
+    state.hb.lastLetter = letter;
+
+    // Förbered box
+    const box = elements.hbBox;
+    box.classList.remove('correct', 'wrong', 'hidden');
+    box.textContent = letter;
+    box.style.transform = 'translateY(0)';
+    // Trigga reflow så att en eventuell pop-animation startar om
+    box.offsetHeight;
+
+    // Mät fallsträcka (marklinjen ligger längst ner i ytan)
+    const areaHeight = elements.hbArea.clientHeight;
+    const boxHeight = box.offsetHeight;
+    const groundOffset = 6; // höjd på marklinjen
+    state.hb.travel = Math.max(0, areaHeight - boxHeight - groundOffset);
+
+    state.hb.isProcessing = false;
+    state.hb.spawnTime = performance.now();
+
+    elements.hbInput.value = '';
+    if (isHbActive()) focusHbInput();
+
+    cancelAnimationFrame(state.hb.rafId);
+    state.hb.rafId = requestAnimationFrame(fallLoop);
+}
+
+function fallLoop(now) {
+    const progress = (now - state.hb.spawnTime) / state.hb.fallTime;
+
+    if (progress >= 1) {
+        elements.hbBox.style.transform = `translateY(${state.hb.travel}px)`;
+        onLetterMissed('ground');
+        return;
+    }
+
+    elements.hbBox.style.transform = `translateY(${progress * state.hb.travel}px)`;
+    state.hb.rafId = requestAnimationFrame(fallLoop);
+}
+
+function handleHittaBokstavenKey(char) {
+    if (state.hb.isProcessing) return;
+    if (state.hb.phase !== 'calibration' && state.hb.phase !== 'round') return;
+    if (!state.hb.targetLetter) return;
+
+    const typed = char.toUpperCase();
+    if (typed === state.hb.targetLetter) {
+        const reaction = performance.now() - state.hb.spawnTime;
+        onLetterCleared(reaction);
+    } else {
+        onLetterMissed('wrong');
+    }
+}
+
+function onLetterCleared(reaction) {
+    const cfg = CONFIG.hittaBokstaven;
+    state.hb.isProcessing = true;
+    cancelAnimationFrame(state.hb.rafId);
+
+    elements.hbBox.classList.add('correct');
+    playSound('correct');
+
+    if (state.hb.phase === 'calibration') {
+        state.hb.calibrationTimes.push(reaction);
+    } else {
+        state.hb.roundCorrect++;
+        state.hb.totalCorrect++;
+        elements.hbCleared.textContent = String(state.hb.roundCorrect);
+    }
+
+    state.hb.letterIndex++;
+    setTimeout(spawnLetter, cfg.spawnDelay);
+}
+
+function onLetterMissed(reason) {
+    const cfg = CONFIG.hittaBokstaven;
+    state.hb.isProcessing = true;
+    cancelAnimationFrame(state.hb.rafId);
+
+    elements.hbBox.classList.add('wrong');
+    playSound('wrong');
+
+    if (state.hb.phase === 'calibration') {
+        // Missad testbokstav ger en långsam baslinje istället för att utebli
+        state.hb.calibrationTimes.push(cfg.testFallTime);
+    }
+    // I poängrundor: ingen ökning av roundCorrect (räknas som miss)
+
+    state.hb.letterIndex++;
+    setTimeout(() => {
+        elements.hbBox.classList.add('hidden');
+        spawnLetter();
+    }, cfg.spawnDelay);
+}
+
+function finishCalibration() {
+    const cfg = CONFIG.hittaBokstaven;
+
+    // Hoppa över första bokstaven, snitta resten
+    const times = state.hb.calibrationTimes.slice(1);
+    let avg;
+    if (times.length > 0) {
+        avg = times.reduce((sum, t) => sum + t, 0) / times.length;
+    } else {
+        avg = 1200; // fallback om inga tider finns
+    }
+    state.hb.baselineReaction = avg;
+    state.hb.fallTime = clampFallTime(avg * cfg.baselineMultiplier);
+    state.hb.fastestFallTime = Math.min(state.hb.fastestFallTime, state.hb.fallTime);
+
+    // Starta runda 1
+    state.hb.phase = 'round';
+    state.hb.round = 1;
+    state.hb.roundCorrect = 0;
+    state.hb.letterIndex = 0;
+
+    elements.hbRound.textContent = `${state.hb.round} / ${cfg.rounds}`;
+    elements.hbCleared.textContent = '0';
+    updateSpeedDisplay();
+
+    showHbBanner(`OMGÅNG ${state.hb.round}`, `Hastighet ${speedLevelFromFallTime(state.hb.fallTime)}`);
+    setTimeout(() => {
+        hideHbBanner();
+        spawnLetter();
+    }, cfg.roundBannerDelay);
+}
+
+function endRound() {
+    const cfg = CONFIG.hittaBokstaven;
+
+    // Adaptiv justering: minst 3 av 5 -> snabbare, annars långsammare
+    if (state.hb.roundCorrect >= cfg.passThreshold) {
+        state.hb.fallTime = clampFallTime(state.hb.fallTime * (1 - cfg.speedStepUp));
+    } else {
+        state.hb.fallTime = clampFallTime(state.hb.fallTime * (1 + cfg.speedStepDown));
+    }
+    state.hb.fastestFallTime = Math.min(state.hb.fastestFallTime, state.hb.fallTime);
+
+    state.hb.round++;
+    if (state.hb.round > cfg.rounds) {
+        showHittaBokstavenEnd();
+        return;
+    }
+
+    state.hb.roundCorrect = 0;
+    state.hb.letterIndex = 0;
+
+    elements.hbRound.textContent = `${state.hb.round} / ${cfg.rounds}`;
+    elements.hbCleared.textContent = '0';
+    updateSpeedDisplay();
+
+    showHbBanner(`OMGÅNG ${state.hb.round}`, `Hastighet ${speedLevelFromFallTime(state.hb.fallTime)}`);
+    setTimeout(() => {
+        hideHbBanner();
+        spawnLetter();
+    }, cfg.roundBannerDelay);
+}
+
+function showHittaBokstavenEnd() {
+    const cfg = CONFIG.hittaBokstaven;
+    state.hb.phase = 'ended';
+    cancelAnimationFrame(state.hb.rafId);
+    elements.hbInput.blur();
+
+    elements.hbBox.classList.add('hidden');
+    elements.hbEndSpeed.textContent = speedLevelFromFallTime(state.hb.fastestFallTime);
+    elements.hbEndCorrect.textContent = String(state.hb.totalCorrect);
+    elements.hbEnd.hidden = false;
+
+    if (state.hb.totalCorrect >= cfg.rounds * cfg.lettersPerRound * 0.7) {
+        createConfetti();
+        playConfettiSound();
+    }
+}
+
+function clampFallTime(ms) {
+    const cfg = CONFIG.hittaBokstaven;
+    return Math.min(cfg.maxFallTime, Math.max(cfg.minFallTime, ms));
+}
+
+// Vänligt hastighetstal: snabbare fall -> högre tal (1 decimal)
+function speedLevelFromFallTime(ms) {
+    if (!isFinite(ms) || ms <= 0) return '0';
+    const ratio = (CONFIG.hittaBokstaven.testFallTime / ms) * 10;
+    return (Math.round(ratio * 10) / 10).toFixed(1);
+}
+
+function updateSpeedDisplay() {
+    elements.hbSpeed.textContent = speedLevelFromFallTime(state.hb.fallTime);
+}
+
+function showHbBanner(title, sub) {
+    elements.hbBannerTitle.textContent = title;
+    elements.hbBannerSub.textContent = sub;
+    elements.hbBanner.classList.remove('hidden');
+}
+
+function hideHbBanner() {
+    elements.hbBanner.classList.add('hidden');
+}
+
+// ========================================
 // Event Listeners
 // ========================================
 function setupEventListeners() {
@@ -2179,7 +2571,22 @@ function setupEventListeners() {
     elements.goHomeBtn.addEventListener('click', () => {
         showScreen('home');
     });
-    
+
+    // Hitta bokstaven - slutknappar
+    if (elements.hbPlayAgain) {
+        elements.hbPlayAgain.addEventListener('click', () => {
+            elements.hbEnd.hidden = true;
+            startHittaBokstavenGame();
+        });
+    }
+    if (elements.hbGoHome) {
+        elements.hbGoHome.addEventListener('click', () => {
+            stopHittaBokstaven();
+            elements.hbEnd.hidden = true;
+            showScreen('home');
+        });
+    }
+
     // Förhindra zoom på dubbelklick (iOS)
     document.addEventListener('touchend', (e) => {
         const now = Date.now();

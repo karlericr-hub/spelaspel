@@ -1531,3 +1531,188 @@ button:focus-visible {
         display: none;
     }
 }
+
+/* ========================================
+   Hitta bokstaven
+   ======================================== */
+.hitta-bokstaven-icon .letter-big {
+    position: static;
+    top: auto;
+    left: auto;
+    font-size: 2.6rem;
+    animation: hbIconFall 2s ease-in-out infinite;
+}
+
+@keyframes hbIconFall {
+    0%, 100% { transform: translateY(-4px); }
+    50% { transform: translateY(4px); }
+}
+
+.hb-status {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.hb-stat {
+    text-align: center;
+}
+
+.hb-stat-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--forest-light);
+    letter-spacing: 0.05em;
+}
+
+.hb-stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--forest-dark);
+}
+
+.hb-area {
+    position: relative;
+    flex: 1;
+    min-height: 45dvh;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, var(--sky-blue) 0%, var(--forest-mist) 100%);
+    box-shadow: inset 0 2px 8px rgba(45, 90, 61, 0.15);
+}
+
+.hb-box {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    margin-left: -2.5rem;
+    width: 5rem;
+    height: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--white);
+    background: var(--forest-main);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-medium);
+    will-change: transform;
+    transform: translateY(0);
+    transition: background var(--transition-fast);
+}
+
+.hb-box.correct {
+    background: var(--correct-green);
+}
+
+.hb-box.wrong {
+    background: var(--wrong-red);
+}
+
+.hb-box.hidden {
+    opacity: 0;
+}
+
+.hb-ground {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 6px;
+    background: var(--bark-brown);
+    opacity: 0.6;
+}
+
+.hb-banner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-md);
+    background: rgba(255, 255, 255, 0.75);
+    z-index: 2;
+    transition: opacity var(--transition-normal);
+}
+
+.hb-banner.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.hb-banner-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--forest-dark);
+}
+
+.hb-banner-sub {
+    font-size: 1rem;
+    color: var(--forest-main);
+    margin-top: var(--space-sm);
+}
+
+/* Dold men fokuserbar tangentfångare (ej display:none/visibility:hidden) */
+.hb-input {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: none;
+    opacity: 0;
+    font-size: 16px; /* >=16px hindrar iOS zoom-on-focus */
+    background: transparent;
+    color: transparent;
+    caret-color: transparent;
+    pointer-events: none;
+}
+
+.hb-end {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    padding: var(--space-md);
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.hb-end[hidden] {
+    display: none;
+}
+
+.hb-end-card {
+    background: var(--cream);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lift);
+    padding: var(--space-xl);
+    text-align: center;
+    max-width: 360px;
+    width: 100%;
+}
+
+.hb-end-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--forest-dark);
+    margin-bottom: var(--space-md);
+}
+
+.hb-end-stat {
+    font-size: 1.1rem;
+    color: var(--forest-main);
+    margin-bottom: var(--space-sm);
+}
+
+.hb-end .result-actions {
+    margin-top: var(--space-lg);
+}
