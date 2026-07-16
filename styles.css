@@ -1147,6 +1147,144 @@ button:disabled {
 }
 
 /* ========================================
+   Huvudstäder
+   ======================================== */
+.hs-intro {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--forest-main);
+    margin: var(--space-sm) 0 var(--space-lg);
+    letter-spacing: 0.5px;
+}
+
+.hs-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+    align-content: start;
+    flex: 1;
+}
+
+.hs-option {
+    background: var(--white);
+    border: 3px solid transparent;
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    box-shadow: var(--shadow-soft);
+    transition: all var(--transition-normal);
+    text-align: left;
+}
+
+.hs-option:not(:disabled):hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
+}
+
+.hs-option:not(:disabled):active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.hs-option.selected {
+    border-color: var(--forest-main);
+    background: var(--forest-mist);
+}
+
+.hs-option-world {
+    grid-column: 1 / -1;
+    justify-content: center;
+}
+
+.hs-check {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 3px solid var(--forest-pale);
+    background: var(--white);
+    position: relative;
+    transition: all var(--transition-normal);
+}
+
+.hs-option.selected .hs-check {
+    border-color: var(--forest-main);
+    background: var(--forest-main);
+}
+
+.hs-option.selected .hs-check::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 3px;
+    width: 6px;
+    height: 12px;
+    border: solid var(--white);
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+.hs-option-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--forest-dark);
+}
+
+.hs-start-btn {
+    margin: var(--space-lg) auto 0;
+    padding: var(--space-md) var(--space-xxl);
+    background: linear-gradient(135deg, var(--forest-light) 0%, var(--forest-main) 100%);
+    color: var(--white);
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    transition: all var(--transition-normal);
+}
+
+.hs-start-btn:not(:disabled):hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
+}
+
+.hs-start-btn:not(:disabled):active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.hs-start-btn:disabled {
+    background: var(--disabled-gray);
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.hs-prompt-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--forest-main);
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-xs);
+}
+
+.hs-country-name {
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    color: var(--forest-dark);
+    min-height: auto !important;
+}
+
+@media (min-width: 400px) {
+    .hs-option-label {
+        font-size: 1rem;
+    }
+    .hs-country-name {
+        font-size: 2.4rem !important;
+    }
+}
+
+/* ========================================
    Länder - världskartespel
    ======================================== */
 .lander-screen-content {
