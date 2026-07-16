@@ -1217,6 +1217,11 @@ button:disabled {
     }
 }
 
+/* Världsdelsläge: visa endast den valda världsdelens länder */
+.country-map-svg--solo .country-path:not(.country-active) {
+    display: none;
+}
+
 .country-path.country-correct {
     fill: var(--correct-green);
     stroke: #2f7a4f;
