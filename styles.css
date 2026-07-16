@@ -1147,6 +1147,148 @@ button:disabled {
 }
 
 /* ========================================
+   Länder - världskartespel
+   ======================================== */
+.lander-screen-content {
+    max-width: 720px;
+}
+
+.lander-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+    margin-bottom: var(--space-sm);
+}
+
+.lander-prompt-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--forest-main);
+}
+
+.lander-country-name {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--forest-dark);
+    line-height: 1.1;
+    text-shadow: 0 3px 6px rgba(45, 90, 61, 0.15);
+    animation: letterPop 0.4s ease-out;
+}
+
+.lander-map-viewport {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: #bfe0f0;
+    box-shadow: var(--shadow-soft);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.country-map-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.country-ocean {
+    fill: #bfe0f0;
+}
+
+.country-path {
+    fill: #dce8c8;
+    stroke: #5a8a68;
+    stroke-width: 0.5;
+    vector-effect: non-scaling-stroke;
+    transition: fill 0.2s ease;
+    cursor: pointer;
+}
+
+@media (hover: hover) {
+    .country-path:hover {
+        fill: #c2ddb0;
+    }
+}
+
+.country-path.country-correct {
+    fill: var(--correct-green);
+    stroke: #2f7a4f;
+}
+
+.country-path.country-wrong {
+    fill: var(--wrong-red);
+    stroke: #b84f4f;
+}
+
+.country-path.country-reveal {
+    fill: var(--sun-yellow);
+    stroke: #cfa92e;
+    animation: countryRevealPulse 0.8s ease-in-out infinite;
+}
+
+@keyframes countryRevealPulse {
+    0%, 100% { fill: var(--sun-yellow); }
+    50% { fill: #ffe89a; }
+}
+
+.lander-zoom-controls {
+    position: absolute;
+    right: var(--space-sm);
+    bottom: var(--space-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    z-index: 5;
+}
+
+.lander-zoom-btn {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    color: var(--forest-dark);
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-soft);
+    cursor: pointer;
+    transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.lander-zoom-btn:active {
+    transform: scale(0.92);
+    background: var(--forest-mist);
+}
+
+.lander-zoom-btn svg {
+    width: 22px;
+    height: 22px;
+}
+
+.globe-icon {
+    width: 42px;
+    height: 42px;
+    color: var(--white);
+}
+
+@media (min-width: 500px) {
+    .lander-country-name {
+        font-size: 2.2rem;
+    }
+}
+
+/* ========================================
    Resultatskärm
    ======================================== */
 .result-area {

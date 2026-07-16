@@ -40,6 +40,23 @@ const CONFIG = {
     // Frågesport
     quizQuestions: 10,
     continentQuestions: 10, // 7 med världskarta + 3 enbart världsdel
+    // Länder - antal länder per omgång
+    landerQuestions: 10,
+    // Länder-spelet: urval av välkända länder att fråga om (ID matchar SVG path-ID:n, utan "land-")
+    landerCountries: [
+        'sweden', 'norway', 'denmark', 'finland', 'iceland',
+        'united-kingdom', 'ireland', 'france', 'spain', 'portugal',
+        'italy', 'germany', 'poland', 'netherlands', 'greece',
+        'switzerland', 'ukraine', 'russia', 'austria',
+        'china', 'japan', 'india', 'thailand', 'indonesia',
+        'turkey', 'saudi-arabia', 'iran', 'kazakhstan', 'mongolia',
+        'vietnam', 'south-korea', 'pakistan',
+        'egypt', 'south-africa', 'morocco', 'nigeria', 'kenya',
+        'ethiopia', 'algeria', 'madagascar', 'tanzania', 'libya',
+        'united-states-of-america', 'canada', 'mexico', 'greenland', 'cuba',
+        'brazil', 'argentina', 'chile', 'peru', 'colombia', 'bolivia', 'venezuela',
+        'australia', 'new-zealand'
+    ],
     // Världsdelar - ID matchar SVG path ID:n
     continents: [
         { id: 'nordamerika', name: 'NORDAMERIKA' },
@@ -146,6 +163,12 @@ const state = {
     // Världsdelar-spelet
     continentOrder: [], // Slumpad ordning av världsdelar för omgången
     continentCorrectAnswer: '', // Rätt världsdel för aktuell fråga
+    // Länder-spelet
+    landerOrder: [], // Slumpad ordning av länder-ID:n för omgången
+    landerCorrectSlug: '', // Rätt lands-ID för aktuell fråga
+    landerWrongThisQuestion: false, // Om spelaren tryckt fel på aktuell fråga
+    landerListenersBound: false, // Om klick-lyssnare på länder är bundna
+    landerView: { x: 0, y: 0, w: 1000, h: 500 }, // Aktuell viewBox för zoom/pan
     // Hitta bokstaven
     hb: {
         phase: 'idle',           // 'calibration' | 'round' | 'ended' | 'idle'
@@ -178,7 +201,9 @@ const elements = {
         svenska: document.getElementById('svenska-screen'),
         klockan: document.getElementById('klockan-screen'),
         fragesport: document.getElementById('fragesport-screen'),
+        geografi: document.getElementById('geografi-screen'),
         quizGame: document.getElementById('quiz-game-screen'),
+        landerGame: document.getElementById('lander-game-screen'),
         game: document.getElementById('game-screen'),
         clockGame: document.getElementById('clock-game-screen'),
         hittaBokstaven: document.getElementById('hitta-bokstaven-screen'),
@@ -208,6 +233,14 @@ const elements = {
     // Världsdelar-element
     continentMapSection: document.getElementById('continent-map-section'),
     worldMapSvg: document.getElementById('world-map-svg'),
+    // Länder-element
+    landerProgressDots: document.getElementById('lander-progress-dots'),
+    landerCountryName: document.getElementById('lander-country-name'),
+    landerMapViewport: document.getElementById('lander-map-viewport'),
+    countryMapSvg: document.getElementById('country-map-svg'),
+    landerZoomIn: document.getElementById('lander-zoom-in'),
+    landerZoomOut: document.getElementById('lander-zoom-out'),
+    landerZoomReset: document.getElementById('lander-zoom-reset'),
     // Resultat
     resultPercentage: document.getElementById('result-percentage'),
     playAgainBtn: document.getElementById('play-again-btn'),
@@ -372,6 +405,7 @@ function goBack() {
         case 'svenska':
         case 'klockan':
         case 'fragesport':
+        case 'geografi':
             showScreen('home');
             break;
         case 'game':
@@ -387,7 +421,10 @@ function goBack() {
         case 'quizGame':
             elements.continentMapSection.style.display = 'none';
             elements.worldMapSvg.classList.remove('continent-solo-mode');
-            showScreen('fragesport');
+            showScreen(state.returnToArea);
+            break;
+        case 'landerGame':
+            showScreen(state.returnToArea);
             break;
         case 'result':
             showScreen(state.returnToArea);
@@ -437,8 +474,11 @@ function startGame(gameType) {
         state.returnToArea = 'fragesport';
         startQuizGame();
     } else if (gameType === 'quiz-varldsdelar') {
-        state.returnToArea = 'fragesport';
+        state.returnToArea = 'geografi';
         startContinentGame();
+    } else if (gameType === 'lander') {
+        state.returnToArea = 'geografi';
+        startLanderGame();
     } else if (gameType === 'hitta-bokstaven') {
         state.returnToArea = 'svenska';
         startHittaBokstavenGame();
@@ -2049,6 +2089,295 @@ function handleContinentAnswer(selectedAnswer, buttonElement) {
 }
 
 // ========================================
+// Spellogik: Länder (världskarta)
+// ========================================
+const LANDER_MAP = { W: 1000, H: 500, MIN_W: 40 }; // MIN_W = maximal inzoomning (mindre = mer zoom)
+
+function startLanderGame() {
+    // Slumpa 10 länder ur urvalet
+    state.landerOrder = shuffleArray([...CONFIG.landerCountries]).slice(0, CONFIG.landerQuestions);
+
+    // Skapa progress-prickar
+    createProgressDots(elements.landerProgressDots, CONFIG.landerQuestions);
+
+    // Visa spelskärmen
+    showScreen('landerGame');
+
+    // Bind klick-/zoom-lyssnare en gång
+    bindLanderInteractions();
+
+    // Återställ kartvyn till hela världen
+    resetLanderView();
+
+    // Rensa markeringar
+    clearLanderHighlights();
+
+    // Starta första frågan
+    nextLanderQuestion();
+}
+
+function clearLanderHighlights() {
+    if (!elements.countryMapSvg) return;
+    elements.countryMapSvg.querySelectorAll('.country-path').forEach(p => {
+        p.classList.remove('country-correct', 'country-wrong', 'country-reveal');
+    });
+}
+
+function nextLanderQuestion() {
+    if (state.currentQuestion >= CONFIG.landerQuestions) {
+        endGame();
+        return;
+    }
+
+    // Markera nuvarande fråga
+    updateProgressDots(elements.landerProgressDots, state.currentQuestion, null);
+
+    clearLanderHighlights();
+    state.landerWrongThisQuestion = false;
+    state.isProcessing = false;
+
+    // Aktuellt land
+    const slug = state.landerOrder[state.currentQuestion];
+    state.landerCorrectSlug = slug;
+
+    const path = document.getElementById('land-' + slug);
+    const name = path ? (path.dataset.name || slug) : slug;
+    elements.landerCountryName.textContent = name.toUpperCase();
+}
+
+function handleLanderClick(clickedSlug, pathElement) {
+    if (state.isProcessing) return;
+
+    if (clickedSlug === state.landerCorrectSlug) {
+        // Rätt!
+        state.isProcessing = true;
+        pathElement.classList.add('country-correct');
+        playSound('correct');
+
+        if (!state.landerWrongThisQuestion) {
+            state.correctFirstTry++;
+        }
+
+        updateProgressDots(elements.landerProgressDots, state.currentQuestion, 'completed');
+        state.currentQuestion++;
+
+        setTimeout(() => {
+            nextLanderQuestion();
+        }, CONFIG.delayAfterCorrect);
+    } else {
+        // Fel - markera rött och visa var det rätta landet ligger
+        state.landerWrongThisQuestion = true;
+        pathElement.classList.add('country-wrong');
+        playSound('wrong');
+
+        // Visa det rätta landet så barnet får lära sig
+        const correctPath = document.getElementById('land-' + state.landerCorrectSlug);
+        if (correctPath) {
+            correctPath.classList.add('country-reveal');
+        }
+
+        setTimeout(() => {
+            pathElement.classList.remove('country-wrong');
+        }, 600);
+    }
+}
+
+// ---- Zoom & pan för världskartan ----
+function applyLanderView() {
+    const v = state.landerView;
+    if (elements.countryMapSvg) {
+        elements.countryMapSvg.setAttribute('viewBox', `${v.x} ${v.y} ${v.w} ${v.h}`);
+    }
+}
+
+function resetLanderView() {
+    state.landerView = { x: 0, y: 0, w: LANDER_MAP.W, h: LANDER_MAP.H };
+    applyLanderView();
+}
+
+// Beräkna det faktiskt ritade kartområdet inuti viewporten (hänsyn till letterbox)
+function getLanderDrawnRect() {
+    const rect = elements.landerMapViewport.getBoundingClientRect();
+    const aspect = LANDER_MAP.W / LANDER_MAP.H; // 2:1, konstant eftersom viewBox behåller ratio
+    const containerAspect = rect.width / rect.height;
+    let drawnW, drawnH, offsetX, offsetY;
+    if (containerAspect > aspect) {
+        drawnH = rect.height;
+        drawnW = drawnH * aspect;
+        offsetX = (rect.width - drawnW) / 2;
+        offsetY = 0;
+    } else {
+        drawnW = rect.width;
+        drawnH = drawnW / aspect;
+        offsetX = 0;
+        offsetY = (rect.height - drawnH) / 2;
+    }
+    return { left: rect.left + offsetX, top: rect.top + offsetY, width: drawnW, height: drawnH };
+}
+
+function clampLanderView() {
+    const v = state.landerView;
+    // Behåll bildförhållandet 2:1
+    v.h = v.w / (LANDER_MAP.W / LANDER_MAP.H);
+    // Begränsa zoom
+    if (v.w > LANDER_MAP.W) { v.w = LANDER_MAP.W; v.h = LANDER_MAP.H; }
+    if (v.w < LANDER_MAP.MIN_W) { v.w = LANDER_MAP.MIN_W; v.h = v.w / 2; }
+    // Håll vyn inom kartan
+    if (v.x < 0) v.x = 0;
+    if (v.y < 0) v.y = 0;
+    if (v.x + v.w > LANDER_MAP.W) v.x = LANDER_MAP.W - v.w;
+    if (v.y + v.h > LANDER_MAP.H) v.y = LANDER_MAP.H - v.h;
+}
+
+function zoomLanderAt(clientX, clientY, factor) {
+    const draw = getLanderDrawnRect();
+    const v = state.landerView;
+    // Förhållande av pekpunkten inom det ritade området (0-1)
+    let rx = (clientX - draw.left) / draw.width;
+    let ry = (clientY - draw.top) / draw.height;
+    rx = Math.max(0, Math.min(1, rx));
+    ry = Math.max(0, Math.min(1, ry));
+    // Punkt i kartkoordinater
+    const px = v.x + rx * v.w;
+    const py = v.y + ry * v.h;
+    // Ny bredd
+    let newW = v.w / factor;
+    newW = Math.max(LANDER_MAP.MIN_W, Math.min(LANDER_MAP.W, newW));
+    const newH = newW / 2;
+    // Behåll punkten under pekaren
+    v.x = px - rx * newW;
+    v.y = py - ry * newH;
+    v.w = newW;
+    v.h = newH;
+    clampLanderView();
+    applyLanderView();
+}
+
+function bindLanderInteractions() {
+    if (state.landerListenersBound) return;
+    state.landerListenersBound = true;
+
+    const svg = elements.countryMapSvg;
+    const viewport = elements.landerMapViewport;
+    if (!svg || !viewport) return;
+
+    // Klick på länder
+    svg.querySelectorAll('.country-path').forEach(path => {
+        path.addEventListener('click', (e) => {
+            if (viewport.dataset.dragged === 'true') return; // ignorera klick efter panorering
+            const slug = path.id.replace(/^land-/, '');
+            handleLanderClick(slug, path);
+        });
+    });
+
+    // Zoomknappar
+    if (elements.landerZoomIn) {
+        elements.landerZoomIn.addEventListener('click', () => {
+            const r = viewport.getBoundingClientRect();
+            zoomLanderAt(r.left + r.width / 2, r.top + r.height / 2, 1.6);
+        });
+    }
+    if (elements.landerZoomOut) {
+        elements.landerZoomOut.addEventListener('click', () => {
+            const r = viewport.getBoundingClientRect();
+            zoomLanderAt(r.left + r.width / 2, r.top + r.height / 2, 1 / 1.6);
+        });
+    }
+    if (elements.landerZoomReset) {
+        elements.landerZoomReset.addEventListener('click', () => resetLanderView());
+    }
+
+    // Hjulzoom
+    viewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+        zoomLanderAt(e.clientX, e.clientY, factor);
+    }, { passive: false });
+
+    // Pekare för panorering + nypzoom
+    const pointers = new Map();
+    let last = null;         // senaste position för en-fingers panorering
+    let startPos = null;     // startposition för att skilja tryck från drag
+    let pinchDist = 0;       // avstånd mellan två fingrar
+    let captured = false;    // om vi fångat pekaren för aktiv drag/pan
+
+    function onPointerDown(e) {
+        // Låt zoomknapparna hantera sina egna klick
+        if (e.target.closest('.lander-zoom-controls')) return;
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pointers.size === 1) {
+            viewport.dataset.dragged = 'false';
+            last = { x: e.clientX, y: e.clientY };
+            startPos = { x: e.clientX, y: e.clientY };
+        } else if (pointers.size === 2) {
+            const pts = [...pointers.values()];
+            pinchDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+            // Två fingrar = zoom, aldrig ett landval
+            viewport.dataset.dragged = 'true';
+        }
+    }
+
+    function onPointerMove(e) {
+        if (!pointers.has(e.pointerId)) return;
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (pointers.size === 2) {
+            // Nypzoom
+            const pts = [...pointers.values()];
+            const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+            if (pinchDist > 0) {
+                const factor = dist / pinchDist;
+                const midX = (pts[0].x + pts[1].x) / 2;
+                const midY = (pts[0].y + pts[1].y) / 2;
+                zoomLanderAt(midX, midY, factor);
+            }
+            pinchDist = dist;
+            viewport.dataset.dragged = 'true';
+            return;
+        }
+
+        if (pointers.size === 1 && last) {
+            const moved = startPos ? Math.hypot(e.clientX - startPos.x, e.clientY - startPos.y) : 0;
+            // Börja panorera först när rörelsen är tydlig (så tapp på land inte blir drag)
+            if (!captured && moved <= 6) { last = { x: e.clientX, y: e.clientY }; return; }
+            if (!captured) {
+                captured = true;
+                viewport.dataset.dragged = 'true';
+                try { viewport.setPointerCapture(e.pointerId); } catch (err) {}
+            }
+            const draw = getLanderDrawnRect();
+            const v = state.landerView;
+            const dx = e.clientX - last.x;
+            const dy = e.clientY - last.y;
+            v.x -= dx / draw.width * v.w;
+            v.y -= dy / draw.height * v.h;
+            clampLanderView();
+            applyLanderView();
+            last = { x: e.clientX, y: e.clientY };
+        }
+    }
+
+    function onPointerUp(e) {
+        if (!pointers.has(e.pointerId)) return;
+        pointers.delete(e.pointerId);
+        if (pointers.size < 2) pinchDist = 0;
+        try { viewport.releasePointerCapture(e.pointerId); } catch (err) {}
+        if (pointers.size === 0) {
+            last = null;
+            startPos = null;
+            captured = false;
+            // Nollställ drag-flaggan strax efter så efterföljande klick tillåts
+            setTimeout(() => { viewport.dataset.dragged = 'false'; }, 0);
+        }
+    }
+
+    viewport.addEventListener('pointerdown', onPointerDown);
+    viewport.addEventListener('pointermove', onPointerMove);
+    viewport.addEventListener('pointerup', onPointerUp);
+    viewport.addEventListener('pointercancel', onPointerUp);
+}
+
+// ========================================
 // Avsluta spel
 // ========================================
 function endGame() {
@@ -2068,6 +2397,8 @@ function endGame() {
         totalQuestions = CONFIG.quizQuestions;
     } else if (state.currentGame === 'quiz-varldsdelar') {
         totalQuestions = CONFIG.continentQuestions;
+    } else if (state.currentGame === 'lander') {
+        totalQuestions = CONFIG.landerQuestions;
     } else {
         totalQuestions = CONFIG.totalQuestions;
     }
