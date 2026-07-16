@@ -116,6 +116,143 @@ const CONFIG = {
         { id: 'oceanien', name: 'OCEANIEN' },
         { id: 'antarktis', name: 'ANTARKTIS' }
     ],
+    // Huvudstäder - antal frågor per omgång
+    huvudstaderQuestions: 10,
+    // Världsdelar som går att välja i Huvudstäder-spelet (Antarktis saknar huvudstäder)
+    huvudstaderContinents: [
+        { id: 'europa', name: 'EUROPA' },
+        { id: 'asien', name: 'ASIEN' },
+        { id: 'afrika', name: 'AFRIKA' },
+        { id: 'nordamerika', name: 'NORDAMERIKA' },
+        { id: 'sydamerika', name: 'SYDAMERIKA' },
+        { id: 'oceanien', name: 'OCEANIEN' }
+    ],
+    // Länder och deras huvudstäder per världsdel
+    capitals: {
+        europa: [
+            { land: 'Sverige', huvudstad: 'Stockholm' },
+            { land: 'Norge', huvudstad: 'Oslo' },
+            { land: 'Danmark', huvudstad: 'Köpenhamn' },
+            { land: 'Finland', huvudstad: 'Helsingfors' },
+            { land: 'Island', huvudstad: 'Reykjavik' },
+            { land: 'Storbritannien', huvudstad: 'London' },
+            { land: 'Irland', huvudstad: 'Dublin' },
+            { land: 'Frankrike', huvudstad: 'Paris' },
+            { land: 'Spanien', huvudstad: 'Madrid' },
+            { land: 'Portugal', huvudstad: 'Lissabon' },
+            { land: 'Italien', huvudstad: 'Rom' },
+            { land: 'Tyskland', huvudstad: 'Berlin' },
+            { land: 'Polen', huvudstad: 'Warszawa' },
+            { land: 'Nederländerna', huvudstad: 'Amsterdam' },
+            { land: 'Grekland', huvudstad: 'Aten' },
+            { land: 'Schweiz', huvudstad: 'Bern' },
+            { land: 'Österrike', huvudstad: 'Wien' },
+            { land: 'Belgien', huvudstad: 'Bryssel' },
+            { land: 'Ukraina', huvudstad: 'Kiev' },
+            { land: 'Ryssland', huvudstad: 'Moskva' },
+            { land: 'Rumänien', huvudstad: 'Bukarest' },
+            { land: 'Ungern', huvudstad: 'Budapest' },
+            { land: 'Tjeckien', huvudstad: 'Prag' },
+            { land: 'Kroatien', huvudstad: 'Zagreb' },
+            { land: 'Serbien', huvudstad: 'Belgrad' },
+            { land: 'Bulgarien', huvudstad: 'Sofia' },
+            { land: 'Estland', huvudstad: 'Tallinn' },
+            { land: 'Lettland', huvudstad: 'Riga' },
+            { land: 'Litauen', huvudstad: 'Vilnius' },
+            { land: 'Slovakien', huvudstad: 'Bratislava' },
+            { land: 'Slovenien', huvudstad: 'Ljubljana' }
+        ],
+        asien: [
+            { land: 'Kina', huvudstad: 'Peking' },
+            { land: 'Japan', huvudstad: 'Tokyo' },
+            { land: 'Indien', huvudstad: 'New Delhi' },
+            { land: 'Thailand', huvudstad: 'Bangkok' },
+            { land: 'Indonesien', huvudstad: 'Jakarta' },
+            { land: 'Turkiet', huvudstad: 'Ankara' },
+            { land: 'Saudiarabien', huvudstad: 'Riyadh' },
+            { land: 'Iran', huvudstad: 'Teheran' },
+            { land: 'Kazakstan', huvudstad: 'Astana' },
+            { land: 'Mongoliet', huvudstad: 'Ulan Bator' },
+            { land: 'Vietnam', huvudstad: 'Hanoi' },
+            { land: 'Sydkorea', huvudstad: 'Seoul' },
+            { land: 'Nordkorea', huvudstad: 'Pyongyang' },
+            { land: 'Pakistan', huvudstad: 'Islamabad' },
+            { land: 'Irak', huvudstad: 'Bagdad' },
+            { land: 'Bangladesh', huvudstad: 'Dhaka' },
+            { land: 'Filippinerna', huvudstad: 'Manila' },
+            { land: 'Malaysia', huvudstad: 'Kuala Lumpur' },
+            { land: 'Nepal', huvudstad: 'Katmandu' },
+            { land: 'Afghanistan', huvudstad: 'Kabul' },
+            { land: 'Syrien', huvudstad: 'Damaskus' },
+            { land: 'Israel', huvudstad: 'Jerusalem' },
+            { land: 'Jordanien', huvudstad: 'Amman' },
+            { land: 'Sri Lanka', huvudstad: 'Colombo' }
+        ],
+        afrika: [
+            { land: 'Egypten', huvudstad: 'Kairo' },
+            { land: 'Sydafrika', huvudstad: 'Pretoria' },
+            { land: 'Marocko', huvudstad: 'Rabat' },
+            { land: 'Nigeria', huvudstad: 'Abuja' },
+            { land: 'Kenya', huvudstad: 'Nairobi' },
+            { land: 'Etiopien', huvudstad: 'Addis Abeba' },
+            { land: 'Algeriet', huvudstad: 'Alger' },
+            { land: 'Tanzania', huvudstad: 'Dodoma' },
+            { land: 'Libyen', huvudstad: 'Tripoli' },
+            { land: 'Ghana', huvudstad: 'Accra' },
+            { land: 'Senegal', huvudstad: 'Dakar' },
+            { land: 'Tunisien', huvudstad: 'Tunis' },
+            { land: 'Zimbabwe', huvudstad: 'Harare' },
+            { land: 'Zambia', huvudstad: 'Lusaka' },
+            { land: 'Angola', huvudstad: 'Luanda' },
+            { land: 'Moçambique', huvudstad: 'Maputo' },
+            { land: 'Uganda', huvudstad: 'Kampala' },
+            { land: 'Kamerun', huvudstad: 'Yaoundé' },
+            { land: 'Sudan', huvudstad: 'Khartoum' },
+            { land: 'Namibia', huvudstad: 'Windhoek' },
+            { land: 'Botswana', huvudstad: 'Gaborone' },
+            { land: 'Madagaskar', huvudstad: 'Antananarivo' },
+            { land: 'Mali', huvudstad: 'Bamako' }
+        ],
+        nordamerika: [
+            { land: 'USA', huvudstad: 'Washington' },
+            { land: 'Kanada', huvudstad: 'Ottawa' },
+            { land: 'Mexiko', huvudstad: 'Mexico City' },
+            { land: 'Kuba', huvudstad: 'Havanna' },
+            { land: 'Guatemala', huvudstad: 'Guatemala City' },
+            { land: 'Panama', huvudstad: 'Panama City' },
+            { land: 'Costa Rica', huvudstad: 'San José' },
+            { land: 'Honduras', huvudstad: 'Tegucigalpa' },
+            { land: 'Nicaragua', huvudstad: 'Managua' },
+            { land: 'Jamaica', huvudstad: 'Kingston' },
+            { land: 'Haiti', huvudstad: 'Port-au-Prince' },
+            { land: 'Dominikanska republiken', huvudstad: 'Santo Domingo' },
+            { land: 'El Salvador', huvudstad: 'San Salvador' },
+            { land: 'Belize', huvudstad: 'Belmopan' },
+            { land: 'Bahamas', huvudstad: 'Nassau' }
+        ],
+        sydamerika: [
+            { land: 'Brasilien', huvudstad: 'Brasília' },
+            { land: 'Argentina', huvudstad: 'Buenos Aires' },
+            { land: 'Chile', huvudstad: 'Santiago' },
+            { land: 'Peru', huvudstad: 'Lima' },
+            { land: 'Colombia', huvudstad: 'Bogotá' },
+            { land: 'Venezuela', huvudstad: 'Caracas' },
+            { land: 'Bolivia', huvudstad: 'La Paz' },
+            { land: 'Ecuador', huvudstad: 'Quito' },
+            { land: 'Uruguay', huvudstad: 'Montevideo' },
+            { land: 'Paraguay', huvudstad: 'Asunción' },
+            { land: 'Guyana', huvudstad: 'Georgetown' },
+            { land: 'Surinam', huvudstad: 'Paramaribo' }
+        ],
+        oceanien: [
+            { land: 'Australien', huvudstad: 'Canberra' },
+            { land: 'Nya Zeeland', huvudstad: 'Wellington' },
+            { land: 'Fiji', huvudstad: 'Suva' },
+            { land: 'Papua Nya Guinea', huvudstad: 'Port Moresby' },
+            { land: 'Samoa', huvudstad: 'Apia' },
+            { land: 'Tonga', huvudstad: 'Nukualofa' }
+        ]
+    },
     // Frågor för 7 år - blandat (kolumn 1 = fråga, kolumn 2 = rätt svar, kolumn 3-5 = fel svar)
     quiz7arBlandat: [
         { question: 'Vilken färg får man om man blandar rött och blått?', answers: ['Lila', 'Grön', 'Orange', 'Brun'] },
@@ -218,6 +355,12 @@ const state = {
     landerWrongThisQuestion: false, // Om spelaren tryckt fel på aktuell fråga
     landerListenersBound: false, // Om klick-lyssnare på länder är bundna
     landerContinent: 'world', // Vald världsdel ('world' = hela världen)
+    // Huvudstäder-spelet
+    huvudstaderSelected: [], // Valda världsdelar (id:n) för omgången
+    huvudstaderOrder: [], // Slumpad ordning av frågor { land, huvudstad } för omgången
+    huvudstaderCorrectAnswer: '', // Rätt huvudstad för aktuell fråga
+    huvudstaderTotal: 10, // Antal frågor i aktuell omgång
+    huvudstaderPool: [], // Alla länder i de valda världsdelarna (för svarsalternativ)
     landerTotal: 10, // Antal frågor i aktuell omgång (kan vara färre än 10 i små världsdelar)
     landerBounds: null, // Yttre gräns för zoom/pan (hela kartan eller inzoomad världsdel)
     landerView: { x: 0, y: 0, w: 1000, h: 500 }, // Aktuell viewBox för zoom/pan
@@ -257,6 +400,8 @@ const elements = {
         quizGame: document.getElementById('quiz-game-screen'),
         landerSelect: document.getElementById('lander-select-screen'),
         landerGame: document.getElementById('lander-game-screen'),
+        huvudstaderSelect: document.getElementById('huvudstader-select-screen'),
+        huvudstaderGame: document.getElementById('huvudstader-game-screen'),
         game: document.getElementById('game-screen'),
         clockGame: document.getElementById('clock-game-screen'),
         hittaBokstaven: document.getElementById('hitta-bokstaven-screen'),
@@ -294,6 +439,12 @@ const elements = {
     landerZoomIn: document.getElementById('lander-zoom-in'),
     landerZoomOut: document.getElementById('lander-zoom-out'),
     landerZoomReset: document.getElementById('lander-zoom-reset'),
+    // Huvudstäder-element
+    huvudstaderProgressDots: document.getElementById('huvudstader-progress-dots'),
+    huvudstaderCountry: document.getElementById('huvudstader-country'),
+    huvudstaderAnswerGrid: document.getElementById('huvudstader-answer-grid'),
+    huvudstaderOptions: document.getElementById('huvudstader-options'),
+    huvudstaderStartBtn: document.getElementById('huvudstader-start-btn'),
     // Resultat
     resultPercentage: document.getElementById('result-percentage'),
     playAgainBtn: document.getElementById('play-again-btn'),
@@ -464,6 +615,12 @@ function goBack() {
         case 'landerSelect':
             showScreen('geografi');
             break;
+        case 'huvudstaderSelect':
+            showScreen('geografi');
+            break;
+        case 'huvudstaderGame':
+            showScreen(state.returnToArea);
+            break;
         case 'game':
             showScreen(state.returnToArea);
             break;
@@ -535,6 +692,9 @@ function startGame(gameType) {
     } else if (gameType === 'lander') {
         state.returnToArea = 'landerSelect';
         startLanderGame();
+    } else if (gameType === 'huvudstader') {
+        state.returnToArea = 'huvudstaderSelect';
+        startHuvudstaderGame();
     } else if (gameType === 'hitta-bokstaven') {
         state.returnToArea = 'svenska';
         startHittaBokstavenGame();
@@ -2145,6 +2305,185 @@ function handleContinentAnswer(selectedAnswer, buttonElement) {
 }
 
 // ========================================
+// Spellogik: Huvudstäder
+// ========================================
+function startHuvudstaderGame() {
+    // Bygg pool av länder från de valda världsdelarna
+    const selected = state.huvudstaderSelected.length
+        ? state.huvudstaderSelected
+        : CONFIG.huvudstaderContinents.map(c => c.id);
+
+    let pool = [];
+    selected.forEach(id => {
+        if (CONFIG.capitals[id]) {
+            pool = pool.concat(CONFIG.capitals[id]);
+        }
+    });
+
+    // Slumpa och begränsa antalet frågor (aldrig fler än det finns länder)
+    const shuffled = shuffleArray([...pool]);
+    state.huvudstaderTotal = Math.min(CONFIG.huvudstaderQuestions, shuffled.length);
+    state.huvudstaderOrder = shuffled.slice(0, state.huvudstaderTotal);
+
+    // Alla huvudstäder i poolen används som felaktiga svarsalternativ
+    state.huvudstaderPool = pool;
+
+    // Skapa progress-prickar
+    createProgressDots(elements.huvudstaderProgressDots, state.huvudstaderTotal);
+
+    // Visa spelskärmen
+    showScreen('huvudstaderGame');
+
+    // Starta första frågan
+    nextHuvudstaderQuestion();
+}
+
+function nextHuvudstaderQuestion() {
+    if (state.currentQuestion >= state.huvudstaderTotal) {
+        endGame();
+        return;
+    }
+
+    // Markera nuvarande fråga
+    updateProgressDots(elements.huvudstaderProgressDots, state.currentQuestion, null);
+
+    // Hämta aktuellt land
+    const current = state.huvudstaderOrder[state.currentQuestion];
+    state.huvudstaderCorrectAnswer = current.huvudstad;
+
+    // Visa landets namn
+    elements.huvudstaderCountry.textContent = current.land;
+
+    // Skapa svarsalternativ: rätt huvudstad + 3 felaktiga från poolen
+    const wrong = state.huvudstaderPool
+        .filter(c => c.huvudstad !== current.huvudstad)
+        .map(c => c.huvudstad);
+    const uniqueWrong = [...new Set(wrong)];
+    const shuffledWrong = shuffleArray(uniqueWrong).slice(0, 3);
+    const allAnswers = shuffleArray([current.huvudstad, ...shuffledWrong]);
+
+    // Rendera svarsknappar
+    renderHuvudstaderAnswerButtons(allAnswers);
+
+    state.isProcessing = false;
+}
+
+function renderHuvudstaderAnswerButtons(answers) {
+    elements.huvudstaderAnswerGrid.innerHTML = '';
+
+    answers.forEach(answer => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn quiz-answer';
+        btn.textContent = answer;
+        btn.dataset.answer = answer;
+        btn.addEventListener('click', () => handleHuvudstaderAnswer(answer, btn));
+        elements.huvudstaderAnswerGrid.appendChild(btn);
+    });
+}
+
+function handleHuvudstaderAnswer(selectedAnswer, buttonElement) {
+    if (state.isProcessing) return;
+
+    const isCorrect = selectedAnswer === state.huvudstaderCorrectAnswer;
+    const isFirstAttempt = !elements.huvudstaderAnswerGrid.querySelector('.answer-btn.wrong');
+
+    if (isCorrect) {
+        state.isProcessing = true;
+        buttonElement.classList.add('correct');
+        playSound('correct');
+
+        if (isFirstAttempt) {
+            state.correctFirstTry++;
+        }
+
+        updateProgressDots(elements.huvudstaderProgressDots, state.currentQuestion, 'completed');
+
+        state.currentQuestion++;
+
+        setTimeout(() => {
+            nextHuvudstaderQuestion();
+        }, CONFIG.delayAfterCorrect);
+
+    } else {
+        buttonElement.classList.add('wrong');
+        buttonElement.disabled = true;
+        playSound('wrong');
+    }
+}
+
+// Bygg världsdelsvalet (kryssrutor) för Huvudstäder
+function setupHuvudstaderSelect() {
+    if (!elements.huvudstaderOptions) return;
+
+    // Rensa och bygg kryssrutor
+    elements.huvudstaderOptions.innerHTML = '';
+
+    // "Hela världen"-knapp överst
+    const worldBtn = document.createElement('button');
+    worldBtn.className = 'hs-option hs-option-world';
+    worldBtn.dataset.hsWorld = 'true';
+    worldBtn.innerHTML = '<span class="hs-check" aria-hidden="true"></span><span class="hs-option-label">HELA VÄRLDEN</span>';
+    elements.huvudstaderOptions.appendChild(worldBtn);
+
+    // En knapp per världsdel
+    CONFIG.huvudstaderContinents.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'hs-option';
+        btn.dataset.hsContinent = c.id;
+        btn.innerHTML = `<span class="hs-check" aria-hidden="true"></span><span class="hs-option-label">${c.name}</span>`;
+        elements.huvudstaderOptions.appendChild(btn);
+    });
+
+    // Klick-lyssnare
+    elements.huvudstaderOptions.querySelectorAll('.hs-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.dataset.hsWorld) {
+                // Växla alla världsdelar på/av
+                const turnOn = !btn.classList.contains('selected');
+                elements.huvudstaderOptions.querySelectorAll('.hs-option').forEach(b => {
+                    b.classList.toggle('selected', turnOn);
+                });
+            } else {
+                btn.classList.toggle('selected');
+            }
+            syncHuvudstaderSelection();
+        });
+    });
+
+    resetHuvudstaderSelect();
+}
+
+// Återställ valet (inget markerat)
+function resetHuvudstaderSelect() {
+    if (!elements.huvudstaderOptions) return;
+    elements.huvudstaderOptions.querySelectorAll('.hs-option').forEach(b => {
+        b.classList.remove('selected');
+    });
+    syncHuvudstaderSelection();
+}
+
+// Uppdatera "Hela världen"-status, valt tillstånd och start-knappen
+function syncHuvudstaderSelection() {
+    const continentBtns = [...elements.huvudstaderOptions.querySelectorAll('.hs-option[data-hs-continent]')];
+    const selectedIds = continentBtns
+        .filter(b => b.classList.contains('selected'))
+        .map(b => b.dataset.hsContinent);
+
+    state.huvudstaderSelected = selectedIds;
+
+    // "Hela världen" markeras när alla världsdelar är valda
+    const worldBtn = elements.huvudstaderOptions.querySelector('.hs-option-world');
+    if (worldBtn) {
+        worldBtn.classList.toggle('selected', selectedIds.length === continentBtns.length);
+    }
+
+    // Start-knappen aktiveras när minst en världsdel är vald
+    if (elements.huvudstaderStartBtn) {
+        elements.huvudstaderStartBtn.disabled = selectedIds.length === 0;
+    }
+}
+
+// ========================================
 // Spellogik: Länder (världskarta)
 // ========================================
 const LANDER_MAP = { W: 1000, H: 631.4, MIN_W: 40 }; // Mercator-karta; MIN_W = maximal inzoomning (mindre = mer zoom)
@@ -2616,6 +2955,8 @@ function endGame() {
         totalQuestions = CONFIG.continentQuestions;
     } else if (state.currentGame === 'lander') {
         totalQuestions = state.landerTotal;
+    } else if (state.currentGame === 'huvudstader') {
+        totalQuestions = state.huvudstaderTotal;
     } else {
         totalQuestions = CONFIG.totalQuestions;
     }
@@ -3125,6 +3466,21 @@ function setupEventListeners() {
             startGame('lander');
         });
     });
+
+    // Huvudstäder: öppna världsdelsval (kryssrutor)
+    document.querySelectorAll('[data-huvudstader-select]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!btn.disabled) showScreen('huvudstaderSelect');
+        });
+    });
+
+    // Huvudstäder: bygg kryssrutorna och koppla start-knappen
+    setupHuvudstaderSelect();
+    if (elements.huvudstaderStartBtn) {
+        elements.huvudstaderStartBtn.addEventListener('click', () => {
+            if (!elements.huvudstaderStartBtn.disabled) startGame('huvudstader');
+        });
+    }
     
     // Spela igen
     elements.playAgainBtn.addEventListener('click', () => {
