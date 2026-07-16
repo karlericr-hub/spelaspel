@@ -2091,7 +2091,7 @@ function handleContinentAnswer(selectedAnswer, buttonElement) {
 // ========================================
 // Spellogik: Länder (världskarta)
 // ========================================
-const LANDER_MAP = { W: 1000, H: 500, MIN_W: 40 }; // MIN_W = maximal inzoomning (mindre = mer zoom)
+const LANDER_MAP = { W: 1000, H: 631.4, MIN_W: 40 }; // Mercator-karta; MIN_W = maximal inzoomning (mindre = mer zoom)
 
 function startLanderGame() {
     // Slumpa 10 länder ur urvalet
@@ -2217,11 +2217,12 @@ function getLanderDrawnRect() {
 
 function clampLanderView() {
     const v = state.landerView;
-    // Behåll bildförhållandet 2:1
-    v.h = v.w / (LANDER_MAP.W / LANDER_MAP.H);
+    const aspect = LANDER_MAP.W / LANDER_MAP.H;
+    // Behåll kartans bildförhållande
+    v.h = v.w / aspect;
     // Begränsa zoom
     if (v.w > LANDER_MAP.W) { v.w = LANDER_MAP.W; v.h = LANDER_MAP.H; }
-    if (v.w < LANDER_MAP.MIN_W) { v.w = LANDER_MAP.MIN_W; v.h = v.w / 2; }
+    if (v.w < LANDER_MAP.MIN_W) { v.w = LANDER_MAP.MIN_W; v.h = v.w / aspect; }
     // Håll vyn inom kartan
     if (v.x < 0) v.x = 0;
     if (v.y < 0) v.y = 0;
@@ -2243,7 +2244,7 @@ function zoomLanderAt(clientX, clientY, factor) {
     // Ny bredd
     let newW = v.w / factor;
     newW = Math.max(LANDER_MAP.MIN_W, Math.min(LANDER_MAP.W, newW));
-    const newH = newW / 2;
+    const newH = newW / (LANDER_MAP.W / LANDER_MAP.H);
     // Behåll punkten under pekaren
     v.x = px - rx * newW;
     v.y = py - ry * newH;
