@@ -1217,8 +1217,18 @@ button:disabled {
     }
 }
 
+/* Avlägsna landdelar (Svalbard, Franska Guyana) – ritas som karta men går ej att klicka på */
+.country-extra {
+    fill: #dce8c8;
+    stroke: #5a8a68;
+    stroke-width: 0.5;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+}
+
 /* Världsdelsläge: visa endast den valda världsdelens länder */
-.country-map-svg--solo .country-path:not(.country-active) {
+.country-map-svg--solo .country-path:not(.country-active),
+.country-map-svg--solo .country-extra {
     display: none;
 }
 

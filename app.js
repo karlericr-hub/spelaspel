@@ -57,40 +57,9 @@ const CONFIG = {
         'brazil', 'argentina', 'chile', 'peru', 'colombia', 'bolivia', 'venezuela',
         'australia', 'new-zealand'
     ],
-    // Länder per världsdel (ID matchar SVG path-ID:n, utan "land-").
-    // Används i världsdels-varianten av Länder-spelet. Ryssland utelämnas här
-    // eftersom dess kartyta sträcker sig över hela världskartan.
-    continentCountries: {
-        europa: [
-            'sweden', 'norway', 'denmark', 'finland', 'iceland',
-            'united-kingdom', 'ireland', 'france', 'spain', 'portugal',
-            'italy', 'germany', 'poland', 'netherlands', 'greece',
-            'switzerland', 'ukraine', 'austria', 'belgium', 'romania', 'hungary'
-        ],
-        asien: [
-            'china', 'japan', 'india', 'thailand', 'indonesia',
-            'turkey', 'saudi-arabia', 'iran', 'kazakhstan', 'mongolia',
-            'vietnam', 'south-korea', 'pakistan', 'iraq', 'bangladesh',
-            'philippines', 'malaysia'
-        ],
-        afrika: [
-            'egypt', 'south-africa', 'morocco', 'nigeria', 'kenya',
-            'ethiopia', 'algeria', 'madagascar', 'tanzania', 'libya',
-            'ghana', 'sudan', 'angola', 'mozambique'
-        ],
-        nordamerika: [
-            'united-states-of-america', 'canada', 'mexico', 'greenland', 'cuba',
-            'guatemala', 'panama', 'honduras', 'nicaragua', 'costa-rica',
-            'jamaica', 'haiti', 'dominican-rep', 'el-salvador', 'belize'
-        ],
-        sydamerika: [
-            'brazil', 'argentina', 'chile', 'peru', 'colombia',
-            'bolivia', 'venezuela', 'ecuador', 'uruguay', 'paraguay'
-        ]
-    },
-    // Alla länder som ska ritas ut (och gå att zooma till) per världsdel.
-    // Frågorna hämtas ur continentCountries ovan, men hela världsdelen visas
-    // så att kartan ser komplett ut. Ryssland utelämnas (dess yta täcker hela kartan).
+    // Alla länder per världsdel (ID matchar SVG path-ID:n, utan "land-").
+    // Hela världsdelen ritas ut och alla dess länder kan komma som fråga.
+    // Ryssland utelämnas (dess kartyta sträcker sig över hela världskartan).
     continentDisplay: {
         europa: [
             'sweden', 'norway', 'denmark', 'finland', 'iceland',
@@ -2183,10 +2152,10 @@ const LANDER_MAP = { W: 1000, H: 631.4, MIN_W: 40 }; // Mercator-karta; MIN_W = 
 function startLanderGame() {
     const continent = state.landerContinent || 'world';
 
-    // Välj länderurval: hela världen eller en specifik världsdel
+    // Välj länderurval: alla länder i världen, eller alla länder i vald världsdel
     const pool = continent === 'world'
-        ? CONFIG.landerCountries
-        : (CONFIG.continentCountries[continent] || CONFIG.landerCountries);
+        ? getAllCountrySlugs()
+        : (CONFIG.continentDisplay[continent] || getAllCountrySlugs());
 
     // Antal frågor: högst landerQuestions, men aldrig fler än det finns länder
     state.landerTotal = Math.min(CONFIG.landerQuestions, pool.length);
@@ -2216,6 +2185,49 @@ function startLanderGame() {
     nextLanderQuestion();
 }
 
+// Alla länder som är utritade på kartan (för Världen-varianten)
+function getAllCountrySlugs() {
+    if (!elements.countryMapSvg) return CONFIG.landerCountries;
+    const slugs = Array.from(elements.countryMapSvg.querySelectorAll('.country-path'))
+        .map(p => p.id.replace(/^land-/, ''))
+        .filter(Boolean);
+    return slugs.length ? slugs : CONFIG.landerCountries;
+}
+
+// Plocka bort avlägsna landdelar (t.ex. Svalbard och Franska Guyana) ur några länders
+// vägar och lägg dem i separata, icke-klickbara vägar. De syns bara i Världen-läget och
+// påverkar därför inte inzoomningen av världsdelarna.
+function splitOutlierTerritories() {
+    const splits = [
+        { slug: 'norway', keep: s => s.minY >= 130 }, // behåll fastlandet, ta bort Svalbard (norrut)
+        { slug: 'france', keep: s => s.minY < 400 }   // behåll Europa-delen, ta bort Franska Guyana (söderut)
+    ];
+    splits.forEach(cfg => {
+        const path = document.getElementById('land-' + cfg.slug);
+        if (!path) return;
+        const d = path.getAttribute('d');
+        if (!d) return;
+        const subs = d.split(/(?=M)/).filter(s => s.trim().length);
+        const keep = [], extra = [];
+        subs.forEach(sub => {
+            const nums = (sub.match(/-?\d+(\.\d+)?/g) || []).map(Number);
+            let minY = Infinity, maxY = -Infinity;
+            for (let i = 1; i < nums.length; i += 2) {
+                if (nums[i] < minY) minY = nums[i];
+                if (nums[i] > maxY) maxY = nums[i];
+            }
+            (cfg.keep({ minY, maxY }) ? keep : extra).push(sub);
+        });
+        if (!extra.length) return;
+        path.setAttribute('d', keep.join(''));
+        const extraPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        extraPath.setAttribute('class', 'country-extra');
+        extraPath.setAttribute('d', extra.join(''));
+        extraPath.id = 'extra-' + cfg.slug;
+        path.parentNode.appendChild(extraPath);
+    });
+}
+
 // Ställ in vilka länder som visas och beräkna zoom-/pan-gränsen för vald världsdel
 function setupLanderContinent(continent) {
     const svg = elements.countryMapSvg;
@@ -2238,7 +2250,7 @@ function setupLanderContinent(continent) {
 
     // Endast vald världsdel ska synas – rita ut alla dess länder
     svg.classList.add('country-map-svg--solo');
-    const shown = CONFIG.continentDisplay[continent] || CONFIG.continentCountries[continent] || [];
+    const shown = CONFIG.continentDisplay[continent] || [];
     shown.forEach(slug => {
         const p = document.getElementById('land-' + slug);
         if (p) p.classList.add('country-active');
@@ -3146,7 +3158,10 @@ function init() {
     
     // Sätt upp event listeners
     setupEventListeners();
-    
+
+    // Bryt ut avlägsna landdelar (Svalbard, Franska Guyana) så de inte stör världsdelarna
+    splitOutlierTerritories();
+
     // Visa startsidan efter laddning
     setTimeout(() => {
         showScreen('home');
