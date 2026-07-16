@@ -69,7 +69,7 @@ const CONFIG = {
             'belarus', 'moldova', 'lithuania', 'latvia', 'estonia', 'bulgaria',
             'albania', 'croatia', 'luxembourg', 'slovenia', 'slovakia', 'czechia',
             'bosnia-and-herz', 'north-macedonia', 'serbia', 'montenegro', 'kosovo',
-            'cyprus', 'n-cyprus', 'turkey'
+            'cyprus', 'turkey'
         ],
         asien: [
             'china', 'japan', 'india', 'thailand', 'indonesia', 'turkey',
@@ -2194,6 +2194,21 @@ function getAllCountrySlugs() {
     return slugs.length ? slugs : CONFIG.landerCountries;
 }
 
+// Slå ihop landdelar som inte är egna länder med sitt huvudland (t.ex. Nordcypern → Cypern).
+// Källans kartyta läggs till målets väg och källvägen tas bort, så hela ön blir en enhet.
+function mergeCountries() {
+    const merges = [
+        { into: 'cyprus', from: 'n-cyprus' } // Nordcypern är inget eget land
+    ];
+    merges.forEach(({ into, from }) => {
+        const target = document.getElementById('land-' + into);
+        const source = document.getElementById('land-' + from);
+        if (!target || !source) return;
+        target.setAttribute('d', (target.getAttribute('d') || '') + (source.getAttribute('d') || ''));
+        source.parentNode.removeChild(source);
+    });
+}
+
 // Plocka bort avlägsna landdelar (t.ex. Svalbard och Franska Guyana) ur några länders
 // vägar och lägg dem i separata, icke-klickbara vägar. De syns bara i Världen-läget och
 // påverkar därför inte inzoomningen av världsdelarna.
@@ -3158,6 +3173,9 @@ function init() {
     
     // Sätt upp event listeners
     setupEventListeners();
+
+    // Slå ihop delar som inte är egna länder (Nordcypern → Cypern)
+    mergeCountries();
 
     // Bryt ut avlägsna landdelar (Svalbard, Franska Guyana) så de inte stör världsdelarna
     splitOutlierTerritories();
