@@ -72,6 +72,7 @@ const CONFIG = {
             'cyprus', 'turkey'
         ],
         asien: [
+            'russia',
             'china', 'japan', 'india', 'thailand', 'indonesia', 'turkey',
             'saudi-arabia', 'iran', 'kazakhstan', 'mongolia', 'vietnam',
             'south-korea', 'north-korea', 'pakistan', 'iraq', 'bangladesh',
@@ -2487,6 +2488,9 @@ function syncHuvudstaderSelection() {
 // Spellogik: Länder (världskarta)
 // ========================================
 const LANDER_MAP = { W: 1000, H: 631.4, MIN_W: 40 }; // Mercator-karta; MIN_W = maximal inzoomning (mindre = mer zoom)
+// Länder vars kartyta täcker hela kartan (Ryssland wrap:ar över antimeridianen) och
+// därför inte ska påverka inzoomningen av en världsdel – de ritas ut men ramar inte in vyn.
+const LANDER_BBOX_EXCLUDE = ['russia'];
 
 function startLanderGame() {
     const continent = state.landerContinent || 'world';
@@ -2610,8 +2614,12 @@ function setupLanderContinent(continent) {
         if (p) p.classList.add('country-active');
     });
 
-    // Beräkna gemensam bounding box för hela världsdelen och zooma in på den
-    const bbox = computeSlugsBBox(shown);
+    // Beräkna gemensam bounding box för hela världsdelen och zooma in på den.
+    // Ryssland utelämnas ur ramberäkningen eftersom dess kartyta sträcker sig runt
+    // hela kartan – annars zoomas världsdelen ut helt. Landet ritas ändå ut och
+    // kan klickas/frågas (den del som ligger inom vyn syns).
+    const framed = shown.filter(slug => !LANDER_BBOX_EXCLUDE.includes(slug));
+    const bbox = computeSlugsBBox(framed.length ? framed : shown);
     state.landerBounds = bbox
         ? fitBoxToAspect(bbox, 0.06, landerAspect())
         : fitBoxToAspect({ x: 0, y: 0, w: LANDER_MAP.W, h: LANDER_MAP.H }, 0, landerAspect());
