@@ -57,35 +57,53 @@ const CONFIG = {
         'brazil', 'argentina', 'chile', 'peru', 'colombia', 'bolivia', 'venezuela',
         'australia', 'new-zealand'
     ],
-    // Länder per världsdel (ID matchar SVG path-ID:n, utan "land-").
-    // Används i världsdels-varianten av Länder-spelet. Ryssland utelämnas här
-    // eftersom dess kartyta sträcker sig över hela världskartan.
-    continentCountries: {
+    // Alla länder per världsdel (ID matchar SVG path-ID:n, utan "land-").
+    // Hela världsdelen ritas ut och alla dess länder kan komma som fråga.
+    // Ryssland utelämnas (dess kartyta sträcker sig över hela världskartan).
+    continentDisplay: {
         europa: [
             'sweden', 'norway', 'denmark', 'finland', 'iceland',
             'united-kingdom', 'ireland', 'france', 'spain', 'portugal',
             'italy', 'germany', 'poland', 'netherlands', 'greece',
-            'switzerland', 'ukraine', 'austria', 'belgium', 'romania', 'hungary'
+            'switzerland', 'ukraine', 'austria', 'belgium', 'romania', 'hungary',
+            'belarus', 'moldova', 'lithuania', 'latvia', 'estonia', 'bulgaria',
+            'albania', 'croatia', 'luxembourg', 'slovenia', 'slovakia', 'czechia',
+            'bosnia-and-herz', 'north-macedonia', 'serbia', 'montenegro', 'kosovo',
+            'cyprus', 'n-cyprus', 'turkey'
         ],
         asien: [
-            'china', 'japan', 'india', 'thailand', 'indonesia',
-            'turkey', 'saudi-arabia', 'iran', 'kazakhstan', 'mongolia',
-            'vietnam', 'south-korea', 'pakistan', 'iraq', 'bangladesh',
-            'philippines', 'malaysia'
+            'china', 'japan', 'india', 'thailand', 'indonesia', 'turkey',
+            'saudi-arabia', 'iran', 'kazakhstan', 'mongolia', 'vietnam',
+            'south-korea', 'north-korea', 'pakistan', 'iraq', 'bangladesh',
+            'philippines', 'malaysia', 'uzbekistan', 'timor-leste', 'cambodia',
+            'laos', 'myanmar', 'bhutan', 'nepal', 'afghanistan', 'tajikistan',
+            'kyrgyzstan', 'turkmenistan', 'syria', 'armenia', 'azerbaijan',
+            'georgia', 'israel', 'lebanon', 'palestine', 'jordan',
+            'united-arab-emirates', 'qatar', 'kuwait', 'oman', 'yemen',
+            'sri-lanka', 'taiwan', 'brunei'
         ],
         afrika: [
-            'egypt', 'south-africa', 'morocco', 'nigeria', 'kenya',
-            'ethiopia', 'algeria', 'madagascar', 'tanzania', 'libya',
-            'ghana', 'sudan', 'angola', 'mozambique'
+            'tanzania', 'w-sahara', 'dem-rep-congo', 'somalia', 'kenya', 'sudan',
+            'chad', 'south-africa', 'lesotho', 'zimbabwe', 'botswana', 'namibia',
+            'senegal', 'mali', 'mauritania', 'benin', 'niger', 'nigeria',
+            'cameroon', 'togo', 'ghana', 'cote-d-ivoire', 'guinea',
+            'guinea-bissau', 'liberia', 'sierra-leone', 'burkina-faso',
+            'central-african-rep', 'congo', 'gabon', 'eq-guinea', 'zambia',
+            'malawi', 'mozambique', 'eswatini', 'angola', 'burundi', 'madagascar',
+            'gambia', 'tunisia', 'algeria', 'morocco', 'egypt', 'libya',
+            'ethiopia', 'djibouti', 'somaliland', 'uganda', 'rwanda', 'eritrea',
+            's-sudan'
         ],
         nordamerika: [
-            'united-states-of-america', 'canada', 'mexico', 'greenland', 'cuba',
-            'guatemala', 'panama', 'honduras', 'nicaragua', 'costa-rica',
-            'jamaica', 'haiti', 'dominican-rep', 'el-salvador', 'belize'
+            'canada', 'united-states-of-america', 'greenland', 'mexico',
+            'guatemala', 'belize', 'honduras', 'el-salvador', 'nicaragua',
+            'costa-rica', 'panama', 'cuba', 'haiti', 'dominican-rep', 'jamaica',
+            'bahamas', 'puerto-rico', 'trinidad-and-tobago'
         ],
         sydamerika: [
-            'brazil', 'argentina', 'chile', 'peru', 'colombia',
-            'bolivia', 'venezuela', 'ecuador', 'uruguay', 'paraguay'
+            'brazil', 'argentina', 'chile', 'uruguay', 'bolivia', 'peru',
+            'colombia', 'venezuela', 'guyana', 'suriname', 'ecuador', 'paraguay',
+            'falkland-is'
         ]
     },
     // Världsdelar - ID matchar SVG path ID:n
@@ -2134,10 +2152,10 @@ const LANDER_MAP = { W: 1000, H: 631.4, MIN_W: 40 }; // Mercator-karta; MIN_W = 
 function startLanderGame() {
     const continent = state.landerContinent || 'world';
 
-    // Välj länderurval: hela världen eller en specifik världsdel
+    // Välj länderurval: alla länder i världen, eller alla länder i vald världsdel
     const pool = continent === 'world'
-        ? CONFIG.landerCountries
-        : (CONFIG.continentCountries[continent] || CONFIG.landerCountries);
+        ? getAllCountrySlugs()
+        : (CONFIG.continentDisplay[continent] || getAllCountrySlugs());
 
     // Antal frågor: högst landerQuestions, men aldrig fler än det finns länder
     state.landerTotal = Math.min(CONFIG.landerQuestions, pool.length);
@@ -2167,6 +2185,49 @@ function startLanderGame() {
     nextLanderQuestion();
 }
 
+// Alla länder som är utritade på kartan (för Världen-varianten)
+function getAllCountrySlugs() {
+    if (!elements.countryMapSvg) return CONFIG.landerCountries;
+    const slugs = Array.from(elements.countryMapSvg.querySelectorAll('.country-path'))
+        .map(p => p.id.replace(/^land-/, ''))
+        .filter(Boolean);
+    return slugs.length ? slugs : CONFIG.landerCountries;
+}
+
+// Plocka bort avlägsna landdelar (t.ex. Svalbard och Franska Guyana) ur några länders
+// vägar och lägg dem i separata, icke-klickbara vägar. De syns bara i Världen-läget och
+// påverkar därför inte inzoomningen av världsdelarna.
+function splitOutlierTerritories() {
+    const splits = [
+        { slug: 'norway', keep: s => s.minY >= 130 }, // behåll fastlandet, ta bort Svalbard (norrut)
+        { slug: 'france', keep: s => s.minY < 400 }   // behåll Europa-delen, ta bort Franska Guyana (söderut)
+    ];
+    splits.forEach(cfg => {
+        const path = document.getElementById('land-' + cfg.slug);
+        if (!path) return;
+        const d = path.getAttribute('d');
+        if (!d) return;
+        const subs = d.split(/(?=M)/).filter(s => s.trim().length);
+        const keep = [], extra = [];
+        subs.forEach(sub => {
+            const nums = (sub.match(/-?\d+(\.\d+)?/g) || []).map(Number);
+            let minY = Infinity, maxY = -Infinity;
+            for (let i = 1; i < nums.length; i += 2) {
+                if (nums[i] < minY) minY = nums[i];
+                if (nums[i] > maxY) maxY = nums[i];
+            }
+            (cfg.keep({ minY, maxY }) ? keep : extra).push(sub);
+        });
+        if (!extra.length) return;
+        path.setAttribute('d', keep.join(''));
+        const extraPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        extraPath.setAttribute('class', 'country-extra');
+        extraPath.setAttribute('d', extra.join(''));
+        extraPath.id = 'extra-' + cfg.slug;
+        path.parentNode.appendChild(extraPath);
+    });
+}
+
 // Ställ in vilka länder som visas och beräkna zoom-/pan-gränsen för vald världsdel
 function setupLanderContinent(continent) {
     const svg = elements.countryMapSvg;
@@ -2180,23 +2241,33 @@ function setupLanderContinent(continent) {
 
     if (continent === 'world') {
         svg.classList.remove('country-map-svg--solo');
-        state.landerBounds = { x: 0, y: 0, w: LANDER_MAP.W, h: LANDER_MAP.H };
+        // Passa in hela världen efter kartrutans form (fyller rutan, hela världen syns)
+        state.landerBounds = fitBoxToAspect(
+            { x: 0, y: 0, w: LANDER_MAP.W, h: LANDER_MAP.H }, 0, landerAspect()
+        );
         return;
     }
 
-    // Endast vald världsdel ska synas
+    // Endast vald världsdel ska synas – rita ut alla dess länder
     svg.classList.add('country-map-svg--solo');
-    const pool = CONFIG.continentCountries[continent] || [];
-    pool.forEach(slug => {
+    const shown = CONFIG.continentDisplay[continent] || [];
+    shown.forEach(slug => {
         const p = document.getElementById('land-' + slug);
         if (p) p.classList.add('country-active');
     });
 
-    // Beräkna gemensam bounding box för världsdelens länder och zooma in på den
-    const bbox = computeSlugsBBox(pool);
+    // Beräkna gemensam bounding box för hela världsdelen och zooma in på den
+    const bbox = computeSlugsBBox(shown);
     state.landerBounds = bbox
-        ? fitToMapAspect(bbox, 0.08)
-        : { x: 0, y: 0, w: LANDER_MAP.W, h: LANDER_MAP.H };
+        ? fitBoxToAspect(bbox, 0.06, landerAspect())
+        : fitBoxToAspect({ x: 0, y: 0, w: LANDER_MAP.W, h: LANDER_MAP.H }, 0, landerAspect());
+}
+
+// Kartrutans faktiska bildförhållande (bredd/höjd i pixlar)
+function landerAspect() {
+    const r = elements.landerMapViewport ? elements.landerMapViewport.getBoundingClientRect() : null;
+    if (r && r.width > 0 && r.height > 0) return r.width / r.height;
+    return LANDER_MAP.W / LANDER_MAP.H;
 }
 
 // Gemensam bounding box (i kartkoordinater) för en lista av länder
@@ -2219,9 +2290,9 @@ function computeSlugsBBox(slugs) {
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
 }
 
-// Expandera en bounding box till kartans bildförhållande (med marginal) och håll den inom kartan
-function fitToMapAspect(bbox, padFrac) {
-    const A = LANDER_MAP.W / LANDER_MAP.H;
+// Expandera en bounding box (med marginal) till ett givet bildförhållande A (bredd/höjd)
+// så att den fyller kartrutan utan att beskäras. Omgivande yta blir hav.
+function fitBoxToAspect(bbox, padFrac, A) {
     const padX = bbox.w * padFrac;
     const padY = bbox.h * padFrac;
     let x = bbox.x - padX;
@@ -2229,7 +2300,7 @@ function fitToMapAspect(bbox, padFrac) {
     let w = bbox.w + 2 * padX;
     let h = bbox.h + 2 * padY;
 
-    // Expandera smalaste ledden så förhållandet matchar kartan
+    // Expandera smalaste ledden så förhållandet matchar kartrutan
     if (w / h < A) {
         const nw = h * A;
         x -= (nw - w) / 2;
@@ -2239,14 +2310,6 @@ function fitToMapAspect(bbox, padFrac) {
         y -= (nh - h) / 2;
         h = nh;
     }
-
-    // Håll gränsen inom kartans yta
-    if (w > LANDER_MAP.W) { w = LANDER_MAP.W; x = 0; }
-    if (h > LANDER_MAP.H) { h = LANDER_MAP.H; y = 0; }
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
-    if (x + w > LANDER_MAP.W) x = LANDER_MAP.W - w;
-    if (y + h > LANDER_MAP.H) y = LANDER_MAP.H - h;
 
     return { x, y, w, h };
 }
@@ -2334,7 +2397,7 @@ function resetLanderView() {
 // Beräkna det faktiskt ritade kartområdet inuti viewporten (hänsyn till letterbox)
 function getLanderDrawnRect() {
     const rect = elements.landerMapViewport.getBoundingClientRect();
-    const aspect = LANDER_MAP.W / LANDER_MAP.H; // 2:1, konstant eftersom viewBox behåller ratio
+    const aspect = landerAspect(); // viewBox följer kartrutans form, så letterbox ≈ 0
     const containerAspect = rect.width / rect.height;
     let drawnW, drawnH, offsetX, offsetY;
     if (containerAspect > aspect) {
@@ -2354,7 +2417,7 @@ function getLanderDrawnRect() {
 function clampLanderView() {
     const v = state.landerView;
     const b = state.landerBounds || { x: 0, y: 0, w: LANDER_MAP.W, h: LANDER_MAP.H };
-    const aspect = LANDER_MAP.W / LANDER_MAP.H;
+    const aspect = landerAspect();
     // Behåll kartans bildförhållande
     v.h = v.w / aspect;
     // Begränsa zoom: aldrig utanför gränsen (världsdel eller hela kartan)
@@ -2382,7 +2445,7 @@ function zoomLanderAt(clientX, clientY, factor) {
     const maxW = (state.landerBounds && state.landerBounds.w) || LANDER_MAP.W;
     let newW = v.w / factor;
     newW = Math.max(LANDER_MAP.MIN_W, Math.min(maxW, newW));
-    const newH = newW / (LANDER_MAP.W / LANDER_MAP.H);
+    const newH = newW / landerAspect();
     // Behåll punkten under pekaren
     v.x = px - rx * newW;
     v.y = py - ry * newH;
@@ -3095,7 +3158,10 @@ function init() {
     
     // Sätt upp event listeners
     setupEventListeners();
-    
+
+    // Bryt ut avlägsna landdelar (Svalbard, Franska Guyana) så de inte stör världsdelarna
+    splitOutlierTerritories();
+
     // Visa startsidan efter laddning
     setTimeout(() => {
         showScreen('home');
