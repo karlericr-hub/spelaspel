@@ -365,6 +365,8 @@ const state = {
     landerTotal: 10, // Antal frågor i aktuell omgång (kan vara färre än 10 i små världsdelar)
     landerBounds: null, // Yttre gräns för zoom/pan (hela kartan eller inzoomad världsdel)
     landerView: { x: 0, y: 0, w: 1000, h: 500 }, // Aktuell viewBox för zoom/pan
+    landerPreviewInterval: null, // Timer för förhandsvisningen av alla ländernamn
+    landerPreviewActive: false, // Om förhandsvisningen (namnen på kartan) pågår
     // Hitta bokstaven
     hb: {
         phase: 'idle',           // 'calibration' | 'round' | 'ended' | 'idle'
@@ -638,6 +640,7 @@ function goBack() {
             showScreen(state.returnToArea);
             break;
         case 'landerGame':
+            finishLanderPreview();
             showScreen(state.returnToArea);
             break;
         case 'result':
@@ -2524,8 +2527,99 @@ function startLanderGame() {
     // Rensa markeringar
     clearLanderHighlights();
 
-    // Starta första frågan
-    nextLanderQuestion();
+    // Ta bort ev. kvarvarande förhandsvisning från en tidigare omgång
+    finishLanderPreview();
+
+    // Endast de världsdelskopplade varianterna visar ländernas namn i förväg.
+    // Varianten "hela världen" startar direkt utan förhandsvisning.
+    if (continent === 'world') {
+        nextLanderQuestion();
+    } else {
+        // Visa namnen på alla länder på kartan i 10 sekunder, starta sedan omgången
+        showLanderPreview(continent, () => nextLanderQuestion());
+    }
+}
+
+// Antal sekunder som ländernas namn visas på kartan innan omgången börjar
+const LANDER_PREVIEW_SECONDS = 10;
+
+// Rita ut namnen på alla länder (hela världen eller vald världsdel) ovanpå kartan
+// en kort stund så barnet hinner lära sig dem innan omgången startar.
+function showLanderPreview(continent, onDone) {
+    const svg = elements.countryMapSvg;
+    const viewport = elements.landerMapViewport;
+    if (!svg || !viewport) { onDone(); return; }
+
+    // Vilka länder ska namnges? Alla på kartan i det aktuella läget.
+    const slugs = continent === 'world'
+        ? getAllCountrySlugs()
+        : (CONFIG.continentDisplay[continent] || getAllCountrySlugs());
+
+    // Textstorlek i kartkoordinater, relativt aktuell vy, så etiketterna blir
+    // ungefär lika stora på skärmen oavsett hur långt kartan är inzoomad.
+    const viewW = (state.landerView && state.landerView.w) || LANDER_MAP.W;
+    const fontSize = viewW / 45;
+
+    // En grupp med alla ländernamn, ritad i samma koordinatsystem som kartan
+    // (följer med vid zoom/pan) och utan att fånga klick.
+    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    group.setAttribute('id', 'lander-preview-labels');
+    group.setAttribute('pointer-events', 'none');
+
+    slugs.forEach(slug => {
+        const path = document.getElementById('land-' + slug);
+        if (!path) return;
+        let b;
+        try { b = path.getBBox(); } catch (e) { return; }
+        if (!b || (b.width === 0 && b.height === 0)) return;
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', b.x + b.width / 2);
+        text.setAttribute('y', b.y + b.height / 2);
+        text.setAttribute('class', 'country-label');
+        text.setAttribute('font-size', fontSize);
+        text.textContent = path.dataset.name || slug;
+        group.appendChild(text);
+    });
+    svg.appendChild(group);
+
+    // Liten banner med nedräkning ovanpå kartan
+    const banner = document.createElement('div');
+    banner.className = 'lander-preview-banner';
+    viewport.appendChild(banner);
+
+    state.landerPreviewActive = true;
+    state.isProcessing = true; // hindra klick medan namnen visas
+
+    let secondsLeft = LANDER_PREVIEW_SECONDS;
+    const render = () => {
+        banner.textContent = `Lär dig länderna! Spelet börjar om ${secondsLeft} s`;
+    };
+    render();
+
+    state.landerPreviewInterval = setInterval(() => {
+        secondsLeft -= 1;
+        if (secondsLeft <= 0) {
+            finishLanderPreview();
+            onDone();
+        } else {
+            render();
+        }
+    }, 1000);
+}
+
+// Avsluta/städa upp förhandsvisningen (timer, etiketter och banner)
+function finishLanderPreview() {
+    if (state.landerPreviewInterval) {
+        clearInterval(state.landerPreviewInterval);
+        state.landerPreviewInterval = null;
+    }
+    state.landerPreviewActive = false;
+    const group = document.getElementById('lander-preview-labels');
+    if (group && group.parentNode) group.parentNode.removeChild(group);
+    if (elements.landerMapViewport) {
+        const banner = elements.landerMapViewport.querySelector('.lander-preview-banner');
+        if (banner && banner.parentNode) banner.parentNode.removeChild(banner);
+    }
 }
 
 // Alla länder som är utritade på kartan (för Världen-varianten)
