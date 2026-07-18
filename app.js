@@ -2530,8 +2530,14 @@ function startLanderGame() {
     // Ta bort ev. kvarvarande förhandsvisning från en tidigare omgång
     finishLanderPreview();
 
-    // Visa namnen på alla länder på kartan i 10 sekunder, starta sedan omgången
-    showLanderPreview(continent, () => nextLanderQuestion());
+    // Endast de världsdelskopplade varianterna visar ländernas namn i förväg.
+    // Varianten "hela världen" startar direkt utan förhandsvisning.
+    if (continent === 'world') {
+        nextLanderQuestion();
+    } else {
+        // Visa namnen på alla länder på kartan i 10 sekunder, starta sedan omgången
+        showLanderPreview(continent, () => nextLanderQuestion());
+    }
 }
 
 // Antal sekunder som ländernas namn visas på kartan innan omgången börjar
