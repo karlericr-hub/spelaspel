@@ -1391,6 +1391,38 @@ button:disabled {
     50% { fill: #ffe89a; }
 }
 
+/* Förhandsvisning: ländernas namn skrivs ut på kartan innan omgången börjar */
+.country-label {
+    fill: var(--forest-dark, #2d5a3d);
+    stroke: #ffffff;
+    stroke-width: 2px;
+    paint-order: stroke fill;
+    font-weight: 800;
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+    vector-effect: non-scaling-stroke;
+}
+
+.lander-preview-banner {
+    position: absolute;
+    top: var(--space-sm);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    max-width: 92%;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(45, 90, 61, 0.92);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: var(--shadow-soft);
+    pointer-events: none;
+}
+
 .lander-zoom-controls {
     position: absolute;
     right: var(--space-sm);
