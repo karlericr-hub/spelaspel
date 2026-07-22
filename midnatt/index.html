@@ -708,38 +708,76 @@
       <div class="panel">
         <h2>UPPDRAG 4 – RITNINGEN</h2>
         <p class="brief center">Vi har dekrypterat en ritning över byggnaden. Krysset visar var nästa ledtråd finns.</p>
-        <svg class="blueprint" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" aria-label="Ritning över huset">
+        <svg class="blueprint" viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" aria-label="Förenklad ritning över övervåningen">
           <defs>
             <style>
-              .bp-line { fill: none; stroke: #2bff88; stroke-width: 2.5; }
-              .bp-thin { fill: none; stroke: #1a9e58; stroke-width: 1.5; }
-              .bp-txt  { fill: #6faa8c; font-family: "Courier New", monospace; font-size: 15px; letter-spacing: 1px; }
+              .bp-line { fill: none; stroke: #2bff88; stroke-width: 3; stroke-linejoin: round; }
+              .bp-thin { fill: none; stroke: #1a9e58; stroke-width: 1.6; }
+              .bp-fill { fill: rgba(43,255,136,0.05); stroke: none; }
+              .bp-loft { fill: rgba(43,255,136,0.09); stroke: none; }
+              .bp-txt  { fill: #6faa8c; font-family: "Courier New", monospace; font-size: 15px; letter-spacing: 1px; text-anchor: middle; }
+              .bp-sm   { font-size: 12px; }
               .bp-txt-hl { fill: #2bff88; font-weight: bold; }
             </style>
           </defs>
-          <!-- Hus-kontur -->
-          <polygon class="bp-line" points="60,120 280,25 500,120 500,310 60,310"/>
-          <!-- Vindsbjälklag -->
-          <line class="bp-line" x1="60" y1="120" x2="500" y2="120"/>
-          <!-- Mellanbjälklag -->
-          <line class="bp-line" x1="60" y1="215" x2="500" y2="215"/>
-          <!-- Rumsväggar -->
-          <line class="bp-thin" x1="280" y1="120" x2="280" y2="215"/>
-          <line class="bp-thin" x1="230" y1="215" x2="230" y2="310"/>
-          <!-- Trappa -->
-          <path class="bp-thin" d="M240 300 h12 v-12 h12 v-12 h12 v-12 h12 v-12 h12 v-12 h12"/>
-          <!-- Rumsnamn -->
-          <text class="bp-txt" x="120" y="170">SOVRUM</text>
-          <text class="bp-txt" x="340" y="170">BADRUM</text>
-          <text class="bp-txt" x="90" y="268">KÖK</text>
-          <text class="bp-txt" x="330" y="268">VARDAGSRUM</text>
-          <text class="bp-txt bp-txt-hl" x="215" y="112">KATTVINDEN</text>
-          <!-- Rött kryss på kattvinden -->
-          <g stroke="#ff4d5e" stroke-width="7" stroke-linecap="round">
-            <line x1="264" y1="48" x2="296" y2="80"/>
-            <line x1="296" y1="48" x2="264" y2="80"/>
+
+          <!-- Ytterväggar -->
+          <rect class="bp-fill" x="40" y="50" width="520" height="280"/>
+          <rect class="bp-line" x="40" y="50" width="520" height="280"/>
+
+          <!-- Bärande innerväggar (tredelning) -->
+          <line class="bp-line" x1="230" y1="50" x2="230" y2="330"/>
+          <line class="bp-line" x1="370" y1="50" x2="370" y2="330"/>
+
+          <!-- Kattvindar (snedtaksförråd) längs takfoten -->
+          <rect class="bp-loft" x="40" y="50" width="190" height="52"/>
+          <rect class="bp-loft" x="370" y="50" width="190" height="52"/>
+          <rect class="bp-loft" x="40" y="278" width="190" height="52"/>
+          <rect class="bp-loft" x="370" y="278" width="190" height="52"/>
+          <line class="bp-thin" x1="40"  y1="102" x2="230" y2="102"/>
+          <line class="bp-thin" x1="370" y1="102" x2="560" y2="102"/>
+          <line class="bp-thin" x1="40"  y1="278" x2="230" y2="278"/>
+          <line class="bp-thin" x1="370" y1="278" x2="560" y2="278"/>
+
+          <!-- Höger sida: två rum -->
+          <line class="bp-line" x1="370" y1="190" x2="560" y2="190"/>
+
+          <!-- Vänster: liten klädkammare (snedvägg) -->
+          <polygon class="bp-thin" points="150,190 230,190 230,278 150,278 150,215"/>
+
+          <!-- Trappa i mitten -->
+          <line class="bp-line" x1="262" y1="212" x2="262" y2="330"/>
+          <line class="bp-line" x1="338" y1="212" x2="338" y2="330"/>
+          <line class="bp-line" x1="262" y1="212" x2="338" y2="212"/>
+          <g class="bp-thin">
+            <line x1="262" y1="226" x2="338" y2="226"/>
+            <line x1="262" y1="240" x2="338" y2="240"/>
+            <line x1="262" y1="254" x2="338" y2="254"/>
+            <line x1="262" y1="268" x2="338" y2="268"/>
+            <line x1="262" y1="282" x2="338" y2="282"/>
+            <line x1="262" y1="296" x2="338" y2="296"/>
+            <line x1="262" y1="310" x2="338" y2="310"/>
           </g>
-          <circle cx="280" cy="64" r="27" fill="none" stroke="#ff4d5e" stroke-width="2" stroke-dasharray="5 5"/>
+
+          <!-- Rumsnamn -->
+          <text class="bp-txt" x="135" y="150">SOVRUM</text>
+          <text class="bp-txt bp-sm" x="190" y="245">KLÄD-</text>
+          <text class="bp-txt bp-sm" x="190" y="260">KAMMARE</text>
+          <text class="bp-txt" x="300" y="150">HALL</text>
+          <text class="bp-txt bp-sm" x="300" y="205">TRAPPA</text>
+          <text class="bp-txt" x="465" y="130">SOVRUM</text>
+          <text class="bp-txt" x="465" y="245">RUM</text>
+          <text class="bp-txt bp-txt-hl bp-sm" x="466" y="82">KATTVIND</text>
+          <text class="bp-txt bp-sm" x="135" y="308">FÖRRÅD</text>
+          <text class="bp-txt bp-sm" x="465" y="308">FÖRRÅD</text>
+
+          <!-- Röd markering: kattvinden uppe till vänster -->
+          <text class="bp-txt bp-txt-hl bp-sm" x="135" y="70">KATTVIND</text>
+          <circle cx="135" cy="90" r="17" fill="none" stroke="#ff4d5e" stroke-width="2" stroke-dasharray="5 5"/>
+          <g stroke="#ff4d5e" stroke-width="6" stroke-linecap="round">
+            <line x1="123" y1="78" x2="147" y2="102"/>
+            <line x1="147" y1="78" x2="123" y2="102"/>
+          </g>
         </svg>
         <div class="obj-row" id="m4-objects"></div>
         <div class="feedback" id="m4-feedback"></div>
