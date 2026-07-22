@@ -374,6 +374,38 @@
     box-shadow: 0 0 16px rgba(43,255,136,0.4);
   }
 
+  /* ---------- Chiffernyckel (uppdrag 3) ---------- */
+  .cipher-key {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: clamp(6px, 1.5vw, 12px);
+    margin: 16px 0 6px;
+    width: 100%;
+  }
+  .key-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: clamp(6px, 1.4vw, 10px) 0;
+    background: var(--bg-panel2);
+    border: 1px solid var(--green-dark);
+    border-radius: 10px;
+    box-shadow: inset 0 0 16px rgba(43,255,136,0.05);
+  }
+  .key-digit {
+    font-family: var(--mono);
+    font-size: clamp(12px, 2.2vw, 17px);
+    color: var(--text-dim);
+  }
+  .key-letter {
+    font-family: var(--mono);
+    font-size: clamp(22px, 4.6vw, 40px);
+    font-weight: bold;
+    color: var(--green);
+    text-shadow: 0 0 10px rgba(43,255,136,0.55);
+  }
+
   /* ---------- Ritningen (uppdrag 4) ---------- */
   .blueprint {
     width: min(560px, 92%);
@@ -662,7 +694,10 @@
         <p class="brief">1. Hur många <strong>ytterdörrar</strong> finns i huset?</p>
         <p class="brief">2. Hur många <strong>lampor</strong> finns i vardagsrummet?</p>
         <p class="brief">3. Hur många <strong>böcker med gul rygg</strong> står i den vänstra bokhyllan på övervåningen?</p>
-        <p class="brief center">Skriv siffrorna i samma ordning:</p>
+        <hr class="divider">
+        <p class="brief center">Säkerhetssystemet svarar bara på bokstäver. Varje siffra motsvarar en bokstav i chiffernyckeln:</p>
+        <div class="cipher-key" id="m3-key"></div>
+        <p class="brief center">Översätt era tre siffror till bokstäver och skriv dem i samma ordning:</p>
         <div class="code-row" id="m3-boxes"></div>
         <div class="feedback" id="m3-feedback"></div>
       </div>
@@ -761,6 +796,9 @@ const UPPDRAG2_BILDER = ["🦖", "🦉", "☀️", "🍋", "🏠", "🐿️", "�
 const UPPDRAG2_SVAR = "DUSCHEN";      // 7 bokstäver – det gömda ordet i chiffret
 const UPPDRAG2_KOD = "729";           // Röd, Grön, Blå – koden på lappen där ordet visar (duschen)
 
+// Uppdrag 3: barnen räknar tre saker (ytterdörrar, lampor, gula böcker) och får
+// tre siffror. Siffrorna översätts sedan till bokstäver med chiffernyckeln nedan
+// (siffra → slumpvald bokstav) och det är bokstäverna som matas in.
 const UPPDRAG3_KOD = "358";           // Ytterdörrar, lampor, gula böcker
 const UPPDRAG4_KOD = "462";           // Siffrorna på föremålen på kattvinden
 const UPPDRAG5_SVAR = ["TVÄTTMASKINEN", "TVÄTTMASKIN", "I TVÄTTMASKINEN"];
@@ -974,6 +1012,83 @@ function handleCode(boxes, code, correctCode, feedbackId, nextScreen) {
   }
 }
 
+/* ---------- Bokstavsrutor (samma beteende som sifferrutor, men bokstäver) ---------- */
+function buildLetterBoxes(containerId, count, onComplete) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  const boxes = [];
+  for (let i = 0; i < count; i++) {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.inputMode = "text";
+    input.maxLength = 1;
+    input.autocomplete = "off";
+    input.autocapitalize = "characters";
+    input.spellcheck = false;
+    input.className = "code-box";
+    container.appendChild(input);
+    boxes.push(input);
+
+    input.addEventListener("input", () => {
+      input.value = input.value.replace(/[^A-Za-zÅÄÖåäö]/g, "").toUpperCase().slice(0, 1);
+      if (input.value) {
+        soundKey();
+        if (i < count - 1) boxes[i + 1].focus();
+        else if (boxes.every(b => b.value)) onComplete(boxes.map(b => b.value).join(""));
+      }
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !input.value && i > 0) {
+        boxes[i - 1].focus();
+        boxes[i - 1].value = "";
+        e.preventDefault();
+      }
+    });
+    input.addEventListener("focus", () => input.select());
+  }
+  return boxes;
+}
+
+/* ---------- Uppdrag 3: chiffernyckel (siffra → slumpvald bokstav) ---------- */
+// Nyckeln slumpas om vid varje sidladdning. Den visas alltid på skärmen, så
+// barnen kan översätta sina tre observerade siffror till bokstäver.
+let UPPDRAG3_CHIFFER = {};
+
+function genereraChiffer() {
+  const alfabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  // Fisher–Yates: blanda och plocka tio unika bokstäver
+  for (let i = alfabet.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [alfabet[i], alfabet[j]] = [alfabet[j], alfabet[i]];
+  }
+  const chiffer = {};
+  for (let d = 0; d < 10; d++) chiffer[d] = alfabet[d];
+  return chiffer;
+}
+
+function buildM3Key() {
+  const key = document.getElementById("m3-key");
+  key.innerHTML = "";
+  for (let d = 0; d < 10; d++) {
+    const cell = document.createElement("div");
+    cell.className = "key-cell";
+    const digit = document.createElement("div");
+    digit.className = "key-digit";
+    digit.textContent = d;
+    const letter = document.createElement("div");
+    letter.className = "key-letter";
+    letter.textContent = UPPDRAG3_CHIFFER[d];
+    cell.appendChild(digit);
+    cell.appendChild(letter);
+    key.appendChild(cell);
+  }
+}
+
+// Rätt svar = de observerade siffrorna översatta via chiffernyckeln.
+function chifferSvar() {
+  return UPPDRAG3_KOD.split("").map(d => UPPDRAG3_CHIFFER[d]).join("");
+}
+
 /* ---------- Uppdrag 2: bildchiffer → gömt ord (ledtråd, inte slutförande) ---------- */
 function buildM2Word() {
   const grid = document.getElementById("m2-grid");
@@ -1053,8 +1168,10 @@ function buildMissions() {
   m2Boxes = buildDigitBoxes("m2-boxes", UPPDRAG2_KOD.length, ["c-red", "c-green", "c-blue"],
     (code) => handleCode(m2Boxes, code, UPPDRAG2_KOD, "m2-feedback", 3));
 
-  m3Boxes = buildDigitBoxes("m3-boxes", UPPDRAG3_KOD.length, null,
-    (code) => handleCode(m3Boxes, code, UPPDRAG3_KOD, "m3-feedback", 4));
+  UPPDRAG3_CHIFFER = genereraChiffer();
+  buildM3Key();
+  m3Boxes = buildLetterBoxes("m3-boxes", UPPDRAG3_KOD.length,
+    (code) => handleCode(m3Boxes, code, chifferSvar(), "m3-feedback", 4));
 
   // Uppdrag 4: rutor med föremålsbild ovanför
   const objRow = document.getElementById("m4-objects");
