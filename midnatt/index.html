@@ -323,22 +323,55 @@
   /* ---------- Bildkoden (uppdrag 2) ---------- */
   .cipher-grid {
     display: flex;
-    flex-wrap: wrap;
-    gap: clamp(8px, 1.6vw, 16px);
+    flex-wrap: nowrap;            /* alla bilder på en enda rad */
+    gap: clamp(6px, 1.4vw, 14px);
     justify-content: center;
-    margin: 18px 0;
+    align-items: flex-start;
+    margin: 18px 0 10px;
+    width: 100%;
+  }
+  .cipher-col {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 108px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(6px, 1.2vw, 10px);
   }
   .cipher-card {
-    width: clamp(70px, 10.5vw, 108px);
+    width: 100%;
     aspect-ratio: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(38px, 6.5vw, 62px);
+    font-size: clamp(26px, 5.4vw, 58px);
     background: var(--bg-panel2);
     border: 1px solid var(--green-dark);
     border-radius: 12px;
     box-shadow: inset 0 0 20px rgba(43,255,136,0.05);
+  }
+  /* Bokstavsrutor under varje bild */
+  .letter-box {
+    width: 100%;
+    height: clamp(46px, 8vw, 74px);
+    font-family: var(--mono);
+    font-size: clamp(22px, 4.6vw, 42px);
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--green);
+    background: var(--bg-panel2);
+    border: 2px solid var(--green-dim);
+    border-radius: 10px;
+    caret-color: var(--green);
+    outline: none;
+    padding: 0;
+    text-shadow: 0 0 10px rgba(43,255,136,0.6);
+  }
+  .letter-box:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 16px rgba(43,255,136,0.4);
   }
 
   /* ---------- Ritningen (uppdrag 4) ---------- */
@@ -398,6 +431,119 @@
     margin-top: 10px;
   }
 
+  /* ---------- Startkuvert (innan spelet börjar) ---------- */
+  #envelope-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(20px, 4vh, 34px);
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    background: radial-gradient(circle at 50% 42%, #0e1a14 0%, #060a08 70%);
+  }
+  #envelope-overlay.hide { animation: envFade 0.55s ease forwards; }
+  @keyframes envFade { to { opacity: 0; visibility: hidden; } }
+
+  #envelope {
+    position: relative;
+    width: min(440px, 84vw);
+    aspect-ratio: 3 / 2;
+    perspective: 1000px;
+    animation: envPulse 2.4s ease-in-out infinite;
+  }
+  #envelope.opening { animation: none; }
+  @keyframes envPulse {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-9px); }
+  }
+
+  .env-body {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(155deg, #16281e, #0d1712);
+    border: 2px solid var(--green-dim);
+    border-radius: 12px;
+    box-shadow: 0 0 55px rgba(43,255,136,0.18), inset 0 0 45px rgba(0,0,0,0.55);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 8% 13%;
+  }
+  .env-label {
+    color: var(--green);
+    font-weight: bold;
+    letter-spacing: clamp(3px, 1vw, 6px);
+    line-height: 1.25;
+    font-size: clamp(19px, 4.4vw, 34px);
+    text-shadow: 0 0 16px rgba(43,255,136,0.55);
+  }
+  .env-stamp {
+    position: absolute;
+    bottom: 8%;
+    right: 7%;
+    color: var(--red);
+    border: 2px solid var(--red);
+    padding: 2px 8px;
+    font-size: clamp(8px, 1.5vw, 12px);
+    letter-spacing: 2px;
+    font-weight: bold;
+    transform: rotate(-5deg);
+    opacity: 0.9;
+    z-index: 7;
+  }
+  .env-flap {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 56%;
+    background: linear-gradient(155deg, #1d3527, #12211a);
+    border: 2px solid var(--green-dim);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transition: transform 0.55s cubic-bezier(.6,.05,.3,1);
+    backface-visibility: hidden;
+    z-index: 4;
+  }
+  #envelope.opening .env-flap { transform: rotateX(-172deg); }
+  .env-seal {
+    position: absolute;
+    top: calc(40% - clamp(26px, 5.5vw, 34px));
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(52px, 11vw, 68px);
+    height: clamp(52px, 11vw, 68px);
+    border-radius: 50%;
+    background: radial-gradient(circle at 34% 30%, #ff7c88, #b3212f 75%);
+    border: 2px solid #ff9ba3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: clamp(24px, 5vw, 32px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    z-index: 6;
+    transition: opacity 0.35s ease, transform 0.45s ease;
+  }
+  #envelope.opening .env-seal {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.35) rotate(45deg);
+  }
+  .env-hint {
+    color: var(--green);
+    letter-spacing: 3px;
+    font-size: clamp(12px, 2vw, 17px);
+    font-weight: bold;
+    animation: blink 1.8s infinite;
+  }
+
   /* ---------- Rotera-skärmen-varning ---------- */
   #rotate-overlay {
     position: fixed;
@@ -439,6 +585,18 @@
   <div class="phone">📱</div>
   <h2>VRID PLATTAN</h2>
   <p class="brief">Detta uppdrag kräver liggande läge, agent.</p>
+</div>
+
+<div id="envelope-overlay">
+  <div id="envelope">
+    <div class="env-body">
+      <div class="env-label">HEMLIGT<br>UPPDRAG</div>
+    </div>
+    <div class="env-flap"></div>
+    <div class="env-seal">★</div>
+    <div class="env-stamp">TOP SECRET</div>
+  </div>
+  <p class="env-hint">▶ TRYCK PÅ KUVERTET FÖR ATT ÖPPNA</p>
 </div>
 
 <canvas id="confetti-canvas"></canvas>
@@ -485,20 +643,9 @@
     <section class="screen" id="screen-m2">
       <div class="panel">
         <h2>UPPDRAG 2 – BILDKODEN</h2>
-        <p class="brief center">Knäck den hemliga koden som är skriven med ett chiffer:</p>
-        <div class="cipher-grid">
-          <div class="cipher-card">🦖</div>
-          <div class="cipher-card">🦉</div>
-          <div class="cipher-card">☀️</div>
-          <div class="cipher-card">🍋</div>
-          <div class="cipher-card">🏠</div>
-          <div class="cipher-card">🐿️</div>
-          <div class="cipher-card">🔑</div>
-        </div>
-        <p class="hint-dim">Chiffret visar er vägen till nästa ledtråd…</p>
-        <hr class="divider">
-        <p class="brief center">När ni hittat ledtråden – mata in siffrorna i rätt ordning:</p>
-        <div class="code-row" id="m2-boxes"></div>
+        <p class="brief center">Detta är ett hemligt chiffer skrivet med bilder. Knäck chiffret och kom på det gömda ordet.</p>
+        <div class="cipher-grid" id="m2-grid"></div>
+        <p class="hint-dim">Skriv en bokstav i rutan under varje bild. Ordet visar er vägen till nästa ledtråd…</p>
         <div class="feedback" id="m2-feedback"></div>
       </div>
     </section>
@@ -603,7 +750,12 @@
    KODER – ändra här för att anpassa spelet till ert hus
    ===================================================== */
 const UPPDRAG1_KOD = "821537";        // 6 siffror (skrivs spegelvänt på den fysiska lappen)
-const UPPDRAG2_KOD = "729";           // Röd, Grön, Blå (lappen i duschen)
+
+// Uppdrag 2: sju bilder (chiffer) som var och en översätts till en bokstav.
+// UPPDRAG2_SVAR måste ha lika många bokstäver som antalet bilder nedan.
+const UPPDRAG2_BILDER = ["🦖", "🦉", "☀️", "🍋", "🏠", "🐿️", "🔑"];
+const UPPDRAG2_SVAR = "DUSCHEN";      // 7 bokstäver – det gömda ordet i chiffret
+
 const UPPDRAG3_KOD = "358";           // Ytterdörrar, lampor, gula böcker
 const UPPDRAG4_KOD = "462";           // Siffrorna på föremålen på kattvinden
 const UPPDRAG5_SVAR = ["TVÄTTMASKINEN", "TVÄTTMASKIN", "I TVÄTTMASKINEN"];
@@ -801,6 +953,59 @@ function handleCode(boxes, code, correctCode, feedbackId, nextScreen) {
   }
 }
 
+/* ---------- Uppdrag 2: bild → bokstav ---------- */
+function buildM2() {
+  const grid = document.getElementById("m2-grid");
+  grid.innerHTML = "";
+  const boxes = [];
+  const count = UPPDRAG2_BILDER.length;
+  const svar = UPPDRAG2_SVAR.toUpperCase();
+
+  UPPDRAG2_BILDER.forEach((emoji, i) => {
+    const col = document.createElement("div");
+    col.className = "cipher-col";
+
+    const card = document.createElement("div");
+    card.className = "cipher-card";
+    card.textContent = emoji;
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.inputMode = "text";
+    input.maxLength = 1;
+    input.autocomplete = "off";
+    input.autocapitalize = "characters";
+    input.spellcheck = false;
+    input.className = "letter-box";
+
+    col.appendChild(card);
+    col.appendChild(input);
+    grid.appendChild(col);
+    boxes.push(input);
+
+    input.addEventListener("input", () => {
+      input.value = input.value.replace(/[^A-Za-zÅÄÖåäö]/g, "").toUpperCase().slice(0, 1);
+      if (input.value) {
+        soundKey();
+        if (i < count - 1) boxes[i + 1].focus();
+        else if (boxes.every(b => b.value)) {
+          handleCode(boxes, boxes.map(b => b.value).join(""), svar, "m2-feedback", 3);
+        }
+      }
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !input.value && i > 0) {
+        boxes[i - 1].focus();
+        boxes[i - 1].value = "";
+        e.preventDefault();
+      }
+    });
+    input.addEventListener("focus", () => input.select());
+  });
+
+  m2Boxes = boxes;
+}
+
 /* ---------- Bygg uppdragen ---------- */
 let m1Boxes, m2Boxes, m3Boxes, m4Boxes;
 
@@ -808,8 +1013,7 @@ function buildMissions() {
   m1Boxes = buildDigitBoxes("m1-boxes", UPPDRAG1_KOD.length, null,
     (code) => handleCode(m1Boxes, code, UPPDRAG1_KOD, "m1-feedback", 2));
 
-  m2Boxes = buildDigitBoxes("m2-boxes", UPPDRAG2_KOD.length, ["c-red", "c-green", "c-blue"],
-    (code) => handleCode(m2Boxes, code, UPPDRAG2_KOD, "m2-feedback", 3));
+  buildM2();
 
   m3Boxes = buildDigitBoxes("m3-boxes", UPPDRAG3_KOD.length, null,
     (code) => handleCode(m3Boxes, code, UPPDRAG3_KOD, "m3-feedback", 4));
@@ -879,6 +1083,33 @@ document.getElementById("m5-input").addEventListener("keydown", (e) => {
   if (e.key === "Enter") checkM5();
 });
 
+/* ---------- Startkuvert ---------- */
+function showEnvelope() {
+  const ov = document.getElementById("envelope-overlay");
+  const env = document.getElementById("envelope");
+  env.classList.remove("opening");
+  ov.classList.remove("hide");
+  ov.style.display = "flex";
+  ov.style.opacity = "";
+  ov.style.visibility = "";
+}
+function openEnvelope() {
+  const ov = document.getElementById("envelope-overlay");
+  const env = document.getElementById("envelope");
+  if (env.classList.contains("opening")) return;   // redan öppnat
+  ctx();          // väck ljudmotorn på användarklick (krav på plattor)
+  soundOk();
+  env.classList.add("opening");
+  setTimeout(() => ov.classList.add("hide"), 560);
+  setTimeout(() => {
+    ov.style.display = "none";
+    ov.classList.remove("hide");
+    env.classList.remove("opening");
+    typeIntro();
+  }, 1160);
+}
+document.getElementById("envelope-overlay").addEventListener("click", openEnvelope);
+
 /* ---------- Intro med skrivmaskinseffekt ---------- */
 const INTRO_TEXT =
   "Välkomna, agenter.\n\n" +
@@ -937,7 +1168,7 @@ document.getElementById("btn-restart").addEventListener("click", () => {
   });
   buildMissions();
   showScreen(0);
-  typeIntro();
+  showEnvelope();
 });
 
 /* ---------- Konfetti ---------- */
@@ -1006,7 +1237,7 @@ document.getElementById(SCREENS[saved]).classList.add("visible");
 currentScreen = saved;
 updateProgress();
 if (saved === 0) {
-  typeIntro();
+  showEnvelope();          // visa kuvertet först – intro startar när det öppnas
 } else if (saved === 6) {
   startConfetti();
 }
