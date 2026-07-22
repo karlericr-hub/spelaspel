@@ -646,6 +646,10 @@
         <p class="brief center">Detta är ett hemligt chiffer skrivet med bilder. Knäck chiffret och kom på det gömda ordet.</p>
         <div class="cipher-grid" id="m2-grid"></div>
         <p class="hint-dim">Skriv en bokstav i rutan under varje bild. Ordet visar er vägen till nästa ledtråd…</p>
+        <div class="feedback" id="m2-word-feedback"></div>
+        <hr class="divider">
+        <p class="brief center">Gå dit ordet visar. När ni hittat ledtråden – mata in siffrorna i rätt ordning:</p>
+        <div class="code-row" id="m2-boxes"></div>
         <div class="feedback" id="m2-feedback"></div>
       </div>
     </section>
@@ -702,7 +706,6 @@
           </g>
           <circle cx="280" cy="64" r="27" fill="none" stroke="#ff4d5e" stroke-width="2" stroke-dasharray="5 5"/>
         </svg>
-        <p class="brief center">Där finns tre föremål med varsin siffra. Mata in dem i denna ordning:</p>
         <div class="obj-row" id="m4-objects"></div>
         <div class="feedback" id="m4-feedback"></div>
       </div>
@@ -752,19 +755,37 @@
 const UPPDRAG1_KOD = "821537";        // 6 siffror (skrivs spegelvänt på den fysiska lappen)
 
 // Uppdrag 2: sju bilder (chiffer) som var och en översätts till en bokstav.
+// Ordet visar VAR nästa ledtråd finns. Där hittar man den riktiga koden nedan.
 // UPPDRAG2_SVAR måste ha lika många bokstäver som antalet bilder nedan.
 const UPPDRAG2_BILDER = ["🦖", "🦉", "☀️", "🍋", "🏠", "🐿️", "🔑"];
 const UPPDRAG2_SVAR = "DUSCHEN";      // 7 bokstäver – det gömda ordet i chiffret
+const UPPDRAG2_KOD = "729";           // Röd, Grön, Blå – koden på lappen där ordet visar (duschen)
 
 const UPPDRAG3_KOD = "358";           // Ytterdörrar, lampor, gula böcker
 const UPPDRAG4_KOD = "462";           // Siffrorna på föremålen på kattvinden
 const UPPDRAG5_SVAR = ["TVÄTTMASKINEN", "TVÄTTMASKIN", "I TVÄTTMASKINEN"];
 
-// Föremålen på kattvinden (uppdrag 4) – byt emoji + namn efter vad ni lägger ut
+// Rubiks kub finns inte som emoji – ritas som liten 3x3-figur i stället.
+const RUBIK_SVG =
+  '<svg viewBox="0 0 100 100" width="1em" height="1em" aria-hidden="true">' +
+  '<rect x="2" y="2" width="96" height="96" rx="14" fill="#0b0f0d" stroke="#000" stroke-width="2"/>' +
+  '<g>' +
+  '<rect x="8"  y="8"  width="24" height="24" rx="4" fill="#ef4444"/>' +
+  '<rect x="38" y="8"  width="24" height="24" rx="4" fill="#f8fafc"/>' +
+  '<rect x="68" y="8"  width="24" height="24" rx="4" fill="#22c55e"/>' +
+  '<rect x="8"  y="38" width="24" height="24" rx="4" fill="#eab308"/>' +
+  '<rect x="38" y="38" width="24" height="24" rx="4" fill="#f97316"/>' +
+  '<rect x="68" y="38" width="24" height="24" rx="4" fill="#3b82f6"/>' +
+  '<rect x="8"  y="68" width="24" height="24" rx="4" fill="#3b82f6"/>' +
+  '<rect x="38" y="68" width="24" height="24" rx="4" fill="#22c55e"/>' +
+  '<rect x="68" y="68" width="24" height="24" rx="4" fill="#ef4444"/>' +
+  '</g></svg>';
+
+// Föremålen på kattvinden (uppdrag 4) – byt emoji/namn efter vad ni lägger ut
 const UPPDRAG4_FOREMAL = [
-  { emoji: "🧸", namn: "NALLEN" },
-  { emoji: "🎩", namn: "HATTEN" },
-  { emoji: "⏰", namn: "KLOCKAN" }
+  { emoji: "📕", namn: "BOKEN" },
+  { emoji: "✏️", namn: "PENNAN" },
+  { svg: RUBIK_SVG, namn: "RUBIKS KUB" }
 ];
 
 /* ===================================================== */
@@ -953,8 +974,8 @@ function handleCode(boxes, code, correctCode, feedbackId, nextScreen) {
   }
 }
 
-/* ---------- Uppdrag 2: bild → bokstav ---------- */
-function buildM2() {
+/* ---------- Uppdrag 2: bildchiffer → gömt ord (ledtråd, inte slutförande) ---------- */
+function buildM2Word() {
   const grid = document.getElementById("m2-grid");
   grid.innerHTML = "";
   const boxes = [];
@@ -988,9 +1009,7 @@ function buildM2() {
       if (input.value) {
         soundKey();
         if (i < count - 1) boxes[i + 1].focus();
-        else if (boxes.every(b => b.value)) {
-          handleCode(boxes, boxes.map(b => b.value).join(""), svar, "m2-feedback", 3);
-        }
+        else if (boxes.every(b => b.value)) checkM2Word(boxes, svar);
       }
     });
     input.addEventListener("keydown", (e) => {
@@ -1003,17 +1022,36 @@ function buildM2() {
     input.addEventListener("focus", () => input.select());
   });
 
-  m2Boxes = boxes;
+  m2LetterBoxes = boxes;
+}
+
+// Kollar det gömda ordet. Rätt ord slutför INTE uppdraget – det visar bara
+// vart man ska gå för att hitta den riktiga koden (729) längre ner.
+function checkM2Word(boxes, svar) {
+  const fb = document.getElementById("m2-word-feedback");
+  const guess = boxes.map(b => b.value).join("");
+  if (guess === svar) {
+    fb.textContent = "✔ RÄTT ORD – GÅ DIT OCH HITTA KODEN!";
+    fb.className = "feedback ok";
+    soundOk();
+  } else {
+    fb.textContent = "✖ FEL ORD – TÄNK SOM EN SPION";
+    fb.className = "feedback err";
+    soundErr();
+    setTimeout(() => { fb.textContent = ""; fb.className = "feedback"; }, 2500);
+  }
 }
 
 /* ---------- Bygg uppdragen ---------- */
-let m1Boxes, m2Boxes, m3Boxes, m4Boxes;
+let m1Boxes, m2Boxes, m2LetterBoxes, m3Boxes, m4Boxes;
 
 function buildMissions() {
   m1Boxes = buildDigitBoxes("m1-boxes", UPPDRAG1_KOD.length, null,
     (code) => handleCode(m1Boxes, code, UPPDRAG1_KOD, "m1-feedback", 2));
 
-  buildM2();
+  buildM2Word();
+  m2Boxes = buildDigitBoxes("m2-boxes", UPPDRAG2_KOD.length, ["c-red", "c-green", "c-blue"],
+    (code) => handleCode(m2Boxes, code, UPPDRAG2_KOD, "m2-feedback", 3));
 
   m3Boxes = buildDigitBoxes("m3-boxes", UPPDRAG3_KOD.length, null,
     (code) => handleCode(m3Boxes, code, UPPDRAG3_KOD, "m3-feedback", 4));
@@ -1027,7 +1065,8 @@ function buildMissions() {
     col.className = "obj-col";
     const icon = document.createElement("div");
     icon.className = "obj-icon";
-    icon.textContent = obj.emoji;
+    if (obj.svg) icon.innerHTML = obj.svg;
+    else icon.textContent = obj.emoji;
     icon.title = obj.namn;
     col.appendChild(icon);
     objRow.appendChild(col);
@@ -1162,7 +1201,7 @@ document.getElementById("btn-restart").addEventListener("click", () => {
   document.getElementById("m5-input").value = "";
   document.getElementById("m5-input").disabled = false;
   document.getElementById("m5-feedback").textContent = "";
-  ["m1-feedback", "m2-feedback", "m3-feedback", "m4-feedback"].forEach(id => {
+  ["m1-feedback", "m2-word-feedback", "m2-feedback", "m3-feedback", "m4-feedback"].forEach(id => {
     document.getElementById(id).textContent = "";
     document.getElementById(id).className = "feedback";
   });
