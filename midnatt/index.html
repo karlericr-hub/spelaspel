@@ -673,6 +673,22 @@
     border-radius: 10px;
     padding: 18px 20px;
   }
+  .hint-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  .hint-card {
+    width: clamp(80px, 20vw, 128px);
+    flex: 0 0 auto;
+  }
+  .hint-equals {
+    font-size: clamp(30px, 6vw, 46px);
+    font-weight: bold;
+    color: var(--green);
+    letter-spacing: 2px;
+  }
 
   .btn-row {
     display: flex;
@@ -1030,23 +1046,21 @@ const UPPDRAG4_FOREMAL = [
   { svg: RUBIK_SVG, namn: "RUBIKS KUB" }
 ];
 
-// Ledtrådar – en per uppdrag. Kluriga och ledande, avslöjar aldrig exakt kod.
+// Fönsterbilden i uppdrag 2:s ledtråd är en emoji, precis som bilderna i uppdraget.
+const LEDTRAD2_BILD = "🪟";
+
+// Ledtrådar – en per uppdrag. Ett värde kan vara en textsträng eller { html: "..." }.
 // Under hela spelet får spelarna använda max MAX_LEDTRADAR stycken.
 const LEDTRADAR = {
-  "screen-m1": "Spegel, spegel på väggen där – vad är det siffrorna vill berätta? " +
-               "De står ju bakvänt. Håll lappen mot något blankt, så vänder de rätt.",
-  "screen-m2": "Varje bild säger bara sin första bokstav. En bild på ett FÖNSTER " +
-               "betyder F, en KATT betyder K. Läs bokstäverna uppifrån och ner – då " +
-               "stavas namnet på rummet dit ni ska gå.",
-  "screen-m3": "En spion räknar tre saker: dörrarna som leder UT, ljusen i " +
-               "vardagsrummet och de gula ryggarna i hyllan. Tre siffror föds – men " +
-               "systemet läser bara bokstäver. Låt chiffernyckeln byta varje siffra " +
-               "mot sin bokstav.",
-  "screen-m4": "Det röda krysset pekar upp under taket, in i kattvinden. Där ligger " +
-               "tre föremål och var och en bär en siffra. Skriv siffrorna i samma " +
-               "ordning som föremålen står här – inte i den ordning ni råkar hitta dem.",
-  "screen-m5": "Jag är inte kall, ändå blir allt blött hos mig. Jag snurrar och " +
-               "snurrar men lämnar aldrig min plats. Leta där kläderna blir rena."
+  "screen-m1": "Spegel, spegel på väggen där, säger mig vad svaret är.",
+  "screen-m2": { html:
+    '<div class="hint-visual">' +
+      '<div class="cipher-card hint-card">' + LEDTRAD2_BILD + '</div>' +
+      '<span class="hint-equals">= F</span>' +
+    '</div>' },
+  "screen-m3": "En siffra kan också vara en bokstav.",
+  "screen-m4": "På övervåningen, i sovrummet, innanför en lucka.",
+  "screen-m5": "Något som finns i tvättstugan."
 };
 const MAX_LEDTRADAR = 2;
 
@@ -1735,8 +1749,12 @@ function closeHintOverlay() {
   pendingHintScreen = null;
 }
 
-function showHintBox(text) {
-  hintText.textContent = text;
+function showHintBox(hint) {
+  if (hint && typeof hint === "object" && hint.html) {
+    hintText.innerHTML = hint.html;
+  } else {
+    hintText.textContent = hint;
+  }
   hintAsk.style.display = "none";
   hintShow.style.display = "block";
   openHintOverlay();
