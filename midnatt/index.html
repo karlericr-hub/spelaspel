@@ -1117,68 +1117,62 @@ function soundKey(freq) {
   try { tone(freq || 1200, 0, 0.035, "square", 0.03); } catch (e) {}
 }
 
-/* ---------- Bakgrundsmusik (WebAudio, spännande spion-/tv-spelskänsla) ---------- */
+/* ---------- Bakgrundsmusik (WebAudio, mystisk och subtil) ---------- */
 let musicGain = null;
 let musicRunning = false;
 let musicMuted = false;
 let musicTimer = null;
 let musicStep = 0;
 let musicNextTime = 0;
-const MUSIC_BPM = 128;
-const MUSIC_STEP = 60 / MUSIC_BPM / 2;   // åttondelar
-const MUSIC_LEVEL = 0.28;
+const MUSIC_BPM = 64;
+const MUSIC_STEP = 60 / MUSIC_BPM / 2;   // långsamma åttondelar (~0.47 s)
+const MUSIC_LEVEL = 0.13;
 
-// A-moll spionvamp, 16 steg (två takter). 0 = tyst.
-const A2=110, C3=130.81, E3=164.81, F2=87.31, G2=98, E2=82.41;
-const MUSIC_BASS = [A2,A2,0,A2, A2,0,C3,0,  G2,G2,0,G2, F2,0,E2,0];
-const A4=440, B4=493.88, C5=523.25, D5=587.33, E5=659.25, G4=392, F4=349.23, E4=329.63;
-const MUSIC_LEAD = [A4,0,C5,E5, A4,B4,C5,0,  G4,0,B4,D5, F4,0,E4,0];
+// A-moll, glest och mystiskt. 16 steg = en lång, svävande slinga. 0 = tyst.
+const A1=55, E2=82.41, F2=87.31, G2=98, A2=110, C3=130.81, D3=146.83;
+const MUSIC_BASS = [A2,0,0,0, 0,0,0,F2, 0,0,0,G2, 0,0,E2,0];
+const B4=493.88, C5=523.25, D5=587.33, E5=659.25;
+// Sparsamt "speldose"-motiv som svävar ovanpå dronen
+const MUSIC_LEAD = [0,0,E5,0, 0,C5,0,0, B4,0,0,0, 0,D5,0,0];
 
-function musicVoice(freq, time, dur, type, vol) {
+function musicVoice(freq, time, dur, type, vol, attack) {
   const ac = ctx();
   const osc = ac.createOscillator();
   const g = ac.createGain();
   osc.type = type;
   osc.frequency.value = freq;
   g.gain.setValueAtTime(0.0001, time);
-  g.gain.exponentialRampToValueAtTime(vol, time + 0.015);
+  g.gain.exponentialRampToValueAtTime(vol, time + (attack || 0.02));
   g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
   osc.connect(g).connect(musicGain);
   osc.start(time);
   osc.stop(time + dur + 0.05);
 }
-function musicKick(time) {
+// Låg dron som andas fram och tillbaka under hela slingan
+function musicDrone(time, dur) {
+  musicVoice(A1, time, dur, "sine", 0.055, 1.4);
+  musicVoice(E2, time, dur, "sine", 0.03, 1.8);   // ren kvint – lätt spänning
+}
+// Mjukt, avlägset "tick" istället för trumma – som en klocka i mörkret
+function musicTick(time) {
   const ac = ctx();
   const osc = ac.createOscillator();
   const g = ac.createGain();
   osc.type = "sine";
-  osc.frequency.setValueAtTime(160, time);
-  osc.frequency.exponentialRampToValueAtTime(50, time + 0.11);
-  g.gain.setValueAtTime(0.5, time);
-  g.gain.exponentialRampToValueAtTime(0.0001, time + 0.16);
+  osc.frequency.value = 1500;
+  g.gain.setValueAtTime(0.02, time);
+  g.gain.exponentialRampToValueAtTime(0.0001, time + 0.07);
   osc.connect(g).connect(musicGain);
   osc.start(time);
-  osc.stop(time + 0.2);
-}
-function musicHat(time) {
-  const ac = ctx();
-  const osc = ac.createOscillator();
-  const g = ac.createGain();
-  osc.type = "square";
-  osc.frequency.value = 5200;
-  g.gain.setValueAtTime(0.06, time);
-  g.gain.exponentialRampToValueAtTime(0.0001, time + 0.03);
-  osc.connect(g).connect(musicGain);
-  osc.start(time);
-  osc.stop(time + 0.05);
+  osc.stop(time + 0.1);
 }
 function musicScheduleStep(step, time) {
+  if (step === 0) musicDrone(time, MUSIC_STEP * 16);   // ny dron varje slinga
   const bass = MUSIC_BASS[step];
-  if (bass) musicVoice(bass, time, MUSIC_STEP * 0.9, "sawtooth", 0.16);
+  if (bass) musicVoice(bass, time, MUSIC_STEP * 6, "triangle", 0.085, 0.18);
   const lead = MUSIC_LEAD[step];
-  if (lead) musicVoice(lead, time, MUSIC_STEP * 0.8, "square", 0.09);
-  if (step % 4 === 0) musicKick(time);
-  if (step % 2 === 1) musicHat(time);
+  if (lead) musicVoice(lead, time, MUSIC_STEP * 4, "sine", 0.06, 0.05);
+  if (step === 0 || step === 8) musicTick(time);       // svag, gles puls
 }
 function musicScheduler() {
   const ac = ctx();
