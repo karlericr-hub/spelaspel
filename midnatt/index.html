@@ -666,10 +666,9 @@
     justify-content: center;
     gap: 20px;
   }
-  .hint-emoji {
-    font-size: clamp(52px, 13vw, 88px);
-    line-height: 1;
-    display: inline-flex;
+  .hint-card {
+    width: clamp(80px, 20vw, 128px);
+    flex: 0 0 auto;
   }
   .hint-equals {
     font-size: clamp(30px, 6vw, 46px);
@@ -1033,13 +1032,8 @@ const UPPDRAG4_FOREMAL = [
   { svg: RUBIK_SVG, namn: "RUBIKS KUB" }
 ];
 
-// Ett fönster ritas som liten SVG (garanterat samma på alla enheter, likt Rubiks kub).
-const FONSTER_SVG =
-  '<svg viewBox="0 0 100 100" width="1em" height="1em" aria-label="fönster">' +
-  '<rect x="8" y="8" width="84" height="84" rx="6" fill="#0e1a14" stroke="#2bff88" stroke-width="5"/>' +
-  '<line x1="50" y1="11" x2="50" y2="89" stroke="#2bff88" stroke-width="5"/>' +
-  '<line x1="11" y1="50" x2="89" y2="50" stroke="#2bff88" stroke-width="5"/>' +
-  '</svg>';
+// Fönsterbilden i uppdrag 2:s ledtråd är en emoji, precis som bilderna i uppdraget.
+const LEDTRAD2_BILD = "🪟";
 
 // Ledtrådar – en per uppdrag. Ett värde kan vara en textsträng eller { html: "..." }.
 // Under hela spelet får spelarna använda max MAX_LEDTRADAR stycken.
@@ -1047,7 +1041,7 @@ const LEDTRADAR = {
   "screen-m1": "Spegel, spegel på väggen där, säger mig vad svaret är.",
   "screen-m2": { html:
     '<div class="hint-visual">' +
-      '<span class="hint-emoji">' + FONSTER_SVG + '</span>' +
+      '<div class="cipher-card hint-card">' + LEDTRAD2_BILD + '</div>' +
       '<span class="hint-equals">= F</span>' +
     '</div>' },
   "screen-m3": "En siffra kan också vara en bokstav.",
