@@ -602,6 +602,65 @@
     #rotate-overlay { display: flex; }
   }
 
+  /* ---------- Ledtrådar ---------- */
+  .hint-row { margin-top: 24px; }
+  .hint-btn {
+    font-size: clamp(14px, 2.2vw, 18px);
+    padding: 12px 28px;
+    min-height: 48px;
+    letter-spacing: 1px;
+  }
+  .hint-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .hint-remaining {
+    color: var(--text-dim);
+    font-size: clamp(12px, 1.9vw, 15px);
+    letter-spacing: 1px;
+    text-align: center;
+    margin-top: 8px;
+  }
+  #hint-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(3,7,5,0.85);
+  }
+  #hint-overlay.show { display: flex; animation: hintFade 0.25s ease; }
+  @keyframes hintFade { from { opacity: 0; } to { opacity: 1; } }
+  .hint-modal {
+    width: min(540px, 92vw);
+    max-height: 88vh;
+    overflow-y: auto;
+    background: linear-gradient(155deg, #16281e, #0d1712);
+    border: 2px solid var(--green-dim);
+    border-radius: 14px;
+    box-shadow: 0 0 55px rgba(43,255,136,0.2), inset 0 0 40px rgba(0,0,0,0.5);
+    padding: clamp(22px, 4vw, 36px);
+    text-align: center;
+  }
+  .hint-modal-title {
+    color: var(--green);
+    font-weight: bold;
+    letter-spacing: 4px;
+    font-size: clamp(18px, 3.4vw, 26px);
+    text-shadow: 0 0 14px rgba(43,255,136,0.5);
+    margin-bottom: 18px;
+  }
+  .hint-modal-text {
+    color: var(--text);
+    font-size: clamp(15px, 2.5vw, 20px);
+    line-height: 1.65;
+  }
+  .hint-box {
+    background: var(--bg-panel2);
+    border: 1px dashed var(--green-dim);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
   .btn-row {
     display: flex;
     gap: 16px;
@@ -629,6 +688,26 @@
     <div class="env-stamp">TOP SECRET</div>
   </div>
   <p class="env-hint">▶ TRYCK PÅ KUVERTET FÖR ATT ÖPPNA</p>
+</div>
+
+<div id="hint-overlay">
+  <div class="hint-modal">
+    <div id="hint-ask">
+      <div class="hint-modal-title">💡 LEDTRÅD</div>
+      <p class="hint-modal-text" id="hint-ask-text"></p>
+      <div class="btn-row">
+        <button class="btn hint-confirm" id="hint-confirm">JA, VISA LEDTRÅD</button>
+        <button class="btn secondary hint-cancel" id="hint-cancel">AVBRYT</button>
+      </div>
+    </div>
+    <div id="hint-show" style="display:none">
+      <div class="hint-modal-title">💡 LEDTRÅD</div>
+      <p class="hint-modal-text hint-box" id="hint-text"></p>
+      <div class="btn-row">
+        <button class="btn" id="hint-close">STÄNG</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <canvas id="confetti-canvas"></canvas>
@@ -668,6 +747,10 @@
         <p class="brief center">Mata in den hemliga koden:</p>
         <div class="code-row" id="m1-boxes"></div>
         <div class="feedback" id="m1-feedback"></div>
+        <div class="btn-row hint-row">
+          <button class="btn secondary hint-btn" data-screen="screen-m1">💡 LEDTRÅD</button>
+        </div>
+        <p class="hint-remaining"></p>
       </div>
     </section>
 
@@ -683,6 +766,10 @@
         <p class="brief center">Gå dit ordet visar. När ni hittat ledtråden – mata in siffrorna i rätt ordning:</p>
         <div class="code-row" id="m2-boxes"></div>
         <div class="feedback" id="m2-feedback"></div>
+        <div class="btn-row hint-row">
+          <button class="btn secondary hint-btn" data-screen="screen-m2">💡 LEDTRÅD</button>
+        </div>
+        <p class="hint-remaining"></p>
       </div>
     </section>
 
@@ -700,6 +787,10 @@
         <p class="brief center">Översätt era tre siffror till bokstäver och skriv dem i samma ordning:</p>
         <div class="code-row" id="m3-boxes"></div>
         <div class="feedback" id="m3-feedback"></div>
+        <div class="btn-row hint-row">
+          <button class="btn secondary hint-btn" data-screen="screen-m3">💡 LEDTRÅD</button>
+        </div>
+        <p class="hint-remaining"></p>
       </div>
     </section>
 
@@ -834,6 +925,10 @@
         </svg>
         <div class="obj-row" id="m4-objects"></div>
         <div class="feedback" id="m4-feedback"></div>
+        <div class="btn-row hint-row">
+          <button class="btn secondary hint-btn" data-screen="screen-m4">💡 LEDTRÅD</button>
+        </div>
+        <p class="hint-remaining"></p>
       </div>
     </section>
 
@@ -851,6 +946,10 @@
           <button class="btn" id="btn-m5-check">DEKRYPTERA 🔓</button>
         </div>
         <div class="feedback" id="m5-feedback"></div>
+        <div class="btn-row hint-row">
+          <button class="btn secondary hint-btn" data-screen="screen-m5">💡 LEDTRÅD</button>
+        </div>
+        <p class="hint-remaining"></p>
       </div>
     </section>
 
@@ -917,6 +1016,26 @@ const UPPDRAG4_FOREMAL = [
   { svg: RUBIK_SVG, namn: "RUBIKS KUB" }
 ];
 
+// Ledtrådar – en per uppdrag. Kluriga och ledande, avslöjar aldrig exakt kod.
+// Under hela spelet får spelarna använda max MAX_LEDTRADAR stycken.
+const LEDTRADAR = {
+  "screen-m1": "Spegel, spegel på väggen där – vad är det siffrorna vill berätta? " +
+               "De står ju bakvänt. Håll lappen mot något blankt, så vänder de rätt.",
+  "screen-m2": "Varje bild säger bara sin första bokstav. En bild på ett FÖNSTER " +
+               "betyder F, en KATT betyder K. Läs bokstäverna uppifrån och ner – då " +
+               "stavas namnet på rummet dit ni ska gå.",
+  "screen-m3": "En spion räknar tre saker: dörrarna som leder UT, ljusen i " +
+               "vardagsrummet och de gula ryggarna i hyllan. Tre siffror föds – men " +
+               "systemet läser bara bokstäver. Låt chiffernyckeln byta varje siffra " +
+               "mot sin bokstav.",
+  "screen-m4": "Det röda krysset pekar upp under taket, in i kattvinden. Där ligger " +
+               "tre föremål och var och en bär en siffra. Skriv siffrorna i samma " +
+               "ordning som föremålen står här – inte i den ordning ni råkar hitta dem.",
+  "screen-m5": "Jag är inte kall, ändå blir allt blött hos mig. Jag snurrar och " +
+               "snurrar men lämnar aldrig min plats. Leta där kläderna blir rena."
+};
+const MAX_LEDTRADAR = 2;
+
 /* ===================================================== */
 
 const SCREENS = ["screen-intro", "screen-m1", "screen-m2", "screen-m3", "screen-m4", "screen-m5", "screen-final"];
@@ -924,6 +1043,8 @@ const STORAGE_KEY = "operation-midnatt-progress";
 
 let currentScreen = 0;
 let transitioning = false;
+let ledtradarUsed = 0;       // antal förbrukade ledtrådar totalt
+let ledtradarOppnade = {};   // uppdrag vars ledtråd redan låsts upp (återöppna gratis)
 
 /* ---------- Ljud (WebAudio, inga filer behövs) ---------- */
 let audioCtx = null;
@@ -1020,6 +1141,7 @@ function showScreen(index, instant) {
 
 function afterShow(index) {
   saveProgress();
+  updateHintUI();
   if (index === 6) {
     soundFanfare();
     startConfetti();
@@ -1031,12 +1153,29 @@ function afterShow(index) {
 }
 
 function saveProgress() {
-  try { localStorage.setItem(STORAGE_KEY, String(currentScreen)); } catch (e) {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      screen: currentScreen,
+      hintsUsed: ledtradarUsed,
+      hintsOpened: Object.keys(ledtradarOppnade)
+    }));
+  } catch (e) {}
 }
 function loadProgress() {
   try {
-    const v = parseInt(localStorage.getItem(STORAGE_KEY), 10);
-    if (v >= 1 && v < SCREENS.length) return v;
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw == null) return 0;
+    // Bakåtkompatibelt: tidigare versioner sparade bara skärmindexet som en siffra
+    if (/^\d+$/.test(raw.trim())) {
+      const v = parseInt(raw, 10);
+      return (v >= 1 && v < SCREENS.length) ? v : 0;
+    }
+    const data = JSON.parse(raw);
+    ledtradarUsed = Math.min(MAX_LEDTRADAR, Math.max(0, data.hintsUsed | 0));
+    ledtradarOppnade = {};
+    (data.hintsOpened || []).forEach(k => { ledtradarOppnade[k] = true; });
+    const v = data.screen | 0;
+    return (v >= 1 && v < SCREENS.length) ? v : 0;
   } catch (e) {}
   return 0;
 }
@@ -1364,6 +1503,8 @@ const INTRO_TEXT =
   "Organisationen har lämnat efter sig fem säkerhetssystem. " +
   "Endast skickliga spioner kan ta sig igenom dem.\n\n" +
   "Varje gång ni löser ett uppdrag får ni en kod som låser upp nästa säkerhetssystem.\n\n" +
+  "Fastnar ni? I varje uppdrag finns en LEDTRÅD-knapp. Men var sparsamma – " +
+  "under hela uppdraget får ni bara använda TVÅ ledtrådar.\n\n" +
   "Samarbeta. Tänk som riktiga spioner.\n\n" +
   "Lycka till.";
 
@@ -1405,6 +1546,9 @@ document.getElementById("btn-start").addEventListener("click", () => {
 /* ---------- Omstart ---------- */
 document.getElementById("btn-restart").addEventListener("click", () => {
   try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  ledtradarUsed = 0;
+  ledtradarOppnade = {};
+  updateHintUI();
   stopConfetti();
   document.getElementById("m5-input").value = "";
   document.getElementById("m5-input").disabled = false;
@@ -1417,6 +1561,87 @@ document.getElementById("btn-restart").addEventListener("click", () => {
   showScreen(0);
   showEnvelope();
 });
+
+/* ---------- Ledtrådar ---------- */
+const hintOverlay = document.getElementById("hint-overlay");
+const hintAsk = document.getElementById("hint-ask");
+const hintShow = document.getElementById("hint-show");
+const hintAskText = document.getElementById("hint-ask-text");
+const hintText = document.getElementById("hint-text");
+const hintConfirmBtn = document.getElementById("hint-confirm");
+const hintCancelBtn = document.getElementById("hint-cancel");
+let pendingHintScreen = null;
+
+function hintsLeft() { return MAX_LEDTRADAR - ledtradarUsed; }
+
+function updateHintUI() {
+  document.querySelectorAll(".hint-btn").forEach(btn => {
+    const opened = !!ledtradarOppnade[btn.dataset.screen];
+    // Knappen är alltid klickbar: när ledtrådarna är slut visar den ett
+    // uppmuntrande meddelande i stället för att bara vara inaktiverad.
+    btn.textContent = opened ? "💡 VISA LEDTRÅD IGEN" : "💡 LEDTRÅD";
+  });
+  document.querySelectorAll(".hint-remaining").forEach(el => {
+    el.textContent = "Ledtrådar kvar: " + hintsLeft() + " / " + MAX_LEDTRADAR;
+  });
+}
+
+function openHintOverlay() { hintOverlay.classList.add("show"); }
+function closeHintOverlay() {
+  hintOverlay.classList.remove("show");
+  pendingHintScreen = null;
+}
+
+function showHintBox(text) {
+  hintText.textContent = text;
+  hintAsk.style.display = "none";
+  hintShow.style.display = "block";
+  openHintOverlay();
+}
+
+function openHintFlow(screenId) {
+  const text = LEDTRADAR[screenId];
+  if (!text) return;
+  // Redan upplåst på detta uppdrag -> visa gratis
+  if (ledtradarOppnade[screenId]) {
+    showHintBox(text);
+    return;
+  }
+  hintShow.style.display = "none";
+  hintAsk.style.display = "block";
+  if (hintsLeft() <= 0) {
+    pendingHintScreen = null;
+    hintAskText.textContent = "Ni har inga ledtrådar kvar. Ni klarar det här, agenter!";
+    hintConfirmBtn.style.display = "none";
+    hintCancelBtn.textContent = "STÄNG";
+  } else {
+    pendingHintScreen = screenId;
+    hintAskText.textContent = "Vill ni förbruka en av era ledtrådar? Ni har " +
+      hintsLeft() + " kvar.";
+    hintConfirmBtn.style.display = "";
+    hintCancelBtn.textContent = "AVBRYT";
+  }
+  openHintOverlay();
+}
+
+function confirmHint() {
+  if (!pendingHintScreen) return;
+  const screenId = pendingHintScreen;
+  pendingHintScreen = null;
+  ledtradarUsed++;
+  ledtradarOppnade[screenId] = true;
+  saveProgress();
+  soundKey();
+  updateHintUI();
+  showHintBox(LEDTRADAR[screenId]);
+}
+
+document.querySelectorAll(".hint-btn").forEach(btn => {
+  btn.addEventListener("click", () => openHintFlow(btn.dataset.screen));
+});
+hintConfirmBtn.addEventListener("click", confirmHint);
+hintCancelBtn.addEventListener("click", closeHintOverlay);
+document.getElementById("hint-close").addEventListener("click", closeHintOverlay);
 
 /* ---------- Konfetti ---------- */
 const confettiCanvas = document.getElementById("confetti-canvas");
@@ -1483,6 +1708,7 @@ const saved = loadProgress();
 document.getElementById(SCREENS[saved]).classList.add("visible");
 currentScreen = saved;
 updateProgress();
+updateHintUI();
 if (saved === 0) {
   showEnvelope();          // visa kuvertet först – intro startar när det öppnas
 } else if (saved === 6) {
