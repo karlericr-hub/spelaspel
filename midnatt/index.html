@@ -111,6 +111,19 @@
     align-items: center;
     gap: 14px;
   }
+  #music-toggle {
+    background: transparent;
+    border: 1px solid var(--green-dark);
+    color: var(--green);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: clamp(14px, 2vw, 18px);
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  #music-toggle:hover { background: rgba(46,204,113,0.12); }
+  #music-toggle.off { opacity: 0.55; }
   #progress .label {
     font-size: clamp(13px, 2vw, 18px);
     letter-spacing: 2px;
@@ -720,6 +733,7 @@
       <span class="label" id="progress-label">UPPDRAG 1/5</span>
       <span class="pips" id="progress-pips"></span>
     </div>
+    <button id="music-toggle" title="Musik på/av" aria-label="Musik på/av">🔊</button>
   </div>
 
   <div id="stage">
@@ -1085,9 +1099,132 @@ function soundFanfare() {
     tone(1319, 0.6, 0.5, "triangle", 0.12);
   } catch (e) {}
 }
-function soundKey() {
-  try { tone(1200, 0, 0.04, "square", 0.03); } catch (e) {}
+function soundKey(freq) {
+  try { tone(freq || 1200, 0, 0.035, "square", 0.03); } catch (e) {}
 }
+
+/* ---------- Bakgrundsmusik (WebAudio, spännande spion-/tv-spelskänsla) ---------- */
+let musicGain = null;
+let musicRunning = false;
+let musicMuted = false;
+let musicTimer = null;
+let musicStep = 0;
+let musicNextTime = 0;
+const MUSIC_BPM = 128;
+const MUSIC_STEP = 60 / MUSIC_BPM / 2;   // åttondelar
+const MUSIC_LEVEL = 0.28;
+
+// A-moll spionvamp, 16 steg (två takter). 0 = tyst.
+const A2=110, C3=130.81, E3=164.81, F2=87.31, G2=98, E2=82.41;
+const MUSIC_BASS = [A2,A2,0,A2, A2,0,C3,0,  G2,G2,0,G2, F2,0,E2,0];
+const A4=440, B4=493.88, C5=523.25, D5=587.33, E5=659.25, G4=392, F4=349.23, E4=329.63;
+const MUSIC_LEAD = [A4,0,C5,E5, A4,B4,C5,0,  G4,0,B4,D5, F4,0,E4,0];
+
+function musicVoice(freq, time, dur, type, vol) {
+  const ac = ctx();
+  const osc = ac.createOscillator();
+  const g = ac.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, time);
+  g.gain.exponentialRampToValueAtTime(vol, time + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+  osc.connect(g).connect(musicGain);
+  osc.start(time);
+  osc.stop(time + dur + 0.05);
+}
+function musicKick(time) {
+  const ac = ctx();
+  const osc = ac.createOscillator();
+  const g = ac.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(160, time);
+  osc.frequency.exponentialRampToValueAtTime(50, time + 0.11);
+  g.gain.setValueAtTime(0.5, time);
+  g.gain.exponentialRampToValueAtTime(0.0001, time + 0.16);
+  osc.connect(g).connect(musicGain);
+  osc.start(time);
+  osc.stop(time + 0.2);
+}
+function musicHat(time) {
+  const ac = ctx();
+  const osc = ac.createOscillator();
+  const g = ac.createGain();
+  osc.type = "square";
+  osc.frequency.value = 5200;
+  g.gain.setValueAtTime(0.06, time);
+  g.gain.exponentialRampToValueAtTime(0.0001, time + 0.03);
+  osc.connect(g).connect(musicGain);
+  osc.start(time);
+  osc.stop(time + 0.05);
+}
+function musicScheduleStep(step, time) {
+  const bass = MUSIC_BASS[step];
+  if (bass) musicVoice(bass, time, MUSIC_STEP * 0.9, "sawtooth", 0.16);
+  const lead = MUSIC_LEAD[step];
+  if (lead) musicVoice(lead, time, MUSIC_STEP * 0.8, "square", 0.09);
+  if (step % 4 === 0) musicKick(time);
+  if (step % 2 === 1) musicHat(time);
+}
+function musicScheduler() {
+  const ac = ctx();
+  while (musicNextTime < ac.currentTime + 0.18) {
+    musicScheduleStep(musicStep, musicNextTime);
+    musicNextTime += MUSIC_STEP;
+    musicStep = (musicStep + 1) % 16;
+  }
+}
+function startMusic() {
+  if (musicRunning) return;
+  const ac = ctx();
+  musicRunning = true;
+  musicGain = ac.createGain();
+  musicGain.gain.value = musicMuted ? 0 : MUSIC_LEVEL;
+  musicGain.connect(ac.destination);
+  musicStep = 0;
+  musicNextTime = ac.currentTime + 0.1;
+  musicScheduler();
+  musicTimer = setInterval(musicScheduler, 30);
+}
+function stopMusic() {
+  musicRunning = false;
+  clearInterval(musicTimer);
+  musicTimer = null;
+  if (musicGain) {
+    try {
+      const ac = ctx();
+      musicGain.gain.setValueAtTime(musicGain.gain.value, ac.currentTime);
+      musicGain.gain.linearRampToValueAtTime(0, ac.currentTime + 0.4);
+    } catch (e) {}
+    const g = musicGain;
+    setTimeout(() => { try { g.disconnect(); } catch (e) {} }, 600);
+    musicGain = null;
+  }
+}
+function setMusicMuted(m) {
+  musicMuted = m;
+  const btn = document.getElementById("music-toggle");
+  if (btn) {
+    btn.textContent = m ? "🔇" : "🔊";
+    btn.classList.toggle("off", m);
+  }
+  if (musicGain) {
+    try {
+      const ac = ctx();
+      musicGain.gain.cancelScheduledValues(ac.currentTime);
+      musicGain.gain.setValueAtTime(m ? 0 : MUSIC_LEVEL, ac.currentTime);
+    } catch (e) {}
+  }
+  try { localStorage.setItem("midnatt_music_muted", m ? "1" : "0"); } catch (e) {}
+}
+// Musik spelar under uppdragen (skärm 1–5), inte på kuvert/intro (0) eller vinst (6).
+function updateMusic() {
+  if (currentScreen >= 1 && currentScreen <= 5) startMusic();
+  else stopMusic();
+}
+document.getElementById("music-toggle").addEventListener("click", () => setMusicMuted(!musicMuted));
+try { musicMuted = localStorage.getItem("midnatt_music_muted") === "1"; } catch (e) {}
+setMusicMuted(musicMuted);
 
 /* ---------- Progress ---------- */
 const pipsEl = document.getElementById("progress-pips");
@@ -1142,6 +1279,7 @@ function showScreen(index, instant) {
 function afterShow(index) {
   saveProgress();
   updateHintUI();
+  updateMusic();
   if (index === 6) {
     soundFanfare();
     startConfetti();
@@ -1522,7 +1660,12 @@ function typeIntro() {
       btn.style.visibility = "visible";
       return;
     }
-    el.textContent += INTRO_TEXT[i];
+    const ch = INTRO_TEXT[i];
+    el.textContent += ch;
+    // Knappljud för varje synlig tecken (hoppa över mellanslag/radbrytningar)
+    if (ch !== " " && ch !== "\n") {
+      soundKey(1050 + Math.floor(Math.random() * 500));
+    }
     i++;
   }, 22);
   // Låt en klickning hoppa över skrivandet
@@ -1713,6 +1856,17 @@ if (saved === 0) {
   showEnvelope();          // visa kuvertet först – intro startar när det öppnas
 } else if (saved === 6) {
   startConfetti();
+} else {
+  // Återupptaget spel mitt i ett uppdrag: starta musiken vid första klicket
+  // (webbläsare kräver en användargest innan ljud får spelas).
+  const kickstart = () => {
+    ctx();
+    updateMusic();
+    window.removeEventListener("pointerdown", kickstart);
+    window.removeEventListener("keydown", kickstart);
+  };
+  window.addEventListener("pointerdown", kickstart);
+  window.addEventListener("keydown", kickstart);
 }
 </script>
 </body>
