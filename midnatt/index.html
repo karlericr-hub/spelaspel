@@ -72,7 +72,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 22px;
+    padding: 6px 22px;
     border-bottom: 1px solid var(--green-dark);
     background: rgba(11,20,16,0.9);
     flex: 0 0 auto;
@@ -84,7 +84,7 @@
     font-weight: bold;
     letter-spacing: 2px;
     color: var(--green);
-    font-size: clamp(14px, 2.2vw, 20px);
+    font-size: clamp(13px, 2vw, 18px);
   }
   #topbar .brand .dot {
     width: 10px; height: 10px;
@@ -99,7 +99,7 @@
     color: var(--red);
     border: 2px solid var(--red);
     padding: 3px 10px;
-    font-size: clamp(10px, 1.6vw, 14px);
+    font-size: clamp(9px, 1.4vw, 13px);
     letter-spacing: 3px;
     transform: rotate(-2deg);
     font-weight: bold;
@@ -117,7 +117,7 @@
     color: var(--green);
     border-radius: 6px;
     padding: 3px 8px;
-    font-size: clamp(14px, 2vw, 18px);
+    font-size: clamp(13px, 1.8vw, 16px);
     line-height: 1;
     cursor: pointer;
     transition: background 0.15s, opacity 0.15s;
@@ -125,7 +125,7 @@
   #music-toggle:hover { background: rgba(46,204,113,0.12); }
   #music-toggle.off { opacity: 0.55; }
   #progress .label {
-    font-size: clamp(13px, 2vw, 18px);
+    font-size: clamp(12px, 1.8vw, 16px);
     letter-spacing: 2px;
     color: var(--green);
     font-weight: bold;
@@ -161,7 +161,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 3vh 5vw;
+    padding: 1.2vh 4vw;
     overflow-y: auto;
     opacity: 0;
     transform: translateX(40px);
@@ -188,36 +188,36 @@
     background: rgba(11,20,16,0.85);
     border: 1px solid var(--green-dark);
     border-radius: 10px;
-    padding: clamp(16px, 3vh, 34px) clamp(18px, 4vw, 44px);
+    padding: clamp(10px, 1.6vh, 20px) clamp(16px, 3.5vw, 38px);
     box-shadow: 0 0 40px rgba(43,255,136,0.06), inset 0 0 60px rgba(43,255,136,0.03);
   }
 
   h1 {
     color: var(--green);
     letter-spacing: 4px;
-    font-size: clamp(22px, 4.5vw, 44px);
+    font-size: clamp(20px, 4vw, 38px);
     text-shadow: 0 0 18px rgba(43,255,136,0.5);
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
   h2 {
     color: var(--green);
     letter-spacing: 2px;
-    font-size: clamp(17px, 2.8vw, 26px);
-    margin-bottom: 14px;
+    font-size: clamp(15px, 2.5vw, 22px);
+    margin-bottom: 7px;
     text-align: center;
   }
   .subtitle {
     text-align: center;
     color: var(--text-dim);
     letter-spacing: 3px;
-    font-size: clamp(11px, 1.8vw, 15px);
-    margin-bottom: 18px;
+    font-size: clamp(10px, 1.6vw, 13px);
+    margin-bottom: 9px;
   }
   p.brief {
-    font-size: clamp(14px, 2.2vw, 19px);
-    line-height: 1.65;
-    margin-bottom: 12px;
+    font-size: clamp(13px, 2vw, 17px);
+    line-height: 1.4;
+    margin-bottom: 6px;
   }
   p.brief strong { color: var(--green); }
   .center { text-align: center; }
@@ -225,15 +225,15 @@
   /* ---------- Knappar ---------- */
   .btn {
     font-family: var(--mono);
-    font-size: clamp(16px, 2.6vw, 22px);
+    font-size: clamp(14px, 2.3vw, 19px);
     font-weight: bold;
     letter-spacing: 2px;
     color: var(--bg);
     background: var(--green);
     border: none;
     border-radius: 8px;
-    padding: 16px 38px;
-    min-height: 58px;
+    padding: 10px 32px;
+    min-height: 46px;
     cursor: pointer;
     box-shadow: 0 0 22px rgba(43,255,136,0.35);
     transition: transform 0.12s, box-shadow 0.2s;
@@ -252,13 +252,13 @@
     display: flex;
     gap: clamp(8px, 1.6vw, 16px);
     justify-content: center;
-    margin: 22px 0 10px;
+    margin: 12px 0 6px;
   }
   .code-box {
-    width: clamp(52px, 9vw, 84px);
-    height: clamp(64px, 12vw, 100px);
+    width: clamp(46px, 8vw, 74px);
+    height: clamp(52px, 9.5vw, 80px);
     font-family: var(--mono);
-    font-size: clamp(30px, 6vw, 52px);
+    font-size: clamp(26px, 5vw, 44px);
     font-weight: bold;
     text-align: center;
     color: var(--green);
@@ -282,7 +282,7 @@
   .text-answer {
     width: min(480px, 90%);
     font-family: var(--mono);
-    font-size: clamp(22px, 4vw, 34px);
+    font-size: clamp(19px, 3.5vw, 29px);
     font-weight: bold;
     text-align: center;
     text-transform: uppercase;
@@ -290,10 +290,10 @@
     background: var(--bg-panel2);
     border: 2px solid var(--green-dim);
     border-radius: 10px;
-    padding: 16px 12px;
+    padding: 10px 12px;
     outline: none;
     letter-spacing: 3px;
-    margin: 20px auto 10px;
+    margin: 10px auto 6px;
     display: block;
   }
   .text-answer:focus {
@@ -302,12 +302,12 @@
   }
 
   .feedback {
-    min-height: 34px;
+    min-height: 24px;
     text-align: center;
-    font-size: clamp(15px, 2.4vw, 21px);
+    font-size: clamp(14px, 2.2vw, 18px);
     letter-spacing: 3px;
     font-weight: bold;
-    margin-top: 6px;
+    margin-top: 4px;
   }
   .feedback.ok { color: var(--green); text-shadow: 0 0 14px rgba(43,255,136,0.7); animation: pop 0.5s ease; }
   .feedback.err { color: var(--red); }
@@ -340,7 +340,7 @@
     gap: clamp(6px, 1.4vw, 14px);
     justify-content: center;
     align-items: flex-start;
-    margin: 18px 0 10px;
+    margin: 10px 0 6px;
     width: 100%;
   }
   .cipher-col {
@@ -358,7 +358,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(26px, 5.4vw, 58px);
+    font-size: clamp(23px, 4.8vw, 50px);
     background: var(--bg-panel2);
     border: 1px solid var(--green-dark);
     border-radius: 12px;
@@ -369,13 +369,13 @@
     display: flex;
     gap: 0;                       /* inget mellanrum mellan rutorna */
     justify-content: center;      /* centrerade på sidan */
-    margin: 6px 0 10px;
+    margin: 4px 0 6px;
   }
   .letter-box {
-    width: clamp(34px, 7vw, 52px);
-    height: clamp(44px, 9vw, 64px);
+    width: clamp(30px, 6vw, 46px);
+    height: clamp(38px, 7.5vw, 54px);
     font-family: var(--mono);
-    font-size: clamp(22px, 4.6vw, 40px);
+    font-size: clamp(19px, 4vw, 34px);
     font-weight: bold;
     text-align: center;
     text-transform: uppercase;
@@ -407,7 +407,7 @@
 
   /* ---------- Chiffernyckel (uppdrag 3) ---------- */
   .cipher-key {
-    margin: 16px 0 6px;
+    margin: 8px 0 4px;
     width: 100%;
     overflow-x: auto;
   }
@@ -419,11 +419,11 @@
   }
   .cipher-table td {
     text-align: center;
-    padding: clamp(6px, 1.4vw, 10px) 2px;
+    padding: clamp(4px, 1vw, 7px) 2px;
     background: var(--bg-panel2);
     border: 1px solid var(--green-dark);
     font-family: var(--mono);
-    font-size: clamp(15px, 3vw, 26px);
+    font-size: clamp(13px, 2.6vw, 22px);
     font-weight: bold;
   }
   .cipher-table .key-digit {
@@ -436,15 +436,16 @@
 
   /* ---------- Ritningen (uppdrag 4) ---------- */
   .blueprint {
-    width: min(560px, 92%);
-    margin: 14px auto;
+    width: min(440px, 78%);
+    max-height: 40vh;
+    margin: 8px auto;
     display: block;
   }
   .obj-row {
     display: flex;
     gap: clamp(14px, 3vw, 30px);
     justify-content: center;
-    margin: 18px 0 6px;
+    margin: 10px 0 4px;
   }
   .obj-col {
     display: flex;
@@ -453,12 +454,12 @@
     gap: 8px;
   }
   .obj-col .obj-icon {
-    font-size: clamp(34px, 6vw, 54px);
+    font-size: clamp(29px, 5vw, 46px);
     filter: drop-shadow(0 0 8px rgba(43,255,136,0.3));
   }
 
   /* ---------- Slutskärm ---------- */
-  #screen-final h1 { font-size: clamp(30px, 6vw, 60px); animation: pop 0.8s ease; }
+  #screen-final h1 { font-size: clamp(26px, 5vw, 50px); animation: pop 0.8s ease; }
   #confetti-canvas {
     position: fixed;
     inset: 0;
@@ -471,24 +472,24 @@
     border: 3px solid var(--green);
     padding: 6px 18px;
     letter-spacing: 4px;
-    font-size: clamp(14px, 2.4vw, 20px);
+    font-size: clamp(13px, 2.2vw, 18px);
     font-weight: bold;
     transform: rotate(-4deg);
-    margin: 14px 0;
+    margin: 8px 0;
     box-shadow: 0 0 20px rgba(43,255,136,0.3);
   }
 
   .divider {
     border: none;
     border-top: 1px dashed var(--green-dark);
-    margin: 18px 0;
+    margin: 10px 0;
   }
 
   .hint-dim {
     color: var(--text-dim);
-    font-size: clamp(12px, 1.9vw, 15px);
+    font-size: clamp(11px, 1.7vw, 13px);
     text-align: center;
-    margin-top: 10px;
+    margin-top: 6px;
   }
 
   /* ---------- Startkuvert (innan spelet börjar) ---------- */
@@ -631,20 +632,20 @@
   }
 
   /* ---------- Ledtrådar ---------- */
-  .hint-row { margin-top: 24px; }
+  .hint-row { margin-top: 12px; }
   .hint-btn {
-    font-size: clamp(14px, 2.2vw, 18px);
-    padding: 12px 28px;
-    min-height: 48px;
+    font-size: clamp(13px, 2vw, 16px);
+    padding: 8px 24px;
+    min-height: 40px;
     letter-spacing: 1px;
   }
   .hint-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .hint-remaining {
     color: var(--text-dim);
-    font-size: clamp(12px, 1.9vw, 15px);
+    font-size: clamp(11px, 1.7vw, 13px);
     letter-spacing: 1px;
     text-align: center;
-    margin-top: 8px;
+    margin-top: 4px;
   }
   #hint-overlay {
     position: fixed;
@@ -709,8 +710,57 @@
     display: flex;
     gap: 16px;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 12px;
     flex-wrap: wrap;
+  }
+
+  /* ---------- Låga skärmar: komprimera höjden så allt ryms utan scroll ---------- */
+  @media (max-height: 640px) {
+    .panel { padding: clamp(8px, 1.2vh, 14px) clamp(14px, 3vw, 32px); }
+    h1 { margin-bottom: 3px; }
+    h2 { margin-bottom: 5px; }
+    .subtitle { margin-bottom: 6px; }
+    p.brief { line-height: 1.32; margin-bottom: 4px; }
+    .code-row { margin: 8px 0 4px; }
+    .cipher-grid { margin: 6px 0 4px; }
+    .letter-row { margin: 3px 0 4px; }
+    .cipher-key { margin: 5px 0 3px; }
+    .divider { margin: 7px 0; }
+    .feedback { min-height: 20px; }
+    .hint-row { margin-top: 8px; }
+    .btn { min-height: 42px; padding: 8px 28px; }
+    .hint-btn { min-height: 36px; padding: 6px 22px; }
+    .blueprint { max-height: 34vh; margin: 5px auto; }
+    .obj-row { margin: 6px 0 3px; }
+    .text-answer { margin: 8px auto 4px; }
+  }
+
+  @media (max-height: 470px) {
+    .panel { padding: 5px 12px; }
+    h1 { font-size: clamp(18px, 4vw, 30px); margin-bottom: 2px; }
+    h2 { font-size: clamp(14px, 2.4vw, 18px); margin-bottom: 3px; }
+    .subtitle { font-size: clamp(9px, 1.5vw, 12px); margin-bottom: 4px; }
+    p.brief { font-size: clamp(12px, 1.9vw, 14px); line-height: 1.24; margin-bottom: 3px; }
+    .btn { font-size: clamp(13px, 2.1vw, 16px); min-height: 36px; padding: 6px 22px; }
+    .code-row { margin: 4px 0 2px; }
+    .code-box { width: clamp(34px, 6vw, 48px); height: clamp(38px, 6.8vw, 50px); font-size: clamp(20px, 4vw, 30px); }
+    .feedback { min-height: 12px; font-size: clamp(12px, 2vw, 15px); margin-top: 2px; }
+    .cipher-grid { margin: 4px 0 2px; }
+    .cipher-col { max-width: 48px; }
+    .cipher-card { font-size: clamp(16px, 3vw, 28px); }
+    .hint-dim { margin-top: 2px; }
+    .letter-row { margin: 2px 0 2px; }
+    .letter-box { width: clamp(24px, 4.4vw, 34px); height: clamp(28px, 5vw, 40px); font-size: clamp(16px, 3vw, 26px); }
+    .cipher-key { margin: 4px 0 2px; }
+    .cipher-table td { padding: clamp(3px, 0.8vw, 5px) 2px; font-size: clamp(12px, 2.3vw, 18px); }
+    .divider { margin: 4px 0; }
+    .blueprint { max-height: 26vh; margin: 4px auto; }
+    .obj-row { margin: 5px 0 2px; }
+    .obj-col .obj-icon { font-size: clamp(24px, 4.2vw, 38px); }
+    .hint-row { margin-top: 4px; }
+    .hint-btn { min-height: 32px; padding: 5px 18px; font-size: clamp(12px, 1.9vw, 15px); }
+    .hint-remaining { margin-top: 2px; }
+    .text-answer { margin: 6px auto 4px; padding: 8px 10px; font-size: clamp(17px, 3.2vw, 26px); }
   }
 </style>
 </head>
@@ -1671,9 +1721,7 @@ const INTRO_TEXT =
   "Endast skickliga spioner kan ta sig igenom dem.\n\n" +
   "Varje gång ni löser ett uppdrag får ni en kod som låser upp nästa säkerhetssystem.\n\n" +
   "Fastnar ni? I varje uppdrag finns en LEDTRÅD-knapp. Men var sparsamma – " +
-  "under hela uppdraget får ni bara använda TVÅ ledtrådar.\n\n" +
-  "Samarbeta. Tänk som riktiga spioner.\n\n" +
-  "Lycka till.";
+  "under hela uppdraget får ni bara använda TVÅ ledtrådar.";
 
 let typingTimer = null;
 function typeIntro() {
