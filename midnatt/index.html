@@ -1682,9 +1682,7 @@ function checkM5() {
   }
 }
 document.getElementById("btn-m5-check").addEventListener("click", checkM5);
-document.getElementById("m5-input").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") checkM5();
-});
+// Enter på m5 hanteras av den centrala tangentbords-routern (se nedan).
 
 /* ---------- Startkuvert ---------- */
 function showEnvelope() {
@@ -1735,6 +1733,7 @@ function typeIntro() {
     if (i >= INTRO_TEXT.length) {
       clearInterval(typingTimer);
       btn.style.visibility = "visible";
+      btn.focus();   // så att Enter kan starta uppdraget utan touch
       return;
     }
     const ch = INTRO_TEXT[i];
@@ -1752,6 +1751,7 @@ function typeIntro() {
       el.textContent = INTRO_TEXT;
       i = INTRO_TEXT.length;
       btn.style.visibility = "visible";
+      btn.focus();
     }
   });
   el.style.whiteSpace = "pre-line";
@@ -1867,6 +1867,108 @@ hintConfirmBtn.addEventListener("click", confirmHint);
 hintCancelBtn.addEventListener("click", closeHintOverlay);
 document.getElementById("hint-close").addEventListener("click", closeHintOverlay);
 
+/* ---------- Extern tangentbordsstyrning ----------
+   Gör hela spelet körbart från ett fysiskt tangentbord (t.ex. Galaxy Tab):
+   - Enter  = tryck på "gå vidare"-knappen för aktuell skärm/modal
+   - F1     = LEDTRÅD för aktuellt uppdrag
+   - Tab    = hoppa till nästa ifyllningsruta (Shift+Tab = föregående)
+   - Escape = stäng ledtrådsrutan
+   Vanlig inmatning (siffror/bokstäver) lämnas orörd. */
+
+function envelopeVisible() {
+  const ov = document.getElementById("envelope-overlay");
+  const env = document.getElementById("envelope");
+  // OBS: kolla den *beräknade* stilen – vid återupptaget spel döljs kuvertet
+  // via CSS (display:none), inte via inline-stil.
+  return getComputedStyle(ov).display !== "none" && !env.classList.contains("opening");
+}
+function hintOpen() { return hintOverlay.classList.contains("show"); }
+
+// Skickar in aktuell kod för uppdrag 1–4, men bara om alla rutor är ifyllda
+// (annars ignoreras Enter så man inte får ett falskt "ÅTKOMST NEKAD").
+function submitMission(index) {
+  let boxes, kod, fb, next;
+  switch (index) {
+    case 1: boxes = m1Boxes; kod = UPPDRAG1_KOD;  fb = "m1-feedback"; next = 2; break;
+    case 2: boxes = m2Boxes; kod = UPPDRAG2_KOD;  fb = "m2-feedback"; next = 3; break;
+    case 3: boxes = m3Boxes; kod = chifferSvar(); fb = "m3-feedback"; next = 4; break;
+    case 4: boxes = m4Boxes; kod = UPPDRAG4_KOD;  fb = "m4-feedback"; next = 5; break;
+    default: return;
+  }
+  if (!boxes || !boxes.length) return;
+  if (!boxes.every(b => b.value)) return;               // ofullständig kod
+  if (boxes.some(b => b.disabled)) return;              // redan löst/pågår
+  handleCode(boxes, boxes.map(b => b.value).join(""), kod, fb, next);
+}
+
+// Enter = primär åtgärd beroende på var man är
+function triggerPrimaryAction() {
+  if (envelopeVisible()) { openEnvelope(); return; }
+  if (hintOpen()) {
+    if (hintConfirmBtn.style.display !== "none" && pendingHintScreen) confirmHint();
+    else closeHintOverlay();
+    return;
+  }
+  if (currentScreen === 0) {
+    const btn = document.getElementById("btn-start");
+    if (btn.style.visibility !== "hidden") btn.click();
+  } else if (currentScreen >= 1 && currentScreen <= 4) {
+    submitMission(currentScreen);
+  } else if (currentScreen === 5) {
+    checkM5();
+  }
+  // Final (6): ingen åtgärd – undvik oavsiktlig omstart.
+}
+
+// Aktiva uppdragets svarsrutor (för Tab-navigering), eller null
+function currentMissionBoxes() {
+  switch (currentScreen) {
+    case 1: return m1Boxes;
+    case 2: return m2Boxes;
+    case 3: return m3Boxes;
+    case 4: return m4Boxes;
+    default: return null;
+  }
+}
+
+document.addEventListener("keydown", (e) => {
+  // Låt modifierade genvägar (Ctrl/Cmd/Alt) vara i fred
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+  if (e.key === "Enter") {
+    e.preventDefault();
+    triggerPrimaryAction();
+    return;
+  }
+
+  if (e.key === "F1") {
+    e.preventDefault();                     // blockera webbläsarens hjälp
+    if (!hintOpen() && currentScreen >= 1 && currentScreen <= 5) {
+      openHintFlow(SCREENS[currentScreen]);
+    }
+    return;
+  }
+
+  if (e.key === "Escape") {
+    if (hintOpen()) { e.preventDefault(); closeHintOverlay(); }
+    return;
+  }
+
+  if (e.key === "Tab") {
+    const boxes = currentMissionBoxes();
+    if (!boxes || boxes.length < 2 || hintOpen()) return;   // annars standard-Tab
+    e.preventDefault();
+    const active = document.activeElement;
+    let idx = boxes.indexOf(active);
+    if (idx === -1) idx = e.shiftKey ? boxes.length : -1;   // utanför -> hoppa in i ändan
+    const dir = e.shiftKey ? -1 : 1;
+    for (let step = 1; step <= boxes.length; step++) {
+      const cand = boxes[(idx + dir * step + boxes.length * step) % boxes.length];
+      if (cand && !cand.disabled) { cand.focus(); cand.select && cand.select(); break; }
+    }
+  }
+});
+
 /* ---------- Konfetti ---------- */
 const confettiCanvas = document.getElementById("confetti-canvas");
 const confettiCtx = confettiCanvas.getContext("2d");
@@ -1938,6 +2040,10 @@ if (saved === 0) {
 } else if (saved === 6) {
   startConfetti();
 } else {
+  // Återupptaget uppdrag: sätt markören i första ifyllningsrutan direkt
+  // (afterShow körs inte vid denna första inladdning).
+  const firstInput = document.getElementById(SCREENS[saved]).querySelector("input");
+  if (firstInput) setTimeout(() => firstInput.focus(), 150);
   // Återupptaget spel mitt i ett uppdrag: starta musiken vid första klicket
   // (webbläsare kräver en användargest innan ljud får spelas).
   const kickstart = () => {
