@@ -124,6 +124,23 @@
   }
   #music-toggle:hover { background: rgba(46,204,113,0.12); }
   #music-toggle.off { opacity: 0.55; }
+  #header-hint {
+    background: transparent;
+    border: 1px solid var(--green-dark);
+    color: var(--green);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-family: inherit;
+    font-weight: bold;
+    letter-spacing: 1px;
+    font-size: clamp(11px, 1.6vw, 14px);
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  #header-hint:hover { background: rgba(46,204,113,0.12); }
+  #header-hint .key { opacity: 0.7; font-weight: normal; font-size: 0.85em; }
   #progress .label {
     font-size: clamp(12px, 1.8vw, 16px);
     letter-spacing: 2px;
@@ -632,21 +649,6 @@
   }
 
   /* ---------- Ledtrådar ---------- */
-  .hint-row { margin-top: 12px; }
-  .hint-btn {
-    font-size: clamp(13px, 2vw, 16px);
-    padding: 8px 24px;
-    min-height: 40px;
-    letter-spacing: 1px;
-  }
-  .hint-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .hint-remaining {
-    color: var(--text-dim);
-    font-size: clamp(11px, 1.7vw, 13px);
-    letter-spacing: 1px;
-    text-align: center;
-    margin-top: 4px;
-  }
   #hint-overlay {
     position: fixed;
     inset: 0;
@@ -727,9 +729,7 @@
     .cipher-key { margin: 5px 0 3px; }
     .divider { margin: 7px 0; }
     .feedback { min-height: 20px; }
-    .hint-row { margin-top: 8px; }
     .btn { min-height: 42px; padding: 8px 28px; }
-    .hint-btn { min-height: 36px; padding: 6px 22px; }
     .blueprint { max-height: 34vh; margin: 5px auto; }
     .obj-row { margin: 6px 0 3px; }
     .text-answer { margin: 8px auto 4px; }
@@ -757,9 +757,7 @@
     .blueprint { max-height: 26vh; margin: 4px auto; }
     .obj-row { margin: 5px 0 2px; }
     .obj-col .obj-icon { font-size: clamp(24px, 4.2vw, 38px); }
-    .hint-row { margin-top: 4px; }
-    .hint-btn { min-height: 32px; padding: 5px 18px; font-size: clamp(12px, 1.9vw, 15px); }
-    .hint-remaining { margin-top: 2px; }
+    #header-hint { padding: 3px 8px; font-size: clamp(10px, 1.5vw, 13px); }
     .text-answer { margin: 6px auto 4px; padding: 8px 10px; font-size: clamp(17px, 3.2vw, 26px); }
   }
 </style>
@@ -814,6 +812,7 @@
       <span class="label" id="progress-label">UPPDRAG 1/5</span>
       <span class="pips" id="progress-pips"></span>
     </div>
+    <button id="header-hint" style="display:none">💡 LEDTRÅD <span class="key">(F1)</span></button>
     <button id="music-toggle" title="Musik på/av" aria-label="Musik på/av">🔊</button>
   </div>
 
@@ -842,10 +841,6 @@
         <p class="brief center">Mata in den hemliga koden:</p>
         <div class="code-row" id="m1-boxes"></div>
         <div class="feedback" id="m1-feedback"></div>
-        <div class="btn-row hint-row">
-          <button class="btn secondary hint-btn" data-screen="screen-m1">💡 LEDTRÅD</button>
-        </div>
-        <p class="hint-remaining"></p>
       </div>
     </section>
 
@@ -862,10 +857,6 @@
         <p class="brief center">Mata in de hemliga siffrorna:</p>
         <div class="code-row" id="m2-boxes"></div>
         <div class="feedback" id="m2-feedback"></div>
-        <div class="btn-row hint-row">
-          <button class="btn secondary hint-btn" data-screen="screen-m2">💡 LEDTRÅD</button>
-        </div>
-        <p class="hint-remaining"></p>
       </div>
     </section>
 
@@ -882,10 +873,6 @@
         <p class="brief center">Mata in de hemliga bokstäverna:</p>
         <div class="code-row" id="m3-boxes"></div>
         <div class="feedback" id="m3-feedback"></div>
-        <div class="btn-row hint-row">
-          <button class="btn secondary hint-btn" data-screen="screen-m3">💡 LEDTRÅD</button>
-        </div>
-        <p class="hint-remaining"></p>
       </div>
     </section>
 
@@ -1020,10 +1007,6 @@
         </svg>
         <div class="obj-row" id="m4-objects"></div>
         <div class="feedback" id="m4-feedback"></div>
-        <div class="btn-row hint-row">
-          <button class="btn secondary hint-btn" data-screen="screen-m4">💡 LEDTRÅD</button>
-        </div>
-        <p class="hint-remaining"></p>
       </div>
     </section>
 
@@ -1041,10 +1024,6 @@
           <button class="btn" id="btn-m5-check">DEKRYPTERA 🔓</button>
         </div>
         <div class="feedback" id="m5-feedback"></div>
-        <div class="btn-row hint-row">
-          <button class="btn secondary hint-btn" data-screen="screen-m5">💡 LEDTRÅD</button>
-        </div>
-        <p class="hint-remaining"></p>
       </div>
     </section>
 
@@ -1795,15 +1774,14 @@ let pendingHintScreen = null;
 function hintsLeft() { return MAX_LEDTRADAR - ledtradarUsed; }
 
 function updateHintUI() {
-  document.querySelectorAll(".hint-btn").forEach(btn => {
-    const opened = !!ledtradarOppnade[btn.dataset.screen];
-    // Knappen är alltid klickbar: när ledtrådarna är slut visar den ett
-    // uppmuntrande meddelande i stället för att bara vara inaktiverad.
-    btn.textContent = opened ? "💡 VISA LEDTRÅD IGEN" : "💡 LEDTRÅD";
-  });
-  document.querySelectorAll(".hint-remaining").forEach(el => {
-    el.textContent = "Ledtrådar kvar: " + hintsLeft() + " / " + MAX_LEDTRADAR;
-  });
+  const btn = document.getElementById("header-hint");
+  // Ledtråds-knappen i headern visas bara på uppdragsskärmarna (1–5).
+  const onMission = currentScreen >= 1 && currentScreen <= 5;
+  btn.style.display = onMission ? "" : "none";
+  if (!onMission) return;
+  const opened = !!ledtradarOppnade[SCREENS[currentScreen]];
+  btn.innerHTML = (opened ? "💡 VISA LEDTRÅD IGEN " : "💡 LEDTRÅD ") +
+                  '<span class="key">(F1)</span>';
 }
 
 function openHintOverlay() { hintOverlay.classList.add("show"); }
@@ -1860,8 +1838,8 @@ function confirmHint() {
   showHintBox(LEDTRADAR[screenId]);
 }
 
-document.querySelectorAll(".hint-btn").forEach(btn => {
-  btn.addEventListener("click", () => openHintFlow(btn.dataset.screen));
+document.getElementById("header-hint").addEventListener("click", () => {
+  if (currentScreen >= 1 && currentScreen <= 5) openHintFlow(SCREENS[currentScreen]);
 });
 hintConfirmBtn.addEventListener("click", confirmHint);
 hintCancelBtn.addEventListener("click", closeHintOverlay);
