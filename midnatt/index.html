@@ -502,6 +502,22 @@
     margin: 10px 0;
   }
 
+  /* ---------- Steg-etiketter (tvådelade uppdrag) ---------- */
+  .steg {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: clamp(11px, 1.7vw, 14px);
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: var(--green);
+    background: rgba(43,255,136,0.08);
+    border: 1px solid var(--green-dim);
+    border-radius: 6px;
+    padding: 3px 11px;
+    margin: 2px 0 7px;
+    text-shadow: 0 0 8px rgba(43,255,136,0.4);
+  }
+
   .hint-dim {
     color: var(--text-dim);
     font-size: clamp(11px, 1.7vw, 13px);
@@ -728,6 +744,7 @@
     .letter-row { margin: 3px 0 4px; }
     .cipher-key { margin: 5px 0 3px; }
     .divider { margin: 7px 0; }
+    .steg { margin: 1px 0 5px; padding: 2px 9px; }
     .feedback { min-height: 20px; }
     .btn { min-height: 42px; padding: 8px 28px; }
     .blueprint { max-height: 34vh; margin: 5px auto; }
@@ -754,6 +771,7 @@
     .cipher-key { margin: 4px 0 2px; }
     .cipher-table td { padding: clamp(3px, 0.8vw, 5px) 2px; font-size: clamp(12px, 2.3vw, 18px); }
     .divider { margin: 4px 0; }
+    .steg { margin: 0 0 3px; padding: 2px 8px; }
     .blueprint { max-height: 26vh; margin: 4px auto; }
     .obj-row { margin: 5px 0 2px; }
     .obj-col .obj-icon { font-size: clamp(24px, 4.2vw, 38px); }
@@ -848,12 +866,14 @@
     <section class="screen" id="screen-m2">
       <div class="panel">
         <h2>UPPDRAG 2 – BILDKODEN</h2>
+        <div class="steg">STEG 1</div>
         <p class="brief center">Detta är ett hemligt chiffer skrivet med bilder. Knäck chiffret och kom på det gömda ordet.</p>
         <div class="cipher-grid" id="m2-grid"></div>
         <p class="hint-dim">Hemligt ord:</p>
         <div class="letter-row" id="m2-letters"></div>
         <div class="feedback" id="m2-word-feedback"></div>
         <hr class="divider">
+        <div class="steg">STEG 2</div>
         <p class="brief center">Mata in de hemliga siffrorna:</p>
         <div class="code-row" id="m2-boxes"></div>
         <div class="feedback" id="m2-feedback"></div>
@@ -864,11 +884,13 @@
     <section class="screen" id="screen-m3">
       <div class="panel">
         <h2>UPPDRAG 3 – OBSERVATIONSTEST</h2>
+        <div class="steg">STEG 1</div>
         <p class="brief">Säkerhetssystemet kräver god observationsförmåga. Ta reda på:</p>
         <p class="brief">1. Hur många <strong>ytterdörrar</strong> finns i huset?</p>
         <p class="brief">2. Hur många <strong>lampor</strong> finns i vardagsrummet?</p>
         <p class="brief">3. Hur många <strong>böcker med gul rygg</strong> står i den vänstra bokhyllan på övervåningen?</p>
         <hr class="divider">
+        <div class="steg">STEG 2</div>
         <div class="cipher-key" id="m3-key"></div>
         <p class="brief center">Mata in de hemliga bokstäverna:</p>
         <div class="code-row" id="m3-boxes"></div>
@@ -880,7 +902,8 @@
     <section class="screen" id="screen-m4">
       <div class="panel">
         <h2>UPPDRAG 4 – RITNINGEN</h2>
-        <p class="brief center">Vi har dekrypterat en ritning över byggnaden. Krysset visar var nästa ledtråd finns.</p>
+        <div class="steg">STEG 1</div>
+        <p class="brief center">Vi har dekrypterat en ritning över byggnaden. Krysset visar var nästa ledtråd finns. Följ kartan.</p>
         <svg class="blueprint" viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg" aria-label="Förenklad ritning över övervåningen">
           <defs>
             <style>
@@ -1005,6 +1028,9 @@
             <line x1="207" y1="41" x2="181" y2="67"/>
           </g>
         </svg>
+        <hr class="divider">
+        <div class="steg">STEG 2</div>
+        <p class="brief center">Lista ut koden från siffrorna på föremålen:</p>
         <div class="obj-row" id="m4-objects"></div>
         <div class="feedback" id="m4-feedback"></div>
       </div>
