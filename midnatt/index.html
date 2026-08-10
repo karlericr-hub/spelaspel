@@ -1295,9 +1295,9 @@ function setMusicMuted(m) {
   }
   try { localStorage.setItem("midnatt_music_muted", m ? "1" : "0"); } catch (e) {}
 }
-// Musik spelar under uppdragen (skärm 1–5), inte på kuvert/intro (0) eller vinst (6).
 function updateMusic() {
-  if (currentScreen >= 1 && currentScreen <= 5) startMusic();
+  // Musik på kuvert/intro (0) och uppdragen (1–5), men inte på vinstskärmen (6).
+  if (currentScreen >= 0 && currentScreen <= 5) startMusic();
   else stopMusic();
 }
 document.getElementById("music-toggle").addEventListener("click", () => setMusicMuted(!musicMuted));
@@ -1705,6 +1705,7 @@ function openEnvelope() {
   if (env.classList.contains("opening")) return;   // redan öppnat
   ctx();          // väck ljudmotorn på användarklick (krav på plattor)
   soundOk();
+  updateMusic();  // starta bakgrundsmusiken redan på kuvert-/introsidan
   env.classList.add("opening");
   setTimeout(() => ov.classList.add("hide"), 560);
   setTimeout(() => {
