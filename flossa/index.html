@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integritetspolicy – Flossa</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1c2430;
+    --text-dim: #5a6572;
+    --heading: #10233b;
+    --accent: #2f6fb0;
+    --border: #e2e6ea;
+    --panel: #f6f8fa;
+    --panel-border: #e2e6ea;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161b;
+      --text: #d5dbe2;
+      --text-dim: #93a0ad;
+      --heading: #eaf1f8;
+      --accent: #6fb0ec;
+      --border: #2a323b;
+      --panel: #1a1f26;
+      --panel-border: #2a323b;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+    font-size: 17px;
+  }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 22px 80px;
+  }
+
+  h1 {
+    color: var(--heading);
+    font-size: 1.85rem;
+    line-height: 1.25;
+    margin: 0 0 0.35em;
+  }
+
+  h2 {
+    color: var(--heading);
+    font-size: 1.25rem;
+    margin: 2em 0 0.6em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--border);
+  }
+
+  p { margin: 0 0 1em; }
+
+  .updated {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-bottom: 1.8em;
+  }
+
+  ul, ol { margin: 0 0 1em; padding-left: 1.4em; }
+  li { margin: 0.35em 0; }
+
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  strong { color: var(--heading); }
+
+  .table-wrap { overflow-x: auto; margin: 0 0 1em; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.97rem;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  thead th {
+    color: var(--heading);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  .contact-mail { font-weight: 500; word-break: break-all; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Integritetspolicy för Flossa</h1>
+
+  <p class="updated">Senast uppdaterad: 2026-08-09</p>
+
+  <h2>Kort sammanfattning</h2>
+  <p>Flossa samlar inte in någon information om dig. All data stannar på din
+  telefon.</p>
+
+  <h2>Vilken data appen hanterar</h2>
+  <p>Flossa sparar följande lokalt på enheten, i appens egen databas:</p>
+  <ul>
+    <li>Vilka dagar du svarat att du flossat, och om det gällde övre eller
+    nedre tandraden.</li>
+    <li>Dina inställningar: påminnelsefrekvens, flossningsläge, notistid och
+    påminnelsetid, samt om notiser är på eller av.</li>
+  </ul>
+  <p>Ingenting av detta lämnar telefonen. Appen har ingen serverdel, inget
+  användarkonto och ingen inloggning.</p>
+
+  <h2>Vad appen <em>inte</em> gör</h2>
+  <ul>
+    <li>Samlar inte in namn, e-post, telefonnummer eller andra
+    personuppgifter.</li>
+    <li>Begär inte, och har ingen behörighet till, plats, kontakter, kamera
+    eller mikrofon.</li>
+    <li>Innehåller inga annonser, ingen analys och inga spårningsbibliotek.</li>
+    <li>Har ingen behörighet att använda internet, och skickar därför ingen
+    data någonstans.</li>
+  </ul>
+
+  <h2>Säkerhetskopiering</h2>
+  <p>Två saker kan kopiera din data ut ur appen, och båda styrs av dig:</p>
+  <ol>
+    <li><strong>Export/import i appen.</strong> Under Inställningar →
+    Säkerhetskopiering kan du spara all din data som en JSON-fil på en plats du
+    själv väljer. Filen är sedan din – Flossa har ingen kontroll över den.</li>
+    <li><strong>Androids automatiska säkerhetskopiering.</strong> Om du har den
+    påslagen i telefonens inställningar kan Android kopiera appens data till
+    ditt eget Google-konto. Det sker via operativsystemet och omfattas av
+    <a href="https://policies.google.com/privacy" rel="noopener" target="_blank">Googles
+    integritetspolicy</a>, inte av den här. Du kan stänga av den i telefonens
+    inställningar.</li>
+  </ol>
+
+  <h2>Behörigheter appen begär</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Behörighet</th><th>Varför</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Notiser</td><td>Visa påminnelserna</td></tr>
+        <tr><td>Alarm och påminnelser</td><td>Skicka notisen på den tid du valt</td></tr>
+        <tr><td>Starta vid uppstart</td><td>Lägga tillbaka påminnelserna efter en omstart</td></tr>
+        <tr><td>Vibration, vakenhet</td><td>Låta notisen märkas</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Barn</h2>
+  <p>Appen riktar sig inte särskilt till barn och samlar inte in data från
+  någon, oavsett ålder.</p>
+
+  <h2>Radera din data</h2>
+  <p>Avinstallera appen. All data raderas då med den. Filer du själv exporterat
+  raderar du på samma sätt som andra filer på telefonen.</p>
+
+  <h2>Ändringar</h2>
+  <p>Om policyn ändras uppdateras datumet högst upp och den nya versionen
+  publiceras på den här sidan.</p>
+
+  <h2>Kontakt</h2>
+  <p>Frågor om appen eller den här policyn:
+  <span class="contact-mail" id="kontakt-mail">e-postadressen visas när JavaScript är på.</span></p>
+</main>
+
+<script>
+  // E-postadressen sätts ihop vid laddning och skrivs som ren text, så att den
+  // inte finns i HTML-källan och därför är svår för spam-bottar att skörda.
+  (function () {
+    var user = "karlericr";
+    var domain = "gmail.com";
+    var el = document.getElementById("kontakt-mail");
+    if (el) { el.textContent = user + "@" + domain; }
+  })();
+</script>
+</body>
+</html>
