@@ -128,6 +128,22 @@ const CONFIG = {
         { id: 'sydamerika', name: 'SYDAMERIKA' },
         { id: 'oceanien', name: 'OCEANIEN' }
     ],
+    // Land - vilken världsdel? Antal frågor per omgång och svarsalternativ (alltid samma, i denna ordning).
+    // Länderna hämtas från capitals nedan.
+    varldsdelLandQuestions: 10,
+    varldsdelLandAnswers: [
+        { id: 'nordamerika', name: 'Nordamerika' },
+        { id: 'sydamerika', name: 'Sydamerika' },
+        { id: 'europa', name: 'Europa' },
+        { id: 'afrika', name: 'Afrika' },
+        { id: 'asien', name: 'Asien' },
+        { id: 'oceanien', name: 'Oceanien' }
+    ],
+    // Länder som ligger i två världsdelar - båda räknas som rätt svar
+    varldsdelLandMulti: {
+        'Ryssland': ['europa', 'asien'],
+        'Turkiet': ['europa', 'asien']
+    },
     // Länder och deras huvudstäder per världsdel
     capitals: {
         europa: [
@@ -362,6 +378,10 @@ const state = {
     huvudstaderCorrectAnswer: '', // Rätt huvudstad för aktuell fråga
     huvudstaderTotal: 10, // Antal frågor i aktuell omgång
     huvudstaderPool: [], // Alla länder i de valda världsdelarna (för svarsalternativ)
+    // Land - vilken världsdel?
+    varldsdelLandOrder: [], // Slumpad ordning av frågor { land, varldsdelar } för omgången
+    varldsdelLandCorrectAnswers: [], // Rätta världsdelar (id:n) för aktuell fråga
+    varldsdelLandTotal: 10, // Antal frågor i aktuell omgång
     landerTotal: 10, // Antal frågor i aktuell omgång (kan vara färre än 10 i små världsdelar)
     landerBounds: null, // Yttre gräns för zoom/pan (hela kartan eller inzoomad världsdel)
     landerView: { x: 0, y: 0, w: 1000, h: 500 }, // Aktuell viewBox för zoom/pan
@@ -405,6 +425,7 @@ const elements = {
         landerGame: document.getElementById('lander-game-screen'),
         huvudstaderSelect: document.getElementById('huvudstader-select-screen'),
         huvudstaderGame: document.getElementById('huvudstader-game-screen'),
+        varldsdelLandGame: document.getElementById('varldsdel-land-game-screen'),
         game: document.getElementById('game-screen'),
         clockGame: document.getElementById('clock-game-screen'),
         hittaBokstaven: document.getElementById('hitta-bokstaven-screen'),
@@ -448,6 +469,10 @@ const elements = {
     huvudstaderAnswerGrid: document.getElementById('huvudstader-answer-grid'),
     huvudstaderOptions: document.getElementById('huvudstader-options'),
     huvudstaderStartBtn: document.getElementById('huvudstader-start-btn'),
+    // Land - vilken världsdel?-element
+    varldsdelLandProgressDots: document.getElementById('varldsdel-land-progress-dots'),
+    varldsdelLandCountry: document.getElementById('varldsdel-land-country'),
+    varldsdelLandAnswerGrid: document.getElementById('varldsdel-land-answer-grid'),
     // Resultat
     resultPercentage: document.getElementById('result-percentage'),
     playAgainBtn: document.getElementById('play-again-btn'),
@@ -622,6 +647,7 @@ function goBack() {
             showScreen('geografi');
             break;
         case 'huvudstaderGame':
+        case 'varldsdelLandGame':
             showScreen(state.returnToArea);
             break;
         case 'game':
@@ -699,6 +725,9 @@ function startGame(gameType) {
     } else if (gameType === 'huvudstader') {
         state.returnToArea = 'huvudstaderSelect';
         startHuvudstaderGame();
+    } else if (gameType === 'land-varldsdel') {
+        state.returnToArea = 'geografi';
+        startVarldsdelLandGame();
     } else if (gameType === 'hitta-bokstaven') {
         state.returnToArea = 'svenska';
         startHittaBokstavenGame();
@@ -2415,6 +2444,99 @@ function handleHuvudstaderAnswer(selectedAnswer, buttonElement) {
     }
 }
 
+// ========================================
+// Spellogik: Land - vilken världsdel?
+// ========================================
+function startVarldsdelLandGame() {
+    // Bygg pool av länder från alla världsdelar
+    let pool = [];
+    CONFIG.varldsdelLandAnswers.forEach(c => {
+        (CONFIG.capitals[c.id] || []).forEach(entry => {
+            const varldsdelar = CONFIG.varldsdelLandMulti[entry.land] || [c.id];
+            pool.push({ land: entry.land, varldsdelar });
+        });
+    });
+
+    // Slumpa och begränsa antalet frågor
+    const shuffled = shuffleArray(pool);
+    state.varldsdelLandTotal = Math.min(CONFIG.varldsdelLandQuestions, shuffled.length);
+    state.varldsdelLandOrder = shuffled.slice(0, state.varldsdelLandTotal);
+
+    // Skapa progress-prickar
+    createProgressDots(elements.varldsdelLandProgressDots, state.varldsdelLandTotal);
+
+    // Visa spelskärmen
+    showScreen('varldsdelLandGame');
+
+    // Starta första frågan
+    nextVarldsdelLandQuestion();
+}
+
+function nextVarldsdelLandQuestion() {
+    if (state.currentQuestion >= state.varldsdelLandTotal) {
+        endGame();
+        return;
+    }
+
+    // Markera nuvarande fråga
+    updateProgressDots(elements.varldsdelLandProgressDots, state.currentQuestion, null);
+
+    // Hämta aktuellt land
+    const current = state.varldsdelLandOrder[state.currentQuestion];
+    state.varldsdelLandCorrectAnswers = current.varldsdelar;
+
+    // Visa landets namn
+    elements.varldsdelLandCountry.textContent = current.land;
+
+    // Svarsalternativen är alltid samma sex världsdelar i samma ordning
+    elements.varldsdelLandAnswerGrid.innerHTML = '';
+    CONFIG.varldsdelLandAnswers.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn quiz-answer';
+        btn.textContent = c.name;
+        btn.dataset.answer = c.id;
+        btn.addEventListener('click', () => handleVarldsdelLandAnswer(c.id, btn));
+        elements.varldsdelLandAnswerGrid.appendChild(btn);
+    });
+
+    state.isProcessing = false;
+}
+
+function handleVarldsdelLandAnswer(selectedAnswer, buttonElement) {
+    if (state.isProcessing) return;
+
+    const isCorrect = state.varldsdelLandCorrectAnswers.includes(selectedAnswer);
+    const isFirstAttempt = !elements.varldsdelLandAnswerGrid.querySelector('.answer-btn.wrong');
+
+    if (isCorrect) {
+        state.isProcessing = true;
+        // Markera alla rätta världsdelar (t.ex. både Europa och Asien för Ryssland)
+        elements.varldsdelLandAnswerGrid.querySelectorAll('.answer-btn').forEach(btn => {
+            if (state.varldsdelLandCorrectAnswers.includes(btn.dataset.answer)) {
+                btn.classList.add('correct');
+            }
+        });
+        playSound('correct');
+
+        if (isFirstAttempt) {
+            state.correctFirstTry++;
+        }
+
+        updateProgressDots(elements.varldsdelLandProgressDots, state.currentQuestion, 'completed');
+
+        state.currentQuestion++;
+
+        setTimeout(() => {
+            nextVarldsdelLandQuestion();
+        }, CONFIG.delayAfterCorrect);
+
+    } else {
+        buttonElement.classList.add('wrong');
+        buttonElement.disabled = true;
+        playSound('wrong');
+    }
+}
+
 // Bygg världsdelsvalet (kryssrutor) för Huvudstäder
 function setupHuvudstaderSelect() {
     if (!elements.huvudstaderOptions) return;
@@ -3059,6 +3181,8 @@ function endGame() {
         totalQuestions = state.landerTotal;
     } else if (state.currentGame === 'huvudstader') {
         totalQuestions = state.huvudstaderTotal;
+    } else if (state.currentGame === 'land-varldsdel') {
+        totalQuestions = state.varldsdelLandTotal;
     } else {
         totalQuestions = CONFIG.totalQuestions;
     }
