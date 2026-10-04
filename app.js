@@ -139,8 +139,11 @@ const CONFIG = {
         { id: 'asien', name: 'Asien' },
         { id: 'oceanien', name: 'Oceanien' }
     ],
-    // Länder som ligger i två världsdelar utesluts för att undvika tvetydiga frågor
-    varldsdelLandExclude: ['Ryssland', 'Turkiet'],
+    // Länder som ligger i två världsdelar - båda räknas som rätt svar
+    varldsdelLandMulti: {
+        'Ryssland': ['europa', 'asien'],
+        'Turkiet': ['europa', 'asien']
+    },
     // Länder och deras huvudstäder per världsdel
     capitals: {
         europa: [
@@ -376,8 +379,8 @@ const state = {
     huvudstaderTotal: 10, // Antal frågor i aktuell omgång
     huvudstaderPool: [], // Alla länder i de valda världsdelarna (för svarsalternativ)
     // Land - vilken världsdel?
-    varldsdelLandOrder: [], // Slumpad ordning av frågor { land, varldsdel } för omgången
-    varldsdelLandCorrectAnswer: '', // Rätt världsdel (id) för aktuell fråga
+    varldsdelLandOrder: [], // Slumpad ordning av frågor { land, varldsdelar } för omgången
+    varldsdelLandCorrectAnswers: [], // Rätta världsdelar (id:n) för aktuell fråga
     varldsdelLandTotal: 10, // Antal frågor i aktuell omgång
     landerTotal: 10, // Antal frågor i aktuell omgång (kan vara färre än 10 i små världsdelar)
     landerBounds: null, // Yttre gräns för zoom/pan (hela kartan eller inzoomad världsdel)
@@ -2449,9 +2452,8 @@ function startVarldsdelLandGame() {
     let pool = [];
     CONFIG.varldsdelLandAnswers.forEach(c => {
         (CONFIG.capitals[c.id] || []).forEach(entry => {
-            if (!CONFIG.varldsdelLandExclude.includes(entry.land)) {
-                pool.push({ land: entry.land, varldsdel: c.id });
-            }
+            const varldsdelar = CONFIG.varldsdelLandMulti[entry.land] || [c.id];
+            pool.push({ land: entry.land, varldsdelar });
         });
     });
 
@@ -2481,7 +2483,7 @@ function nextVarldsdelLandQuestion() {
 
     // Hämta aktuellt land
     const current = state.varldsdelLandOrder[state.currentQuestion];
-    state.varldsdelLandCorrectAnswer = current.varldsdel;
+    state.varldsdelLandCorrectAnswers = current.varldsdelar;
 
     // Visa landets namn
     elements.varldsdelLandCountry.textContent = current.land;
@@ -2503,12 +2505,17 @@ function nextVarldsdelLandQuestion() {
 function handleVarldsdelLandAnswer(selectedAnswer, buttonElement) {
     if (state.isProcessing) return;
 
-    const isCorrect = selectedAnswer === state.varldsdelLandCorrectAnswer;
+    const isCorrect = state.varldsdelLandCorrectAnswers.includes(selectedAnswer);
     const isFirstAttempt = !elements.varldsdelLandAnswerGrid.querySelector('.answer-btn.wrong');
 
     if (isCorrect) {
         state.isProcessing = true;
-        buttonElement.classList.add('correct');
+        // Markera alla rätta världsdelar (t.ex. både Europa och Asien för Ryssland)
+        elements.varldsdelLandAnswerGrid.querySelectorAll('.answer-btn').forEach(btn => {
+            if (state.varldsdelLandCorrectAnswers.includes(btn.dataset.answer)) {
+                btn.classList.add('correct');
+            }
+        });
         playSound('correct');
 
         if (isFirstAttempt) {
