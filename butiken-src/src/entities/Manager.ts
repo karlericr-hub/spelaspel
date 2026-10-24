@@ -1,0 +1,26 @@
+import { Actor } from './Actor';
+import { BALANCE } from '../config/balance';
+
+export type StationId = 'checkout' | 'parcel' | null;
+
+/** Butiksföreståndaren – spelarens avatar. Kan bara göra en sak i taget. */
+export class Manager extends Actor {
+  /** Stationen avataren just nu står vid och betjänar. */
+  station: StationId = null;
+  /** Vilken kassa avataren bemannar när `station` är 'checkout' (annars null). */
+  checkoutIndex: number | null = null;
+  /** Sant medan en handling pågår (betalning, påfyllning). */
+  busy = false;
+
+  constructor(scene: Phaser.Scene, x: number, y: number) {
+    super(scene, x, y, 'mgr', BALANCE.managerSpeed);
+  }
+
+  /** Gå till en punkt. Avbryter pågående stationering (men inte pågående handling). */
+  walkTo(x: number, y: number, onArrive?: () => void): void {
+    if (this.busy) return;
+    this.station = null;
+    this.checkoutIndex = null;
+    this.moveTo(x, y, onArrive);
+  }
+}
