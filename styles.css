@@ -358,6 +358,26 @@ button:disabled {
     box-shadow: var(--shadow-soft);
 }
 
+.area-link {
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.area-link:focus-visible {
+    outline: 3px solid var(--sun-yellow);
+    outline-offset: 3px;
+}
+
+.midnatt-link .area-icon {
+    background: linear-gradient(135deg, #1a3a4a 0%, #0b1410 100%);
+    color: #ffc14d;
+}
+
+.moon-icon {
+    width: 40px;
+    height: 40px;
+}
+
 .area-btn:disabled .area-icon {
     background: linear-gradient(135deg, var(--disabled-gray) 0%, #a0a0a0 100%);
 }
