@@ -378,6 +378,16 @@ button:disabled {
     height: 40px;
 }
 
+.kattdropp-link .area-icon {
+    background: linear-gradient(135deg, #6b4f8a 0%, #1c1727 100%);
+    color: #f5b971;
+}
+
+.cat-icon {
+    width: 40px;
+    height: 40px;
+}
+
 .area-btn:disabled .area-icon {
     background: linear-gradient(135deg, var(--disabled-gray) 0%, #a0a0a0 100%);
 }
