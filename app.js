@@ -323,6 +323,119 @@ const CONFIG = {
         { question: 'Vad är ett mönster?', answers: ['Något som upprepas', 'Något som går sönder', 'Något som är osynligt', 'Något som är slump'] },
         { question: 'Varför har vi regler i samhället?', answers: ['För att alla ska vara trygga', 'För att leka', 'För att tävla', 'För att vinna'] }
     ],
+    // Frågor för 8 år - blandat (answers[0] = rätt svar, övriga = fel svar)
+    quiz8arBlandat: [
+        // Djur och natur
+        { question: 'Vilket djur är världens största?', answers: ['Blåval', 'Elefant', 'Giraff', 'Isbjörn'] },
+        { question: 'Vad kallas en kos unge?', answers: ['Kalv', 'Föl', 'Lamm', 'Killing'] },
+        { question: 'Hur många ben har en spindel?', answers: ['8', '6', '10', '4'] },
+        { question: 'Vilket djur brukar kallas ”skogens konung”?', answers: ['Älg', 'Björn', 'Varg', 'Lodjur'] },
+        { question: 'Vad äter en koala nästan bara?', answers: ['Eukalyptusblad', 'Bambu', 'Bananer', 'Gräs'] },
+        { question: 'Vilket av djuren sover vintersömn (går i ide)?', answers: ['Igelkott', 'Räv', 'Hare', 'Älg'] },
+        { question: 'Vilken fågel kan inte flyga?', answers: ['Pingvin', 'Örn', 'Svala', 'Fiskmås'] },
+        { question: 'Vilket träd har barr i stället för löv?', answers: ['Gran', 'Björk', 'Ek', 'Lönn'] },
+        { question: 'Vad hämtar bina från blommorna när de gör honung?', answers: ['Nektar', 'Vatten', 'Frön', 'Löv'] },
+        { question: 'Vilket av djuren är ett däggdjur?', answers: ['Delfin', 'Haj', 'Lax', 'Krokodil'] },
+        // Sverige
+        { question: 'Vad heter Sveriges huvudstad?', answers: ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala'] },
+        { question: 'Vilka färger har Sveriges flagga?', answers: ['Blå och gul', 'Röd och vit', 'Grön och gul', 'Blå och vit'] },
+        { question: 'Vilket datum är Sveriges nationaldag?', answers: ['6 juni', '1 maj', '24 december', '30 april'] },
+        { question: 'Vilken högtid firar vi den 13 december?', answers: ['Lucia', 'Valborg', 'Påsk', 'Midsommar'] },
+        { question: 'Vad äter många svenskar på midsommar?', answers: ['Sill och färskpotatis', 'Lussekatter', 'Semlor', 'Pepparkakor'] },
+        { question: 'Vilken är Sveriges största sjö?', answers: ['Vänern', 'Vättern', 'Mälaren', 'Siljan'] },
+        { question: 'Vad heter Sveriges högsta berg?', answers: ['Kebnekaise', 'Åreskutan', 'Mount Everest', 'Kinnekulle'] },
+        { question: 'Vilken är Sveriges största ö?', answers: ['Gotland', 'Öland', 'Orust', 'Värmdö'] },
+        { question: 'Vilket landskap ligger längst söderut i Sverige?', answers: ['Skåne', 'Lappland', 'Dalarna', 'Gotland'] },
+        { question: 'Vad kallas de målade trähästarna från Dalarna?', answers: ['Dalahäst', 'Gotlandsruss', 'Shetlandsponny', 'Islandshäst'] },
+        // Kroppen
+        { question: 'Vilket organ pumpar runt blodet i kroppen?', answers: ['Hjärtat', 'Lungorna', 'Magen', 'Hjärnan'] },
+        { question: 'Vad använder vi när vi andas?', answers: ['Lungorna', 'Levern', 'Njurarna', 'Hjärtat'] },
+        { question: 'Vilket sinne använder vi när vi känner dofter?', answers: ['Lukt', 'Syn', 'Hörsel', 'Smak'] },
+        { question: 'Hur många sinnen brukar man säga att människan har?', answers: ['5', '3', '4', '7'] },
+        { question: 'Vad kallas alla ben i kroppen tillsammans?', answers: ['Skelettet', 'Musklerna', 'Nerverna', 'Senorna'] },
+        { question: 'Vilka tänder tappar barn när de är ungefär 6–12 år?', answers: ['Mjölktänderna', 'Visdomständerna', 'Guldtänderna', 'Löständerna'] },
+        { question: 'Vilket är kroppens största organ?', answers: ['Huden', 'Hjärtat', 'Levern', 'Hjärnan'] },
+        { question: 'Vad heter den färgade delen av ögat?', answers: ['Regnbågshinnan (iris)', 'Pupillen', 'Ögonlocket', 'Ögonfransen'] },
+        { question: 'Varför ska man borsta tänderna?', answers: ['Så att man inte får hål i dem', 'Så att de växer', 'Så att man blir starkare', 'Så att man hör bättre'] },
+        { question: 'Vilken dryck brukar man säga är bra för starka ben och tänder?', answers: ['Mjölk', 'Läsk', 'Saft', 'Juice'] },
+        // Mat
+        { question: 'Vad blir grädde om man vispar den alldeles för länge?', answers: ['Smör', 'Ost', 'Yoghurt', 'Mjölk'] },
+        { question: 'Vad görs pommes frites av?', answers: ['Potatis', 'Morötter', 'Lök', 'Majs'] },
+        { question: 'Från vilket land kommer pizzan?', answers: ['Italien', 'Frankrike', 'USA', 'Spanien'] },
+        { question: 'Vad äter man traditionellt på fettisdagen?', answers: ['Semla', 'Lussekatt', 'Kanelbulle', 'Våffla'] },
+        { question: 'Vilket bär har fröna på utsidan?', answers: ['Jordgubbe', 'Blåbär', 'Hallon', 'Vinbär'] },
+        { question: 'Vilket gulorange bär växer på myrar i norra Sverige?', answers: ['Hjortron', 'Lingon', 'Smultron', 'Krusbär'] },
+        { question: 'Hur smakar en citron?', answers: ['Surt', 'Sött', 'Salt', 'Starkt'] },
+        { question: 'Vad gör man popcorn av?', answers: ['Majs', 'Ris', 'Vete', 'Havre'] },
+        { question: 'Vilken grönsak är orange och växer under jorden?', answers: ['Morot', 'Gurka', 'Tomat', 'Paprika'] },
+        { question: 'Från vilket djur kommer de flesta ägg vi äter?', answers: ['Höna', 'Anka', 'Gås', 'Struts'] },
+        // Sagor och böcker
+        { question: 'Vem skrev böckerna om Pippi Långstrump?', answers: ['Astrid Lindgren', 'Elsa Beskow', 'Sven Nordqvist', 'Gunilla Bergström'] },
+        { question: 'Vad heter Pippis häst?', answers: ['Lilla Gubben', 'Herr Nilsson', 'Svante', 'Pelle'] },
+        { question: 'Vad heter katten som bor med Pettson?', answers: ['Findus', 'Måns', 'Gustav', 'Sixten'] },
+        { question: 'Var bor Emil?', answers: ['Katthult i Lönneberga', 'Bullerbyn', 'Villa Villekulla', 'Saltkråkan'] },
+        { question: 'Vad heter Alfons Åbergs låtsaskompis?', answers: ['Mållgan', 'Totte', 'Lillebror', 'Viktor'] },
+        { question: 'Vem bor i ett litet hus på ett tak och har en propeller på ryggen?', answers: ['Karlsson på taket', 'Emil', 'Nils Karlsson Pyssling', 'Mio'] },
+        { question: 'Vad heter Ronja Rövardotters pappa?', answers: ['Mattis', 'Borka', 'Skalle-Per', 'Birk'] },
+        { question: 'Vem möter Rödluvan i skogen?', answers: ['En varg', 'En björn', 'En räv', 'En älg'] },
+        { question: 'Hur många dvärgar finns det i sagan om Snövit?', answers: ['7', '5', '6', '8'] },
+        { question: 'Vad äter Bamse för att bli stark?', answers: ['Dunderhonung', 'Spenat', 'Gröt', 'Blåbär'] },
+        // Världen
+        { question: 'Vilken är världens största ocean?', answers: ['Stilla havet', 'Atlanten', 'Indiska oceanen', 'Norra ishavet'] },
+        { question: 'Vilket land har ett rött lönnlöv på sin flagga?', answers: ['Kanada', 'Norge', 'Japan', 'Schweiz'] },
+        { question: 'I vilket land finns de kända pyramiderna i Giza?', answers: ['Egypten', 'Mexiko', 'Grekland', 'Kina'] },
+        { question: 'Vilket land ligger väster om Sverige?', answers: ['Norge', 'Finland', 'Danmark', 'Tyskland'] },
+        { question: 'Vad heter Norges huvudstad?', answers: ['Oslo', 'Bergen', 'Köpenhamn', 'Helsingfors'] },
+        { question: 'I vilken världsdel ligger Sverige?', answers: ['Europa', 'Asien', 'Afrika', 'Sydamerika'] },
+        { question: 'I vilken stad står Eiffeltornet?', answers: ['Paris', 'London', 'Rom', 'Berlin'] },
+        { question: 'Vilket djur med en ficka på magen lever i Australien?', answers: ['Känguru', 'Zebra', 'Lama', 'Panda'] },
+        { question: 'Vilket land kommer man till om man åker över Öresundsbron?', answers: ['Danmark', 'Norge', 'Finland', 'Tyskland'] },
+        { question: 'I vilket land lever pandor vilt?', answers: ['Kina', 'Japan', 'Indien', 'Brasilien'] },
+        // Rymden och väder
+        { question: 'Vad är solen?', answers: ['En stjärna', 'En planet', 'En måne', 'Ett moln'] },
+        { question: 'Vilken planet kallas ”den röda planeten”?', answers: ['Mars', 'Saturnus', 'Neptunus', 'Merkurius'] },
+        { question: 'Vilken planet är känd för sina stora ringar?', answers: ['Saturnus', 'Mars', 'Jorden', 'Venus'] },
+        { question: 'Vilken planet ligger närmast solen?', answers: ['Merkurius', 'Venus', 'Jorden', 'Mars'] },
+        { question: 'Hur många planeter finns det i vårt solsystem?', answers: ['8', '7', '9', '10'] },
+        { question: 'Hur lång tid tar det för jorden att snurra ett varv runt sig själv?', answers: ['Ett dygn', 'En timme', 'En vecka', 'Ett år'] },
+        { question: 'Vem var den första människan som gick på månen?', answers: ['Neil Armstrong', 'Christer Fuglesang', 'Jurij Gagarin', 'Buzz Lightyear'] },
+        { question: 'Vad kan synas på himlen när solen skiner samtidigt som det regnar?', answers: ['Regnbåge', 'Norrsken', 'Stjärnfall', 'Åska'] },
+        { question: 'Vilken årstid kommer efter vintern?', answers: ['Vår', 'Sommar', 'Höst', 'Midvinter'] },
+        { question: 'Vad blir vatten när det fryser?', answers: ['Is', 'Ånga', 'Dimma', 'Regn'] },
+        // Siffror och former
+        { question: 'Hur många hörn har en triangel?', answers: ['3', '4', '5', '6'] },
+        { question: 'Vad är 7 + 8?', answers: ['15', '14', '16', '13'] },
+        { question: 'Hur många dagar har februari oftast?', answers: ['28', '29', '30', '31'] },
+        { question: 'Hur många månader har ett år?', answers: ['12', '10', '11', '13'] },
+        { question: 'Vad är dubbelt så mycket som 6?', answers: ['12', '8', '10', '16'] },
+        { question: 'Hur många minuter är en timme?', answers: ['60', '30', '100', '24'] },
+        { question: 'Vilken form har inga hörn alls?', answers: ['Cirkel', 'Kvadrat', 'Triangel', 'Rektangel'] },
+        { question: 'Vad är 20 − 7?', answers: ['13', '12', '14', '17'] },
+        { question: 'Vad är hälften av 10?', answers: ['5', '2', '4', '20'] },
+        { question: 'Hur många ben har tre hundar tillsammans?', answers: ['12', '9', '10', '16'] },
+        // Språk och ord
+        { question: 'Vad är motsatsen till ”varm”?', answers: ['Kall', 'Het', 'Ljum', 'Blöt'] },
+        { question: 'Hur många bokstäver har det svenska alfabetet?', answers: ['29', '26', '28', '30'] },
+        { question: 'Vilken bokstav är den sista i det svenska alfabetet?', answers: ['Ö', 'Z', 'Å', 'Ä'] },
+        { question: 'Vad heter ”hund” på engelska?', answers: ['Dog', 'Cat', 'Horse', 'Bird'] },
+        { question: 'Vilket ord rimmar på ”katt”?', answers: ['Hatt', 'Hus', 'Bil', 'Sol'] },
+        { question: 'Vad betyder det engelska ordet ”red”?', answers: ['Röd', 'Blå', 'Grön', 'Gul'] },
+        { question: 'Vilket av orden är något man gör (ett verb)?', answers: ['Springa', 'Bord', 'Glad', 'Blå'] },
+        { question: 'Hur många stavelser har ordet ”banan”?', answers: ['2', '1', '3', '4'] },
+        { question: 'Vilken av bokstäverna är en vokal?', answers: ['O', 'B', 'K', 'S'] },
+        { question: 'Vad säger man när det är fler än en mus?', answers: ['Möss', 'Musar', 'Muser', 'Musarna'] },
+        // Sport, musik och blandat
+        { question: 'Hur många spelare har ett fotbollslag på planen samtidigt?', answers: ['11', '9', '10', '12'] },
+        { question: 'Vilket instrument har svarta och vita tangenter?', answers: ['Piano', 'Gitarr', 'Trumma', 'Flöjt'] },
+        { question: 'Hur många strängar har en vanlig gitarr?', answers: ['6', '4', '5', '8'] },
+        { question: 'Vilka färger har ett trafikljus?', answers: ['Röd, gul och grön', 'Blå, gul och röd', 'Röd, vit och grön', 'Rosa, gul och grön'] },
+        { question: 'Vilket nummer ringer man i Sverige vid en nödsituation?', answers: ['112', '911', '113', '999'] },
+        { question: 'Vilken svensk grupp vann Eurovision med låten ”Waterloo”?', answers: ['ABBA', 'Roxette', 'Europe', 'Ace of Base'] },
+        { question: 'Vilken sport spelar man med klubba och puck?', answers: ['Ishockey', 'Fotboll', 'Tennis', 'Basket'] },
+        { question: 'Hur många ringar finns det i OS-symbolen?', answers: ['5', '4', '6', '7'] },
+        { question: 'Vilken färg får man om man blandar blått och gult?', answers: ['Grön', 'Lila', 'Orange', 'Brun'] },
+        { question: 'Vilken färg får man om man blandar rött och vitt?', answers: ['Rosa', 'Lila', 'Orange', 'Grå'] }
+    ],
     // Minutetiketterna - position på klockan och motsvarande text
     minuteLabels: {
         12: 'HEL',
@@ -715,7 +828,10 @@ function startGame(gameType) {
         startHurMycketArKlockanGame();
     } else if (gameType === 'quiz-7ar-blandat') {
         state.returnToArea = 'fragesport';
-        startQuizGame();
+        startQuizGame(CONFIG.quiz7arBlandat);
+    } else if (gameType === 'quiz-8ar-blandat') {
+        state.returnToArea = 'fragesport';
+        startQuizGame(CONFIG.quiz8arBlandat);
     } else if (gameType === 'quiz-varldsdelar') {
         state.returnToArea = 'geografi';
         startContinentGame();
@@ -2099,9 +2215,9 @@ function handleHurMycketArKlockanAnswer(selectedAnswer, buttonElement) {
 // ========================================
 // Spellogik: Frågesport
 // ========================================
-function startQuizGame() {
+function startQuizGame(questionPool) {
     // Välj 10 slumpade frågor från poolen
-    const allQuestions = [...CONFIG.quiz7arBlandat];
+    const allQuestions = [...questionPool];
     const shuffled = shuffleArray(allQuestions);
     state.quizSelectedQuestions = shuffled.slice(0, CONFIG.quizQuestions);
 
@@ -3173,7 +3289,7 @@ function endGame() {
         totalQuestions = CONFIG.minutvisarenHardQuestions;
     } else if (state.currentGame === 'tim-och-minutvisaren') {
         totalQuestions = CONFIG.timOchMinutvisarenQuestions;
-    } else if (state.currentGame === 'quiz-7ar-blandat') {
+    } else if (state.currentGame === 'quiz-7ar-blandat' || state.currentGame === 'quiz-8ar-blandat') {
         totalQuestions = CONFIG.quizQuestions;
     } else if (state.currentGame === 'quiz-varldsdelar') {
         totalQuestions = CONFIG.continentQuestions;
