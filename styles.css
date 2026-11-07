@@ -229,6 +229,20 @@ button:disabled {
     display: flex;
 }
 
+/* Startsidan kan scrollas när knapparna inte får plats på skärmen */
+#home-screen {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+#home-screen .screen-content {
+    flex: 1 0 auto;
+    /* Plats under sista raden så att den fasta ljudknappen inte täcker den */
+    padding-bottom: calc(50px + var(--space-lg) * 2 + env(safe-area-inset-bottom, 0px));
+}
+
 .screen-content {
     flex: 1;
     display: flex;
