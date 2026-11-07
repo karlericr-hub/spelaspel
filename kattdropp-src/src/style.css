@@ -7,12 +7,38 @@
 html,
 body {
   height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
   background: #1c1727;
   font-family: system-ui, sans-serif;
   color: #fff;
+  touch-action: manipulation;
+}
+
+/* Storlekar räknas ut från skärmen så att spelplanen (480 × 720) och
+   kattskalan alltid får plats, även på en mobil. */
+:root {
+  --vh: 1vh;
+  --pad: 8px;
+  --gap: 12px;
+  /* Bredare skärm: skalan står bredvid spelplanen */
+  --stage-w: min(
+    480px,
+    calc((var(--vh) * 100 - var(--pad) * 2) * 2 / 3),
+    calc(100vw - var(--pad) * 2 - var(--gap) - 84px)
+  );
+  --stage-h: calc(var(--stage-w) * 1.5);
+  /* Kattbilderna är 5:6, summan av bredderna är 440 enheter */
+  --unit: min(1px, calc((var(--stage-h) - 28px - 50px) / 528));
+}
+
+@supports (height: 1dvh) {
+  :root {
+    --vh: 1dvh;
+  }
 }
 
 #app {
@@ -20,7 +46,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: var(--gap);
+  padding: var(--pad);
 }
 
 #scale {
@@ -32,32 +59,63 @@ body {
   padding: 14px 12px;
   background: #2b2438;
   border-radius: 8px;
-  max-height: min(720px, 100vh);
+  max-height: var(--stage-h);
 }
 
 #scale img {
   display: block;
+  width: calc(var(--w) * var(--unit));
+  height: auto;
 }
 
 #stage {
   position: relative;
-  height: min(720px, 100vh);
-  aspect-ratio: 480 / 720;
+  flex: none;
+  width: var(--stage-w);
+  height: var(--stage-h);
+}
+
+/* Smal/stående skärm (mobil): skalan läggs i en rad under spelplanen */
+@media (max-aspect-ratio: 4/5) {
+  :root {
+    --stage-w: min(
+      480px,
+      calc(100vw - var(--pad) * 2),
+      calc((var(--vh) * 100 - var(--pad) * 2 - var(--gap) - 80px) * 2 / 3)
+    );
+    --unit: min(1px, calc((var(--stage-w) - 16px - 30px) / 440));
+  }
+
+  #app {
+    flex-direction: column;
+  }
+
+  #scale {
+    flex-direction: row;
+    align-items: flex-end;
+    width: var(--stage-w);
+    max-height: none;
+    padding: 8px;
+    gap: 3px;
+  }
 }
 
 #game {
   display: block;
+  touch-action: none;
   width: 100%;
   height: 100%;
   border-radius: 8px;
 }
 
+/* Pausknappen skalas med spelplanen så att den inte täcker "Nästa" */
 #pause {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 34px;
-  height: 34px;
+  top: calc(var(--stage-w) * 10 / 480);
+  right: calc(var(--stage-w) * 10 / 480);
+  width: max(28px, calc(var(--stage-w) * 34 / 480));
+  height: max(28px, calc(var(--stage-w) * 34 / 480));
+  padding: 0;
   border: none;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.12);

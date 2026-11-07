@@ -9,13 +9,30 @@ function canvasX(canvas: HTMLCanvasElement, clientX: number): number {
 }
 
 export function setupInput(canvas: HTMLCanvasElement, game: Game): void {
-  canvas.addEventListener('mousemove', (e) => {
-    game.setAim(canvasX(canvas, e.clientX))
+  // Pekarhändelser täcker både mus och touch: på mobil drar man fingret för
+  // att sikta och släpper katten när fingret lyfts.
+  canvas.addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'mouse' || canvas.hasPointerCapture(e.pointerId)) {
+      game.setAim(canvasX(canvas, e.clientX))
+    }
   })
 
-  canvas.addEventListener('click', (e) => {
+  canvas.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return
+    canvas.setPointerCapture(e.pointerId)
+    game.setAim(canvasX(canvas, e.clientX))
+    e.preventDefault()
+  })
+
+  canvas.addEventListener('pointerup', (e) => {
+    if (!canvas.hasPointerCapture(e.pointerId)) return
+    canvas.releasePointerCapture(e.pointerId)
     game.setAim(canvasX(canvas, e.clientX))
     game.drop()
+  })
+
+  canvas.addEventListener('pointercancel', (e) => {
+    if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId)
   })
 
   window.addEventListener('keydown', (e) => {

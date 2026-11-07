@@ -7,6 +7,7 @@ och Matter.js enligt [SPEC.md](SPEC.md).
 ## Styrning
 
 - **Mus:** flytta siktet, klicka för att släppa
+- **Touch:** dra fingret för att sikta, lyft fingret för att släppa
 - **Tangentbord:** vänster/höger pil flyttar siktet, mellanslag släpper
 - **P** eller **Esc** pausar
 

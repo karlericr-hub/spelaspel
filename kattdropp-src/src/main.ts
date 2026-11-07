@@ -65,7 +65,7 @@ LEVELS.forEach((level, rank) => {
   const img = document.createElement('img')
   img.src = level.sprite
   img.alt = `Katt rank ${rank}`
-  img.width = Math.round(24 + rank * 3.2)
+  img.style.setProperty('--w', String(Math.round(24 + rank * 3.2)))
   scalePanel.appendChild(img)
 })
 const renderer = new Renderer(canvas)
