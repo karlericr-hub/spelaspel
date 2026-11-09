@@ -2,6 +2,7 @@
 
 /* =====================================================
    KODER – ändra här för att anpassa spelet till ert hus
+   (uppdatera då även förberedelserna i ../index.html, #midnatt-info)
    ===================================================== */
 const UPPDRAG1_KOD = "821537";        // 6 siffror (skrivs spegelvänt på den fysiska lappen)
 
