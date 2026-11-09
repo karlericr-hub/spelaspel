@@ -6,8 +6,8 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'" />
     <title>Kattdropp</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐱</text></svg>" />
-    <script type="module" crossorigin src="./assets/index-qfnUxa9n.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-ClAIeU5W.css">
+    <script type="module" crossorigin src="./assets/index-DlxYw8uF.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-B6bHFAmh.css">
   </head>
   <body>
     <div id="app">
@@ -17,12 +17,20 @@
         <div id="pause-overlay" class="overlay hidden">
           <h1>Pausad</h1>
           <button id="resume" type="button">Fortsätt</button>
+          <a class="button secondary" href="../index.html">Till SpelaSpel</a>
         </div>
         <div id="gameover-overlay" class="overlay hidden">
           <h1>Slut!</h1>
           <p id="final-score"></p>
           <p id="new-highscore" class="hidden">🏆 Nytt rekord!</p>
+          <p id="play-again-info" class="info hidden">Samla 230 nya poäng i SpelaSpel för att spela igen!</p>
           <button id="restart" type="button">Spela igen</button>
+          <a class="button" href="../index.html">Till SpelaSpel</a>
+        </div>
+        <div id="locked-overlay" class="overlay hidden">
+          <h1>🔒 Låst</h1>
+          <p class="info">Du behöver 230 poäng för att spela Kattdropp. Spela spelen i SpelaSpel och samla poäng!</p>
+          <a class="button" href="../index.html">Till SpelaSpel</a>
         </div>
       </div>
       <aside id="scale" aria-label="Kattskala, minsta till största"></aside>

@@ -725,6 +725,122 @@ function loadSoundSetting() {
 }
 
 // ========================================
+// Poäng (sparas i webbläsaren)
+// ========================================
+// Varje avslutat spel ger lika många poäng som procent rätt (90 % = 90 poäng).
+// Med minst KATTDROPP_COST poäng kan man spela Kattdropp en gång – då
+// nollställs poängen och en "biljett" sparas som Kattdropp förbrukar.
+const POINTS_KEY = 'spelaspel.poang';
+const KATTDROPP_TICKET_KEY = 'spelaspel.kattdropp-biljett';
+const KATTDROPP_COST = 230;
+
+// Reserv om localStorage inte går att använda (t.ex. blockerad lagring)
+let pointsFallback = 0;
+
+function loadPoints() {
+    try {
+        const value = Number(localStorage.getItem(POINTS_KEY));
+        return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+    } catch (e) {
+        return pointsFallback;
+    }
+}
+
+function savePoints(points) {
+    pointsFallback = points;
+    try {
+        localStorage.setItem(POINTS_KEY, String(points));
+    } catch (e) {
+        // localStorage inte tillgängligt – poängen gäller bara denna session
+    }
+}
+
+function addPoints(amount) {
+    const total = loadPoints() + Math.max(0, Math.round(amount));
+    savePoints(total);
+    updatePointsDisplay();
+    return total;
+}
+
+function hasKattdroppTicket() {
+    try {
+        return localStorage.getItem(KATTDROPP_TICKET_KEY) === '1';
+    } catch (e) {
+        return false;
+    }
+}
+
+function pointsResultText(earned, total) {
+    if (total >= KATTDROPP_COST) {
+        return `+${earned} POÄNG! Du har ${total} – du kan spela KATTDROPP!`;
+    }
+    return `+${earned} POÄNG! Du har ${total} av ${KATTDROPP_COST}.`;
+}
+
+function updatePointsDisplay() {
+    const total = loadPoints();
+    const totalEl = document.getElementById('points-total');
+    if (totalEl) totalEl.textContent = String(total);
+
+    const link = document.querySelector('.kattdropp-link');
+    const status = document.getElementById('kattdropp-status');
+    if (!link || !status) return;
+
+    const ready = total >= KATTDROPP_COST || hasKattdroppTicket();
+    link.classList.toggle('unlocked', ready);
+    link.classList.toggle('locked', !ready);
+    status.textContent = ready ? 'REDO!' : `🔒 ${total}/${KATTDROPP_COST}`;
+}
+
+let pointsToastTimer = null;
+
+function showPointsToast(message) {
+    const toast = document.getElementById('points-toast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.hidden = false;
+    clearTimeout(pointsToastTimer);
+    pointsToastTimer = setTimeout(() => {
+        toast.hidden = true;
+    }, 4000);
+}
+
+function setupKattdroppGate() {
+    const link = document.querySelector('.kattdropp-link');
+    if (!link) return;
+
+    link.addEventListener('click', (e) => {
+        // En oanvänd biljett finns redan (t.ex. om man gick tillbaka innan
+        // första katten släpptes) – släpp igenom utan att dra poäng igen.
+        if (hasKattdroppTicket()) return;
+
+        const total = loadPoints();
+        if (total < KATTDROPP_COST) {
+            e.preventDefault();
+            const missing = KATTDROPP_COST - total;
+            showPointsToast(`Du behöver ${KATTDROPP_COST} poäng för att spela Kattdropp. Du har ${total} – samla ${missing} till genom att spela spelen!`);
+            playSound('wrong');
+            return;
+        }
+
+        try {
+            localStorage.setItem(KATTDROPP_TICKET_KEY, '1');
+        } catch (err) {
+            // Utan lagring kan Kattdropp inte se biljetten – den släpper då
+            // igenom spelaren ändå.
+        }
+        savePoints(0);
+        updatePointsDisplay();
+    });
+
+    // Sidan kan komma tillbaka från webbläsarens cache (bakåtknappen) –
+    // uppdatera då poängen som kan ha ändrats.
+    window.addEventListener('pageshow', updatePointsDisplay);
+    // Håll flera öppna flikar i synk
+    window.addEventListener('storage', updatePointsDisplay);
+}
+
+// ========================================
 // Skärmnavigering
 // ========================================
 function showScreen(screenName) {
@@ -3303,10 +3419,15 @@ function endGame() {
         totalQuestions = CONFIG.totalQuestions;
     }
     
-    const percentage = Math.round(
-        (state.correctFirstTry / totalQuestions) * 100
-    );
-    
+    const percentage = totalQuestions > 0
+        ? Math.min(100, Math.round((state.correctFirstTry / totalQuestions) * 100))
+        : 0;
+
+    // Poäng: lika många som procent rätt
+    const totalPoints = addPoints(percentage);
+    const resultPoints = document.getElementById('result-points');
+    if (resultPoints) resultPoints.textContent = pointsResultText(percentage, totalPoints);
+
     // Visa resultatskärmen
     showScreen('result');
 
@@ -3725,6 +3846,14 @@ function showHittaBokstavenEnd() {
     elements.hbBox.classList.add('hidden');
     elements.hbEndSpeed.textContent = speedLevelFromFallTime(state.hb.fastestFallTime);
     elements.hbEndCorrect.textContent = String(state.hb.totalCorrect);
+
+    // Poäng: lika många som procent rätt
+    const maxCorrect = cfg.rounds * cfg.lettersPerRound;
+    const percentage = Math.min(100, Math.round((state.hb.totalCorrect / maxCorrect) * 100));
+    const totalPoints = addPoints(percentage);
+    const hbEndPoints = document.getElementById('hb-end-points');
+    if (hbEndPoints) hbEndPoints.textContent = pointsResultText(percentage, totalPoints);
+
     elements.hbEnd.hidden = false;
 
     if (state.hb.totalCorrect >= cfg.rounds * cfg.lettersPerRound * 0.7) {
@@ -3871,6 +4000,10 @@ function init() {
     
     // Sätt upp event listeners
     setupEventListeners();
+
+    // Poäng och spärren till Kattdropp
+    setupKattdroppGate();
+    updatePointsDisplay();
 
     // Slå ihop delar som inte är egna länder (Nordcypern → Cypern)
     mergeCountries();
