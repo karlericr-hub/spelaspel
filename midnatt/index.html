@@ -125,6 +125,20 @@
   }
   #music-toggle:hover { background: rgba(46,204,113,0.12); }
   #music-toggle.off { opacity: 0.55; }
+  /* Liten, diskret knapp för vuxna: hoppa till nästa uppdrag */
+  #skip-btn {
+    background: transparent;
+    border: 1px solid var(--green-dark);
+    color: var(--green);
+    border-radius: 6px;
+    padding: 3px 7px;
+    font-size: clamp(11px, 1.5vw, 13px);
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  #skip-btn:hover, #skip-btn:focus-visible { background: rgba(46,204,113,0.12); opacity: 1; }
   #header-hint {
     background: transparent;
     border: 1px solid var(--green-dark);
@@ -666,7 +680,7 @@
   }
 
   /* ---------- Ledtrådar ---------- */
-  #hint-overlay {
+  #hint-overlay, #skip-overlay {
     position: fixed;
     inset: 0;
     z-index: 95;
@@ -676,7 +690,15 @@
     padding: 24px;
     background: rgba(3,7,5,0.85);
   }
-  #hint-overlay.show { display: flex; animation: hintFade 0.25s ease; }
+  #hint-overlay.show, #skip-overlay.show { display: flex; animation: hintFade 0.25s ease; }
+  .skip-question {
+    display: block;
+    color: var(--green);
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-size: clamp(20px, 3.8vw, 30px);
+    margin: 14px 0 4px;
+  }
   @keyframes hintFade { from { opacity: 0; } to { opacity: 1; } }
   .hint-modal {
     width: min(540px, 92vw);
@@ -821,6 +843,21 @@
   </div>
 </div>
 
+<!-- Hoppa över uppdrag: endast för vuxna (låses med ett svårt mattetal) -->
+<div id="skip-overlay">
+  <div class="hint-modal" role="dialog" aria-modal="true" aria-labelledby="skip-title">
+    <div class="hint-modal-title" id="skip-title">⏭ ENDAST FÖR VUXNA</div>
+    <p class="hint-modal-text">Lös talet för att hoppa till nästa uppdrag.</p>
+    <label class="skip-question" id="skip-question" for="skip-answer"></label>
+    <input type="text" class="text-answer" id="skip-answer" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="SVAR">
+    <div class="feedback" id="skip-feedback" role="status" aria-live="polite"></div>
+    <div class="btn-row">
+      <button class="btn" id="skip-confirm">HOPPA ÖVER ⏭</button>
+      <button class="btn secondary" id="skip-cancel">AVBRYT</button>
+    </div>
+  </div>
+</div>
+
 <canvas id="confetti-canvas"></canvas>
 
 <div id="app">
@@ -833,6 +870,7 @@
     </div>
     <button id="header-hint" style="display:none">💡 LEDTRÅD <span class="key">(F1)</span></button>
     <button id="music-toggle" title="Musik på/av" aria-label="Musik på/av">🔊</button>
+    <button id="skip-btn" style="display:none" title="Hoppa till nästa uppdrag (för vuxna)" aria-label="Hoppa till nästa uppdrag (för vuxna)">⏭</button>
   </div>
 
   <div id="stage">
