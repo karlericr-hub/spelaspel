@@ -5,6 +5,7 @@ import { setupInput } from './input'
 import { LEVELS, MAX_RANK } from './levels'
 import { STEP_MS } from './physics'
 import { Renderer } from './render'
+import { hasTicket, useTicket } from './ticket'
 
 const canvas = document.querySelector<HTMLCanvasElement>('#game')
 if (!canvas) throw new Error('Hittar inte canvas #game')
@@ -25,8 +26,34 @@ const gameoverOverlay = el<HTMLDivElement>('#gameover-overlay')
 const finalScore = el<HTMLParagraphElement>('#final-score')
 const newHighscoreEl = el<HTMLParagraphElement>('#new-highscore')
 
+const lockedOverlay = el<HTMLDivElement>('#locked-overlay')
+const restartButton = el<HTMLButtonElement>('#restart')
+const playAgainInfo = el<HTMLParagraphElement>('#play-again-info')
+
+// Spärr: utan biljett från SpelaSpel går spelet inte att starta.
+let locked = !hasTicket()
+let ticketUsed = false
+
+function lock(): void {
+  locked = true
+  game.paused = true
+  pauseOverlay.classList.add('hidden')
+  pauseButton.classList.add('hidden')
+  lockedOverlay.classList.remove('hidden')
+}
+
+if (locked) lock()
+
+// Biljetten förbrukas när första katten släpps — sedan räknas omgången
+// som påbörjad även om sidan laddas om.
+game.onDrop = () => {
+  if (ticketUsed) return
+  ticketUsed = true
+  useTicket()
+}
+
 function setPaused(paused: boolean): void {
-  if (game.gameOver) return
+  if (game.gameOver || locked) return
   game.paused = paused
   pauseOverlay.classList.toggle('hidden', !paused)
 }
@@ -50,12 +77,22 @@ window.addEventListener('keydown', unlockAudio)
 game.onGameOver = () => {
   finalScore.textContent = `${game.score} poäng`
   newHighscoreEl.classList.toggle('hidden', !game.newHighscore)
+  // En ny omgång kräver en ny biljett (nya poäng i SpelaSpel)
+  const canPlayAgain = hasTicket()
+  restartButton.classList.toggle('hidden', !canPlayAgain)
+  playAgainInfo.classList.toggle('hidden', canPlayAgain)
   gameoverOverlay.classList.remove('hidden')
 }
 
-el<HTMLButtonElement>('#restart').addEventListener('click', () => {
+restartButton.addEventListener('click', () => {
+  if (!hasTicket()) {
+    gameoverOverlay.classList.add('hidden')
+    lock()
+    return
+  }
   gameoverOverlay.classList.add('hidden')
   pauseOverlay.classList.add('hidden')
+  ticketUsed = false
   game.restart()
 })
 

@@ -402,6 +402,25 @@ button:disabled {
     height: 40px;
 }
 
+.area-status {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--bark-brown);
+    background: var(--cream);
+    border-radius: var(--radius-sm);
+    padding: 2px 10px;
+}
+
+.kattdropp-link.locked .area-icon {
+    filter: grayscale(0.6);
+    opacity: 0.75;
+}
+
+.kattdropp-link.unlocked .area-status {
+    color: var(--white);
+    background: var(--correct-green);
+}
+
 .butiken-link .area-icon {
     background: linear-gradient(135deg, #4fb3cf 0%, #2a6b80 100%);
     color: #fff4d6;
@@ -2397,4 +2416,53 @@ body.mn-open {
     0%, 100% { transform: translateX(0); }
     20%, 60% { transform: translateX(-8px); }
     40%, 80% { transform: translateX(8px); }
+}
+
+/* =====================================================
+   Poäng – samlas i spelen och låser upp Kattdropp
+   ===================================================== */
+.points-badge {
+    display: inline-block;
+    margin-top: var(--space-md);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    box-shadow: var(--shadow-soft);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--forest-dark);
+}
+
+.points-toast {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    width: calc(100% - 2 * var(--space-md));
+    max-width: 420px;
+    margin: 0;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    background: var(--cream);
+    box-shadow: var(--shadow-lift);
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--forest-dark);
+}
+
+.points-toast[hidden] {
+    display: none;
+}
+
+.result-points {
+    margin-top: var(--space-sm);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--bark-brown);
+}
+
+.result-points:empty {
+    display: none;
 }

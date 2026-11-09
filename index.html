@@ -37,6 +37,7 @@
                 <header class="home-header">
                     <h1 class="logo">SPELASPEL</h1>
                     <p class="tagline">LÄR DIG GENOM ATT LEKA!</p>
+                    <p class="points-badge" aria-live="polite">⭐ <span id="points-total">0</span> POÄNG</p>
                 </header>
                 
                 <nav class="learning-areas">
@@ -99,6 +100,7 @@
                             </svg>
                         </div>
                         <span class="area-label">KATTDROPP</span>
+                        <span class="area-status" id="kattdropp-status">🔒 0/230</span>
                     </a>
 
                     <a class="area-btn area-link butiken-link" href="butiken/index.html" aria-label="Butiken">
@@ -112,6 +114,8 @@
                         <span class="area-label">BUTIKEN</span>
                     </a>
                 </nav>
+
+                <p class="points-toast" id="points-toast" role="status" hidden></p>
 
                 <!-- Ljudknapp på startsidan -->
                 <button id="home-sound-btn" class="sound-btn" aria-label="Ljud på/av">
@@ -1097,6 +1101,7 @@
                             <p class="hb-end-title">BRA JOBBAT!</p>
                             <p class="hb-end-stat">Högsta hastighet: <span id="hb-end-speed">0</span></p>
                             <p class="hb-end-stat">Rätt totalt: <span id="hb-end-correct">0</span> / 25</p>
+                            <p class="result-points" id="hb-end-points"></p>
                             <div class="result-actions">
                                 <button class="action-btn play-again-btn" id="hb-play-again" aria-label="Spela igen">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -1449,6 +1454,7 @@
                             <span class="result-percent-sign">%</span>
                         </div>
                         <p class="result-text">RÄTT SVAR</p>
+                        <p class="result-points" id="result-points"></p>
                     </div>
 
                     <div class="result-actions">

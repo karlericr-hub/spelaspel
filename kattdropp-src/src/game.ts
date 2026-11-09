@@ -31,6 +31,7 @@ export class Game {
   keyRight = false
 
   onGameOver: (() => void) | null = null
+  onDrop: (() => void) | null = null
   onMergeEffect: ((event: MergeEvent) => void) | null = null
 
   private lastDropAt = -Infinity
@@ -91,6 +92,7 @@ export class Game {
     const r = LEVELS[rank].radius
     const x = clamp(this.aimX, WALL_LEFT + r, WALL_RIGHT - r)
     this.physics.spawnCat(rank, x, DROP_Y)
+    this.onDrop?.()
     this.currentRank = this.nextRank
     this.nextRank = randomDropRank()
     this.setAim(this.aimX) // klampa om ifall nya objektet är större

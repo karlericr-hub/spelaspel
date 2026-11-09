@@ -165,8 +165,29 @@ body {
   cursor: pointer;
 }
 
-.overlay button:hover {
+.overlay button:hover,
+.overlay .button:hover {
   filter: brightness(1.1);
+}
+
+.overlay .button {
+  padding: 12px 28px;
+  border-radius: 10px;
+  background: #e8875a;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.overlay .button.secondary {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.overlay .info {
+  max-width: 85%;
+  font-size: 18px;
+  line-height: 1.4;
 }
 
 .hidden {
