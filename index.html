@@ -1475,6 +1475,107 @@
         </div>
     </div>
 
+    <!-- Midnatt: informationsruta, vuxenspärr och förberedelser -->
+    <div id="midnatt-info" class="mn-overlay" hidden>
+        <div class="mn-modal" role="dialog" aria-modal="true" aria-labelledby="mn-title">
+            <button type="button" class="mn-close" aria-label="Stäng">&times;</button>
+
+            <!-- Steg 1: om spelet -->
+            <div class="mn-step" data-step="info">
+                <div class="mn-moon" aria-hidden="true">
+                    <svg viewBox="0 0 50 50"><path d="M31 6 A19 19 0 1 0 44 34 A15 15 0 1 1 31 6 Z" fill="currentColor"/><circle cx="38" cy="12" r="1.8" fill="currentColor"/><circle cx="44" cy="21" r="1.2" fill="currentColor"/></svg>
+                </div>
+                <h2 class="mn-title" id="mn-title">OPERATION MIDNATT</h2>
+                <p class="mn-lead">Ett spionäventyr att spela <strong>i grupp</strong> &ndash; perfekt på till exempel ett <strong>kalas</strong>!</p>
+                <ul class="mn-facts">
+                    <li><span class="mn-ico" aria-hidden="true">👫</span> <span>Spelas tillsammans i grupp</span></li>
+                    <li><span class="mn-ico" aria-hidden="true">🎂</span> <span>Passar bra för <strong>8&ndash;9 år</strong></span></li>
+                    <li><span class="mn-ico" aria-hidden="true">🧑&zwj;🔧</span> <span>Kräver <strong>förberedelser av en vuxen</strong> innan spelet</span></li>
+                </ul>
+                <div class="mn-actions">
+                    <button type="button" class="mn-btn mn-btn-secondary" data-goto="math">SE FÖRBEREDELSER</button>
+                    <a class="mn-btn" href="midnatt/index.html">STARTA SPELET ▶</a>
+                </div>
+            </div>
+
+            <!-- Steg 2: mattetal som bara vuxna klarar -->
+            <div class="mn-step" data-step="math" hidden>
+                <h2 class="mn-title">ENDAST FÖR VUXNA</h2>
+                <p class="mn-lead">Förberedelserna avslöjar alla svar. Lös talet för att se dem.</p>
+                <form class="mn-math" novalidate>
+                    <label class="mn-question" for="mn-answer" id="mn-question"></label>
+                    <input class="mn-answer" id="mn-answer" type="text" inputmode="numeric" autocomplete="off" placeholder="SVAR">
+                    <p class="mn-feedback" id="mn-feedback" role="status" aria-live="polite"></p>
+                    <div class="mn-actions">
+                        <button type="button" class="mn-btn mn-btn-secondary" data-goto="info">TILLBAKA</button>
+                        <button type="submit" class="mn-btn">LÅS UPP 🔓</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Steg 3: förberedelser -->
+            <div class="mn-step" data-step="prep" hidden>
+                <h2 class="mn-title">FÖRBEREDELSER</h2>
+                <p class="mn-lead">Gör detta innan barnen börjar. Bocka av allt eftersom.</p>
+
+                <section class="mn-prep">
+                    <h3>Allmänt</h3>
+                    <label><input type="checkbox"> <span>Ladda surfplattan/datorn som spelet visas på och slå på ljudet.</span></label>
+                    <label><input type="checkbox"> <span>Ta fram ett <strong>hemligt paket</strong> (t.ex. godis eller en liten present) &ndash; det är skatten barnen letar efter.</span></label>
+                    <label><input type="checkbox"> <span>En vuxen behöver vara med under hela spelet (behövs i uppdrag 1).</span></label>
+                </section>
+
+                <section class="mn-prep">
+                    <h3>Uppdrag 1 &ndash; Samarbetsprovet</h3>
+                    <p>Barnen ställer sig på led från yngst till äldst. När de gjort rätt ger du dem en lapp med koden.</p>
+                    <label><input type="checkbox"> <span>Skriv koden <span class="mn-code">821537</span> <strong>spegelvänt</strong> på en lapp och ha den i fickan.</span></label>
+                    <label><input type="checkbox"> <span>Se till att det finns en spegel i närheten så att barnen kan läsa lappen.</span></label>
+                </section>
+
+                <section class="mn-prep">
+                    <h3>Uppdrag 2 &ndash; Bildkoden</h3>
+                    <p>Bilderna 🦖 🦉 ☀️ 🍋 🏠 🐿️ 🔑 ger ordet <span class="mn-code">DUSCHEN</span> (första bokstaven i dinosaurie, uggla, sol, citron, hus, ekorre, nyckel).</p>
+                    <p>Koden <span class="mn-code"><span class="mn-red">7</span><span class="mn-green">2</span><span class="mn-blue">9</span></span> matas in i tre färgade rutor: <strong class="mn-red">röd</strong>, <strong class="mn-green">grön</strong> och <strong class="mn-blue">blå</strong>. Färgen på lappen visar vilken ruta siffran ska in i.</p>
+                    <label><input type="checkbox"> <span>Gör <strong>tre separata lappar</strong>, en siffra per lapp: <span class="mn-code mn-red">7</span> i <strong>rött</strong>, <span class="mn-code mn-green">2</span> i <strong>grönt</strong> och <span class="mn-code mn-blue">9</span> i <strong>blått</strong> (färga t.ex. lappen eller siffran).</span></label>
+                    <label><input type="checkbox"> <span>Lägg de tre lapparna vid duschen <strong>i oordning</strong>, gärna utspridda, så att barnen måste använda färgerna för att få rätt ordning.</span></label>
+                </section>
+
+                <section class="mn-prep">
+                    <h3>Uppdrag 3 &ndash; Observationstestet</h3>
+                    <p>Barnen räknar saker i huset. Svaret ska bli <span class="mn-code">358</span>. Kontrollera att det stämmer:</p>
+                    <label><input type="checkbox"> <span>Det finns <strong>3 ytterdörrar</strong> i huset.</span></label>
+                    <label><input type="checkbox"> <span>Det finns <strong>5 lampor</strong> i vardagsrummet.</span></label>
+                    <label><input type="checkbox"> <span>Det står <strong>8 böcker med gul rygg</strong> i den vänstra bokhyllan på övervåningen.</span></label>
+                    <p class="mn-note">Chiffernyckeln (siffra &rarr; bokstav) visas på skärmen, den behöver du inte förbereda.</p>
+                </section>
+
+                <section class="mn-prep">
+                    <h3>Uppdrag 4 &ndash; Ritningen</h3>
+                    <p>Krysset på ritningen pekar på luckan till kattvinden i sovrummet uppe till vänster.</p>
+                    <label><input type="checkbox"> <span>Lägg en <strong>bok</strong>, en <strong>penna</strong> och en <strong>Rubiks kub</strong> innanför luckan.</span></label>
+                    <label><input type="checkbox"> <span>Märk föremålen med siffror: boken <span class="mn-code">4</span>, pennan <span class="mn-code">6</span> och Rubiks kub <span class="mn-code">2</span> (t.ex. en lapp med tejp).</span></label>
+                </section>
+
+                <section class="mn-prep">
+                    <h3>Uppdrag 5 &ndash; Sista säkerhetssystemet</h3>
+                    <p>Gåtan har svaret <span class="mn-code">TVÄTTMASKINEN</span>.</p>
+                    <label><input type="checkbox"> <span>Göm det hemliga paketet i tvättmaskinen (se till att den är tom och avstängd).</span></label>
+                </section>
+
+                <section class="mn-prep">
+                    <h3>Bra att veta</h3>
+                    <p>Barnen får använda högst två ledtrådar under hela spelet. Spelet sparar var ni är, så det går att fortsätta om sidan laddas om.</p>
+                </section>
+
+                <div class="mn-actions">
+                    <button type="button" class="mn-btn mn-btn-secondary" data-goto="info">TILLBAKA</button>
+                    <a class="mn-btn" href="midnatt/index.html">STARTA SPELET ▶</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
+    <script src="midnatt-info.js"></script>
 </body>
 </html>
