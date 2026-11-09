@@ -13,34 +13,20 @@ const UPPDRAG2_BILDER = ["🦖", "🦉", "☀️", "🍋", "🏠", "🐿️", "�
 const UPPDRAG2_SVAR = "DUSCHEN";      // 7 bokstäver – det gömda ordet i chiffret
 const UPPDRAG2_KOD = "729";           // Röd, Grön, Blå – koden på lappen där ordet visar (duschen)
 
-// Uppdrag 3: barnen räknar tre saker (ytterdörrar, lampor, gula böcker) och får
-// tre siffror. Siffrorna översätts sedan till bokstäver med chiffernyckeln nedan
+// Uppdrag 3: barnen letar upp tre vardagsföremål som finns i alla hem och räknar
+// något på dem. Svaren är desamma i alla hem, så inget behöver anpassas.
+// Siffrorna översätts sedan till bokstäver med chiffernyckeln nedan
 // (siffra → slumpvald bokstav) och det är bokstäverna som matas in.
-const UPPDRAG3_KOD = "358";           // Ytterdörrar, lampor, gula böcker
-const UPPDRAG4_KOD = "462";           // Siffrorna på föremålen på kattvinden
+const UPPDRAG3_KOD = "425";           // Gaffelns taggar, saxens hål, handskens fingrar
+const UPPDRAG4_KOD = "462";           // Siffrorna på föremålen under kudden
 const UPPDRAG5_SVAR = ["TVÄTTMASKINEN", "TVÄTTMASKIN", "I TVÄTTMASKINEN"];
 
-// Rubiks kub finns inte som emoji – ritas som liten 3x3-figur i stället.
-const RUBIK_SVG =
-  '<svg viewBox="0 0 100 100" width="1em" height="1em" aria-hidden="true">' +
-  '<rect x="2" y="2" width="96" height="96" rx="14" fill="#0b0f0d" stroke="#000" stroke-width="2"/>' +
-  '<g>' +
-  '<rect x="8"  y="8"  width="24" height="24" rx="4" fill="#ef4444"/>' +
-  '<rect x="38" y="8"  width="24" height="24" rx="4" fill="#f8fafc"/>' +
-  '<rect x="68" y="8"  width="24" height="24" rx="4" fill="#22c55e"/>' +
-  '<rect x="8"  y="38" width="24" height="24" rx="4" fill="#eab308"/>' +
-  '<rect x="38" y="38" width="24" height="24" rx="4" fill="#f97316"/>' +
-  '<rect x="68" y="38" width="24" height="24" rx="4" fill="#3b82f6"/>' +
-  '<rect x="8"  y="68" width="24" height="24" rx="4" fill="#3b82f6"/>' +
-  '<rect x="38" y="68" width="24" height="24" rx="4" fill="#22c55e"/>' +
-  '<rect x="68" y="68" width="24" height="24" rx="4" fill="#ef4444"/>' +
-  '</g></svg>';
-
-// Föremålen på kattvinden (uppdrag 4) – byt emoji/namn efter vad ni lägger ut
+// Föremålen under kudden (uppdrag 4) – saker som finns i alla hem.
+// Byt emoji/namn om ni lägger ut något annat. { svg: "..." } fungerar också.
 const UPPDRAG4_FOREMAL = [
   { emoji: "📕", namn: "BOKEN" },
   { emoji: "✏️", namn: "PENNAN" },
-  { svg: RUBIK_SVG, namn: "RUBIKS KUB" }
+  { emoji: "🥄", namn: "SKEDEN" }
 ];
 
 // Fönsterbilden i uppdrag 2:s ledtråd är en emoji, precis som bilderna i uppdraget.
@@ -56,7 +42,7 @@ const LEDTRADAR = {
       '<span class="hint-equals">= F</span>' +
     '</div>' },
   "screen-m3": "En siffra kan också vara en bokstav.",
-  "screen-m4": "På övervåningen, i sovrummet, innanför en lucka.",
+  "screen-m4": "Där man lägger huvudet när man sover.",
   "screen-m5": "Något som finns i tvättstugan."
 };
 const MAX_LEDTRADAR = 2;
