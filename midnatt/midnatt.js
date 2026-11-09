@@ -715,9 +715,10 @@ function hintsLeft() { return MAX_LEDTRADAR - ledtradarUsed; }
 
 function updateHintUI() {
   const btn = document.getElementById("header-hint");
-  // Ledtråds-knappen i headern visas bara på uppdragsskärmarna (1–5).
+  // Ledtråds- och hoppa över-knapparna i headern visas bara på uppdragsskärmarna (1–5).
   const onMission = currentScreen >= 1 && currentScreen <= 5;
   btn.style.display = onMission ? "" : "none";
+  document.getElementById("skip-btn").style.display = onMission ? "" : "none";
   if (!onMission) return;
   const opened = !!ledtradarOppnade[SCREENS[currentScreen]];
   btn.innerHTML = (opened ? "💡 VISA LEDTRÅD IGEN " : "💡 LEDTRÅD ") +
@@ -785,6 +786,67 @@ hintConfirmBtn.addEventListener("click", confirmHint);
 hintCancelBtn.addEventListener("click", closeHintOverlay);
 document.getElementById("hint-close").addEventListener("click", closeHintOverlay);
 
+/* ---------- Hoppa över uppdrag (för vuxna) ----------
+   Liten knapp i headern. Kräver ett mattetal som 8–9-åringar inte klarar
+   (samma typ som vuxenspärren på startsidan). Fel svar ger ett nytt tal. */
+const skipOverlay = document.getElementById("skip-overlay");
+const skipQuestion = document.getElementById("skip-question");
+const skipAnswer = document.getElementById("skip-answer");
+const skipFeedback = document.getElementById("skip-feedback");
+let skipCorrect = null;
+let skipLastFocus = null;
+
+function skipRand(min, max) {
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
+function newSkipProblem() {
+  if (Math.random() < 0.5) {
+    const a = skipRand(13, 19);
+    const b = skipRand(12, 19);
+    skipQuestion.textContent = "Vad är " + a + " × " + b + "?";
+    skipCorrect = a * b;
+  } else {
+    const pct = [15, 25, 75][skipRand(0, 2)];
+    const base = pct === 15 ? skipRand(3, 12) * 20 : skipRand(5, 20) * 12;
+    skipQuestion.textContent = "Vad är " + pct + " % av " + base + "?";
+    skipCorrect = base * pct / 100;
+  }
+  skipAnswer.value = "";
+}
+function skipOpen() { return skipOverlay.classList.contains("show"); }
+function openSkip() {
+  if (currentScreen < 1 || currentScreen > 5 || transitioning) return;
+  skipLastFocus = document.activeElement;
+  newSkipProblem();
+  skipFeedback.textContent = "";
+  skipFeedback.className = "feedback";
+  skipOverlay.classList.add("show");
+  setTimeout(() => skipAnswer.focus(), 50);
+}
+function closeSkip() {
+  skipOverlay.classList.remove("show");
+  if (skipLastFocus && skipLastFocus.focus) skipLastFocus.focus();
+}
+function confirmSkip() {
+  const raw = skipAnswer.value.trim().replace(",", ".").replace(/\s+/g, "");
+  if (!raw) { skipAnswer.focus(); return; }
+  if (Number(raw) === skipCorrect) {
+    skipOverlay.classList.remove("show");
+    soundOk();
+    showScreen(Math.min(currentScreen + 1, 6));
+  } else {
+    soundErr();
+    skipFeedback.textContent = "✖ FEL SVAR – HÄR ÄR ETT NYTT TAL";
+    skipFeedback.className = "feedback err";
+    newSkipProblem();
+    skipAnswer.focus();
+  }
+}
+document.getElementById("skip-btn").addEventListener("click", openSkip);
+document.getElementById("skip-confirm").addEventListener("click", confirmSkip);
+document.getElementById("skip-cancel").addEventListener("click", closeSkip);
+skipOverlay.addEventListener("click", (e) => { if (e.target === skipOverlay) closeSkip(); });
+
 /* ---------- Extern tangentbordsstyrning ----------
    Gör hela spelet körbart från ett fysiskt tangentbord (t.ex. Galaxy Tab):
    - Enter  = tryck på "gå vidare"-knappen för aktuell skärm/modal
@@ -821,6 +883,7 @@ function submitMission(index) {
 
 // Enter = primär åtgärd beroende på var man är
 function triggerPrimaryAction() {
+  if (skipOpen()) { confirmSkip(); return; }
   if (envelopeVisible()) { openEnvelope(); return; }
   if (hintOpen()) {
     if (hintConfirmBtn.style.display !== "none" && pendingHintScreen) confirmHint();
@@ -861,20 +924,21 @@ document.addEventListener("keydown", (e) => {
 
   if (e.key === "F1") {
     e.preventDefault();                     // blockera webbläsarens hjälp
-    if (!hintOpen() && currentScreen >= 1 && currentScreen <= 5) {
+    if (!hintOpen() && !skipOpen() && currentScreen >= 1 && currentScreen <= 5) {
       openHintFlow(SCREENS[currentScreen]);
     }
     return;
   }
 
   if (e.key === "Escape") {
+    if (skipOpen()) { e.preventDefault(); closeSkip(); return; }
     if (hintOpen()) { e.preventDefault(); closeHintOverlay(); }
     return;
   }
 
   if (e.key === "Tab") {
     const boxes = currentMissionBoxes();
-    if (!boxes || boxes.length < 2 || hintOpen()) return;   // annars standard-Tab
+    if (!boxes || boxes.length < 2 || hintOpen() || skipOpen()) return;   // annars standard-Tab
     e.preventDefault();
     const active = document.activeElement;
     let idx = boxes.indexOf(active);
