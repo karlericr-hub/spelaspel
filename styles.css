@@ -322,14 +322,38 @@ button:disabled {
     opacity: 0.9;
 }
 
+/* Spelsektioner på startsidan */
+.game-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    flex: 1;
+    padding: var(--space-md) 0;
+}
+
+.section-title {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--forest-dark);
+    letter-spacing: 0.04em;
+    text-shadow: 0 2px 4px rgba(45, 90, 61, 0.15);
+}
+
+.section-subtitle {
+    margin: 2px 0 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--forest-main);
+}
+
 /* Lärområden grid */
 .learning-areas {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-md);
-    flex: 1;
     align-content: start;
-    padding: var(--space-md) 0;
+    padding-top: var(--space-sm);
 }
 
 .area-btn {
