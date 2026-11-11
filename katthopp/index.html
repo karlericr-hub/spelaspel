@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#6ccfff">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>Katthopp</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+  @font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 200 1000;
+    font-display: swap;
+    src: url('../fonts/nunito-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  :root {
+    --ink: #3b2314;
+    --cream: #fff7e8;
+    --orange: #f39c4a;
+    --orange-dark: #d9752b;
+    --green: #5cc25a;
+    --green-dark: #3d9440;
+    --red: #ef5a5a;
+    --vh: 1vh;
+  }
+  @supports (height: 1dvh) { :root { --vh: 1dvh; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    background: #23324d;
+    font-family: 'Nunito', system-ui, sans-serif;
+    color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  #app {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Stående format: på bred skärm blir spelplanen en smal kolumn */
+  #stage {
+    position: relative;
+    width: min(100vw, calc(var(--vh) * 100 * 0.6));
+    height: calc(var(--vh) * 100);
+    overflow: hidden;
+    background: #9fdcff;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
+  }
+
+  #game {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+  }
+
+  .hidden { display: none !important; }
+
+  /* ---------- HUD ---------- */
+  #hud {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+  #hud > * { pointer-events: auto; }
+
+  .hud-btn {
+    width: 44px; height: 44px;
+    flex: none;
+    border-radius: 14px;
+    border: 3px solid var(--ink);
+    background: var(--cream);
+    color: var(--ink);
+    font: 900 18px/1 'Nunito', system-ui, sans-serif;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 4px 0 var(--ink);
+    cursor: pointer;
+  }
+  .hud-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+  .hud-btn svg { width: 22px; height: 22px; }
+
+  .hud-pill {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 20px;
+    border: 3px solid var(--ink);
+    background: rgba(255, 247, 232, 0.92);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 900;
+    font-size: 17px;
+    box-shadow: 0 3px 0 rgba(59, 35, 20, 0.6);
+    white-space: nowrap;
+  }
+  #hud-level { flex: 1; justify-content: center; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  #hud-lives svg { width: 22px; height: 22px; display: block; }
+  #hud-lives svg.lost { opacity: 0.3; filter: grayscale(1); }
+  #hud-lives svg.pop { animation: heart-pop 0.7s ease; }
+  #hud-fish svg { width: 26px; height: 18px; }
+
+  @keyframes heart-pop {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.6) rotate(-12deg); }
+    100% { transform: scale(1); }
+  }
+
+  /* ---------- Tips och bana-banner ---------- */
+  #hint {
+    position: absolute;
+    left: 50%;
+    top: calc(env(safe-area-inset-top, 0px) + 72px);
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 88%;
+    padding: 12px 18px;
+    border-radius: 20px;
+    border: 3px solid var(--ink);
+    background: var(--cream);
+    font-weight: 900;
+    font-size: 18px;
+    text-align: center;
+    box-shadow: 0 5px 0 var(--ink);
+    pointer-events: none;
+    animation: hint-bob 1.6s ease-in-out infinite;
+  }
+  #hint .finger { display: inline-block; animation: press 1.2s ease-in-out infinite; }
+  @keyframes hint-bob { 50% { transform: translateX(-50%) translateY(-5px); } }
+  @keyframes press { 0%, 100% { transform: translateY(0); } 45%, 70% { transform: translateY(5px) scale(0.92); } }
+
+  #banner {
+    position: absolute;
+    top: 24%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+    color: #fff;
+    -webkit-text-stroke: 2px var(--ink);
+    paint-order: stroke fill;
+    text-shadow: 0 4px 0 var(--ink);
+    animation: banner 2.6s ease forwards;
+    width: 100%;
+  }
+  #banner .b-small { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+  #banner .b-big { font-size: 42px; font-weight: 1000; line-height: 1.05; }
+  @keyframes banner {
+    0% { opacity: 0; transform: translate(-50%, -30%) scale(0.7); }
+    15% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+    25% { transform: translate(-50%, -50%) scale(1); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -60%); }
+  }
+
+  /* ---------- Överlägg ---------- */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px 22px calc(env(safe-area-inset-bottom, 0px) + 24px);
+    background: rgba(35, 50, 77, 0.45);
+    text-align: center;
+    overflow-y: auto;
+  }
+  .card {
+    width: 100%;
+    max-width: 340px;
+    background: var(--cream);
+    border: 4px solid var(--ink);
+    border-radius: 28px;
+    padding: 22px 18px 20px;
+    box-shadow: 0 8px 0 var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    animation: card-in 0.35s cubic-bezier(.2, 1.4, .5, 1);
+  }
+  @keyframes card-in { from { transform: scale(0.6); opacity: 0; } }
+  .card h1 { font-size: 34px; font-weight: 1000; line-height: 1.05; }
+  .card p { font-size: 18px; font-weight: 800; line-height: 1.3; }
+  .card .info { font-size: 16px; font-weight: 700; opacity: 0.85; }
+
+  .logo {
+    font-size: 54px;
+    font-weight: 1000;
+    line-height: 1;
+    color: var(--orange);
+    -webkit-text-stroke: 3px var(--ink);
+    paint-order: stroke fill;
+    text-shadow: 0 6px 0 var(--ink);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .logo span { display: inline-block; animation: logo-hop 2.4s ease-in-out infinite; }
+  @keyframes logo-hop { 0%, 60%, 100% { transform: translateY(0); } 70% { transform: translateY(-12px) rotate(-4deg); } 80% { transform: translateY(0); } }
+
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: 3px solid var(--ink);
+    background: var(--green);
+    color: #fff;
+    font: 1000 21px/1.1 'Nunito', system-ui, sans-serif;
+    -webkit-text-stroke: 1px var(--ink);
+    paint-order: stroke fill;
+    text-decoration: none;
+    box-shadow: 0 5px 0 var(--ink);
+    cursor: pointer;
+  }
+  .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+  .btn.secondary { background: #ffd36b; color: var(--ink); -webkit-text-stroke: 0; }
+  .btn.small { padding: 10px 14px; font-size: 17px; }
+
+  .levels {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .level-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 16px;
+    border: 3px solid var(--ink);
+    background: #fff;
+    font: 900 17px/1.1 'Nunito', system-ui, sans-serif;
+    color: var(--ink);
+    text-align: left;
+    box-shadow: 0 4px 0 var(--ink);
+    cursor: pointer;
+  }
+  .level-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+  .level-btn .num {
+    flex: none;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 3px solid var(--ink);
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    font-weight: 1000;
+    color: #fff;
+  }
+  .level-btn .name { flex: 1; }
+  .level-btn .diff { font-size: 13px; letter-spacing: 1px; color: var(--orange-dark); }
+  .level-btn:disabled { opacity: 0.55; cursor: default; }
+  .level-btn:disabled .num { background: #b9b2a8 !important; }
+
+  .lives-row { display: flex; gap: 6px; justify-content: center; }
+  .lives-row svg { width: 30px; height: 30px; }
+  .lives-row svg.lost { opacity: 0.25; filter: grayscale(1); }
+
+  .stat { font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 8px; justify-content: center; }
+  .stat svg { width: 34px; height: 24px; }
+
+  .row { display: flex; gap: 10px; width: 100%; }
+  .row .btn { flex: 1; }
+
+  #sound-btn .off { display: none; }
+  #sound-btn.muted .on { display: none; }
+  #sound-btn.muted .off { display: inline; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="game" aria-label="Katthopp spelplan"></canvas>
+
+    <div id="hud" class="hidden">
+      <button id="pause-btn" class="hud-btn" type="button" aria-label="Paus">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="5" height="16" rx="1.5" fill="currentColor"/></svg>
+      </button>
+      <div id="hud-level" class="hud-pill">Bana 1</div>
+      <div id="hud-fish" class="hud-pill" aria-label="Fiskar"></div>
+      <div id="hud-lives" class="hud-pill" aria-label="Liv"></div>
+    </div>
+
+    <div id="hint" class="hidden"><span class="finger">👆</span> Håll in fingret –<br>ju längre, desto längre hopp!</div>
+    <div id="banner" class="hidden"></div>
+
+    <!-- Startmeny -->
+    <div id="menu" class="overlay hidden">
+      <div class="card">
+        <div class="logo" aria-label="Katthopp"><span>K</span><span>a</span><span>t</span><span>t</span><span>h</span><span>o</span><span>p</span><span>p</span></div>
+        <div id="menu-lives" class="lives-row"></div>
+        <p id="menu-text"></p>
+        <button id="continue-btn" class="btn hidden" type="button">Fortsätt</button>
+        <div id="levels" class="levels"></div>
+        <div class="row">
+          <a class="btn secondary small" href="../index.html">Till SpelaSpel</a>
+          <button id="sound-btn" class="btn secondary small" type="button" aria-label="Ljud på/av"><span class="on">🔊 Ljud</span><span class="off">🔇 Tyst</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paus -->
+    <div id="pause" class="overlay hidden">
+      <div class="card">
+        <h1>Paus</h1>
+        <button id="resume-btn" class="btn" type="button">Fortsätt</button>
+        <button id="restart-btn" class="btn secondary" type="button">Börja om banan</button>
+        <button id="menu-btn" class="btn secondary" type="button">Meny</button>
+      </div>
+    </div>
+
+    <!-- Bana klar -->
+    <div id="cleared" class="overlay hidden">
+      <div class="card">
+        <h1 id="cleared-title">Bana klar!</h1>
+        <p id="cleared-text"></p>
+        <div id="cleared-fish" class="stat"></div>
+        <div id="cleared-lives" class="lives-row"></div>
+        <button id="next-btn" class="btn" type="button">Nästa bana</button>
+        <a class="btn secondary small" href="../index.html">Till SpelaSpel</a>
+      </div>
+    </div>
+
+    <!-- Slut på liv -->
+    <div id="gameover" class="overlay hidden">
+      <div class="card">
+        <h1>Slut på liv!</h1>
+        <p id="gameover-text"></p>
+        <p class="info">Samla 230 nya poäng i SpelaSpel för att spela igen!</p>
+        <button id="again-btn" class="btn hidden" type="button">Spela igen</button>
+        <a class="btn" href="../index.html">Till SpelaSpel</a>
+      </div>
+    </div>
+
+    <!-- Alla banor klara -->
+    <div id="victory" class="overlay hidden">
+      <div class="card">
+        <h1>Hurra!</h1>
+        <p>Kattungen klarade alla fem banorna och hittade hem till mamma!</p>
+        <div id="victory-fish" class="stat"></div>
+        <p class="info">Samla 230 nya poäng i SpelaSpel för att spela igen.</p>
+        <a class="btn" href="../index.html">Till SpelaSpel</a>
+      </div>
+    </div>
+
+    <!-- Låst -->
+    <div id="locked" class="overlay hidden">
+      <div class="card">
+        <h1>🔒 Låst</h1>
+        <p>Du behöver 230 poäng för att spela Katthopp.</p>
+        <p class="info">Spela spelen i SpelaSpel och samla poäng!</p>
+        <a class="btn" href="../index.html">Till SpelaSpel</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="katthopp.js"></script>
+</body>
+</html>

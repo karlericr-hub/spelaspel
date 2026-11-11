@@ -435,12 +435,19 @@ button:disabled {
     padding: 2px 10px;
 }
 
-.kattdropp-link.locked .area-icon {
+.katthopp-link .area-icon {
+    background: linear-gradient(135deg, #5cc3ff 0%, #2b86c6 100%);
+    color: #f7a24f;
+}
+
+.kattdropp-link.locked .area-icon,
+.katthopp-link.locked .area-icon {
     filter: grayscale(0.6);
     opacity: 0.75;
 }
 
-.kattdropp-link.unlocked .area-status {
+.kattdropp-link.unlocked .area-status,
+.katthopp-link.unlocked .area-status {
     color: var(--white);
     background: var(--correct-green);
 }

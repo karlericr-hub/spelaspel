@@ -728,11 +728,38 @@ function loadSoundSetting() {
 // Poäng (sparas i webbläsaren)
 // ========================================
 // Varje avslutat spel ger lika många poäng som procent rätt (90 % = 90 poäng).
-// Med minst KATTDROPP_COST poäng kan man spela Kattdropp en gång – då
-// nollställs poängen och en "biljett" sparas som Kattdropp förbrukar.
+// Poängen låser upp de roliga spelen. När man startar ett av dem dras
+// poängen och en "biljett" sparas som spelet sedan förbrukar:
+// - Kattdropp: en omgång, poängen nollställs.
+// - Katthopp: en omgång med tre liv, 230 poäng dras. Pågående omgång sparas
+//   av Katthopp själv, så man kan gå tillbaka in utan att betala igen.
 const POINTS_KEY = 'spelaspel.poang';
 const KATTDROPP_TICKET_KEY = 'spelaspel.kattdropp-biljett';
 const KATTDROPP_COST = 230;
+const KATTHOPP_TICKET_KEY = 'spelaspel.katthopp-biljett';
+const KATTHOPP_RUN_KEY = 'katthopp.runda';
+const KATTHOPP_COST = 230;
+
+const FUN_GAMES = [
+    {
+        name: 'Kattdropp',
+        link: '.kattdropp-link',
+        status: 'kattdropp-status',
+        ticketKey: KATTDROPP_TICKET_KEY,
+        cost: KATTDROPP_COST,
+        spend: () => 0,
+    },
+    {
+        name: 'Katthopp',
+        link: '.katthopp-link',
+        status: 'katthopp-status',
+        ticketKey: KATTHOPP_TICKET_KEY,
+        runKey: KATTHOPP_RUN_KEY,
+        cost: KATTHOPP_COST,
+        spend: (total) => total - KATTHOPP_COST,
+    },
+];
+const CHEAPEST_FUN_GAME = Math.min(...FUN_GAMES.map((g) => g.cost));
 
 // Reserv om localStorage inte går att använda (t.ex. blockerad lagring)
 let pointsFallback = 0;
@@ -762,19 +789,21 @@ function addPoints(amount) {
     return total;
 }
 
-function hasKattdroppTicket() {
+// Har spelet redan en biljett eller en pågående omgång?
+function hasFunGameAccess(game) {
     try {
-        return localStorage.getItem(KATTDROPP_TICKET_KEY) === '1';
+        if (localStorage.getItem(game.ticketKey) === '1') return true;
+        return Boolean(game.runKey && localStorage.getItem(game.runKey));
     } catch (e) {
         return false;
     }
 }
 
 function pointsResultText(earned, total) {
-    if (total >= KATTDROPP_COST) {
-        return `+${earned} POÄNG! Du har ${total} – du kan spela KATTDROPP!`;
+    if (total >= CHEAPEST_FUN_GAME) {
+        return `+${earned} POÄNG! Du har ${total} – du kan spela ett ROLIGT SPEL!`;
     }
-    return `+${earned} POÄNG! Du har ${total} av ${KATTDROPP_COST}.`;
+    return `+${earned} POÄNG! Du har ${total} av ${CHEAPEST_FUN_GAME}.`;
 }
 
 function updatePointsDisplay() {
@@ -782,14 +811,15 @@ function updatePointsDisplay() {
     const totalEl = document.getElementById('points-total');
     if (totalEl) totalEl.textContent = String(total);
 
-    const link = document.querySelector('.kattdropp-link');
-    const status = document.getElementById('kattdropp-status');
-    if (!link || !status) return;
-
-    const ready = total >= KATTDROPP_COST || hasKattdroppTicket();
-    link.classList.toggle('unlocked', ready);
-    link.classList.toggle('locked', !ready);
-    status.textContent = ready ? 'REDO!' : `🔒 ${total}/${KATTDROPP_COST}`;
+    for (const game of FUN_GAMES) {
+        const link = document.querySelector(game.link);
+        const status = document.getElementById(game.status);
+        if (!link || !status) continue;
+        const ready = total >= game.cost || hasFunGameAccess(game);
+        link.classList.toggle('unlocked', ready);
+        link.classList.toggle('locked', !ready);
+        status.textContent = ready ? 'REDO!' : `🔒 ${total}/${game.cost}`;
+    }
 }
 
 let pointsToastTimer = null;
@@ -805,33 +835,35 @@ function showPointsToast(message) {
     }, 4000);
 }
 
-function setupKattdroppGate() {
-    const link = document.querySelector('.kattdropp-link');
-    if (!link) return;
+function setupFunGameGates() {
+    for (const game of FUN_GAMES) {
+        const link = document.querySelector(game.link);
+        if (!link) continue;
 
-    link.addEventListener('click', (e) => {
-        // En oanvänd biljett finns redan (t.ex. om man gick tillbaka innan
-        // första katten släpptes) – släpp igenom utan att dra poäng igen.
-        if (hasKattdroppTicket()) return;
+        link.addEventListener('click', (e) => {
+            // En oanvänd biljett eller en pågående omgång finns redan –
+            // släpp igenom utan att dra poäng igen.
+            if (hasFunGameAccess(game)) return;
 
-        const total = loadPoints();
-        if (total < KATTDROPP_COST) {
-            e.preventDefault();
-            const missing = KATTDROPP_COST - total;
-            showPointsToast(`Du behöver ${KATTDROPP_COST} poäng för att spela Kattdropp. Du har ${total} – samla ${missing} till genom att spela spelen!`);
-            playSound('wrong');
-            return;
-        }
+            const total = loadPoints();
+            if (total < game.cost) {
+                e.preventDefault();
+                const missing = game.cost - total;
+                showPointsToast(`Du behöver ${game.cost} poäng för att spela ${game.name}. Du har ${total} – samla ${missing} till genom att spela spelen!`);
+                playSound('wrong');
+                return;
+            }
 
-        try {
-            localStorage.setItem(KATTDROPP_TICKET_KEY, '1');
-        } catch (err) {
-            // Utan lagring kan Kattdropp inte se biljetten – den släpper då
-            // igenom spelaren ändå.
-        }
-        savePoints(0);
-        updatePointsDisplay();
-    });
+            try {
+                localStorage.setItem(game.ticketKey, '1');
+            } catch (err) {
+                // Utan lagring kan spelet inte se biljetten – det släpper då
+                // igenom spelaren ändå.
+            }
+            savePoints(Math.max(0, game.spend(total)));
+            updatePointsDisplay();
+        });
+    }
 
     // Sidan kan komma tillbaka från webbläsarens cache (bakåtknappen) –
     // uppdatera då poängen som kan ha ändrats.
@@ -4002,7 +4034,7 @@ function init() {
     setupEventListeners();
 
     // Poäng och spärren till Kattdropp
-    setupKattdroppGate();
+    setupFunGameGates();
     updatePointsDisplay();
 
     // Slå ihop delar som inte är egna länder (Nordcypern → Cypern)
