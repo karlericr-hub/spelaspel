@@ -2,12 +2,13 @@
 // =====================================================================
 // KATTHOPP – en kattunge hoppar över vallgravar och mellan lådor.
 // Håll in för att ladda hoppet: ju längre man håller, desto längre hopp.
-// Fem banor som blir svårare och svårare, tre liv per omgång.
+// Fem banor som blir svårare och svårare, tre liv per bana (liven fylls
+// på igen när man klarar en bana).
 //
 // Spelet låses upp med poäng i SpelaSpel. Startsidan sparar en biljett
 // (spelaspel.katthopp-biljett) som här blir en omgång med tre liv. Omgången
 // sparas så att den finns kvar om sidan laddas om. När liven är slut (eller
-// alla banor är klarade) behövs 230 nya poäng.
+// alla banor är klarade) behövs 200 nya poäng.
 // =====================================================================
 (function () {
 
@@ -2669,6 +2670,7 @@ function win() {
     saveRun(null);
   } else {
     G.run.level = idx + 1;
+    G.run.lives = 3;           // fulla liv igen inför varje ny bana
     saveRun(G.run);
   }
   saveUnlocked(Math.max(loadUnlocked(), Math.min(idx + 1, LEVELS.length - 1)));

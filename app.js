@@ -731,14 +731,14 @@ function loadSoundSetting() {
 // Poängen låser upp de roliga spelen. När man startar ett av dem dras
 // poängen och en "biljett" sparas som spelet sedan förbrukar:
 // - Kattdropp: en omgång, poängen nollställs.
-// - Katthopp: en omgång med tre liv, 230 poäng dras. Pågående omgång sparas
+// - Katthopp: en omgång med tre liv, 200 poäng dras. Pågående omgång sparas
 //   av Katthopp själv, så man kan gå tillbaka in utan att betala igen.
 const POINTS_KEY = 'spelaspel.poang';
 const KATTDROPP_TICKET_KEY = 'spelaspel.kattdropp-biljett';
-const KATTDROPP_COST = 230;
+const KATTDROPP_COST = 200;
 const KATTHOPP_TICKET_KEY = 'spelaspel.katthopp-biljett';
 const KATTHOPP_RUN_KEY = 'katthopp.runda';
-const KATTHOPP_COST = 230;
+const KATTHOPP_COST = 200;
 
 const FUN_GAMES = [
     {

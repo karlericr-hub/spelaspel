@@ -1,5 +1,5 @@
 // Kattdropp låses upp med poäng från SpelaSpel. Huvudsidan sparar en
-// "biljett" i localStorage när man har minst 230 poäng (och nollställer
+// "biljett" i localStorage när man har minst 200 poäng (och nollställer
 // poängen). Biljetten räcker till en omgång och förbrukas när första
 // katten släpps.
 const TICKET_KEY = 'spelaspel.kattdropp-biljett'
